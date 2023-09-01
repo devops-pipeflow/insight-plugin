@@ -1,0 +1,2 @@
+# insight-plugin
+Insight plugin
