@@ -57,32 +57,65 @@ kind: insight
 metadata:
   name: insight
 spec:
-  buildsight:
-    file:
-      - name: string
-        content: base64
-    path:
-      - name: string
-        path: /path/to/file
-  codesight:
-    file:
-      - name: string
-        content: base64
-    path:
-      - name: string
-        path: /path/to/file
-  gptsight:
-    file:
-      - name: string
-        content: base64
-    path:
-      - name: string
-        path: /path/to/file
-    gpt:
-      - name: string
-        url: 127.0.0.1:8080
-        user: user
-        pass: pass
+  files:
+    - name: string
+      content: base64
+  paths:
+    - name: string
+      path: local:/path/to/file
+    - name: string
+      path: url:/path/to/file
+  sights:
+    - buildsight
+    - codesight
+    - gptsight
+  git:
+    repo:
+      url: 127.0.0.1:8080
+      user: user
+      pass: pass
+    review:
+      url: 127.0.0.1:8081
+      user: user
+      pass: pass
+  gpt:
+    url: 127.0.0.1:8082
+    user: user
+    pass: pass
+```
+
+
+
+## Output
+
+```json
+[
+  {
+    "sight": "buildsight",
+    "file": "name",
+    "line": 1,
+    "type": "error",
+    "details": "details",
+    "repo": {
+      "project": "name",
+      "branch": "name",
+      "commit": "hash",
+      "committer": "name <name@example.com>",
+      "author": "name <name@example.com>",
+      "message": "content",
+      "date": "2023-09-04T19:44:39+0800"
+    },
+    "review": {
+      "project": "name",
+      "branch": "name",
+      "change": "number",
+      "owner": "name <name@example.com>",
+      "author": "name <name@example.com>",
+      "message": "content",
+      "date": "2023-09-04T19:44:39+0800"
+    }
+  }
+]
 ```
 
 
