@@ -3,27 +3,18 @@ kind: insight
 metadata:
   name: insight
 spec:
-  files:
-    - name: string
-      content: base64
-  paths:
-    - name: string
-      path: local:/path/to/file
-    - name: string
-      path: url:/path/to/file
   sights:
     - buildsight
     - codesight
     - gptsight
   git:
-    repo:
-      url: 127.0.0.1:8080
-      user: user
-      pass: pass
-    review:
-      url: 127.0.0.1:8081
-      user: user
-      pass: pass
+    url: 127.0.0.1:8080
+    user: user
+    pass: pass
+  review:
+    url: 127.0.0.1:8081
+    user: user
+    pass: pass
   gpt:
     url: 127.0.0.1:8082
     user: user
