@@ -1,0 +1,24 @@
+---
+builds:
+  - id: example
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin
+      - linux
+      - windows
+    goarch:
+      - amd64
+    dir: example
+    main: main.go
+    binary: example
+    flags:
+      - -trimpath
+    ldflags: -s -w
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - Merge pull request
+      - Merge branch

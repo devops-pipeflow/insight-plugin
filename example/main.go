@@ -1,9 +1,11 @@
 package main
 
 import (
-	"fmt"
+	"context"
+	"os"
 )
 
 func main() {
-	fmt.Println("done.")
+	_ = context.Background()
+	os.Exit(0)
 }

@@ -4,9 +4,12 @@ metadata:
   name: insight
 spec:
   sights:
-    - buildsight
-    - codesight
-    - gptsight
+    - name: buildSight
+      enable: true
+    - name: codeSight
+      enable: false
+    - name: gptSight
+      enable: false
   git:
     url: 127.0.0.1:8080
     user: user

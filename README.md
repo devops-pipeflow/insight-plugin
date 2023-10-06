@@ -58,9 +58,12 @@ metadata:
   name: insight
 spec:
   sights:
-    - buildsight
-    - codesight
-    - gptsight
+    - name: buildSight
+      enable: true
+    - name: codeSight
+      enable: false
+    - name: gptSight
+      enable: false
   git:
     url: 127.0.0.1:8080
     user: user
@@ -80,34 +83,47 @@ spec:
 ## Output
 
 ```json
-[
-  {
-    "sight": "buildsight",
-    "file": "name",
-    "line": 1,
-    "type": "error",
-    "details": "details",
-    "repo": {
-      "project": "name",
-      "branch": "name",
-      "commit": "hash",
-      "committer": "name <name@example.com>",
-      "author": "name <name@example.com>",
-      "message": "content",
-      "date": "2023-09-04T19:44:39+0800"
-    },
-    "review": {
-      "project": "name",
-      "branch": "name",
-      "change": "number",
-      "owner": "name <name@example.com>",
-      "author": "name <name@example.com>",
-      "message": "content",
-      "date": "2023-09-04T19:44:39+0800"
+{
+  "sights": [
+    {
+      "name": "buildSight",
+      "sight": {
+        "file": "name",
+        "line": 1,
+        "type": "error",
+        "details": "text"
+      },
+      "repo": {
+        "project": "name",
+        "branch": "name",
+        "commit": "hash",
+        "committer": "name <name@example.com>",
+        "author": "name <name@example.com>",
+        "message": "base64",
+        "date": "2023-01-01T12:34:56+0800"
+      },
+      "review": {
+        "project": "name",
+        "branch": "name",
+        "change": 1,
+        "owner": "name <name@example.com>",
+        "author": "name <name@example.com>",
+        "message": "base64",
+        "date": "2023-01-01T12:34:56+0800"
+      }
     }
-  }
-]
+  ]
+}
 ```
+
+> `sights.sight.type`: sight type
+> > The sight type in `sights.sight.type` should be one of below:
+> >
+> > `error`
+> >
+> > `warn`
+> >
+> > `info`
 
 
 
