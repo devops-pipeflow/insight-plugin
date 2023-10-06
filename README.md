@@ -24,7 +24,7 @@
 
 ```bash
 version=latest make build
-./bin/example --config-file="$PWD"/config/config.yml
+./bin/insight --config-file="$PWD"/config/config.yml
 ```
 
 
@@ -32,15 +32,17 @@ version=latest make build
 ## Usage
 
 ```
-devops-pipeflow insight-plugin
+usage: insight --config-file=CONFIG-FILE [<flags>]
 
-Usage:
-  insight-plugin [flags]
+insight plugin
+
 
 Flags:
-  -c, --config-file string   config file (.yml)
-  -h, --help                 help for insight-plugin
-  -v, --version              version for insight-plugin
+  --[no-]help                Show context-sensitive help (also try --help-long
+                             and --help-man).
+  --[no-]version             Show application version.
+  --config-file=CONFIG-FILE  Config file (.yml)
+  --log-level="INFO"         Log level (DEBUG|INFO|WARN|ERROR)
 ```
 
 
