@@ -64,7 +64,7 @@ spec:
       enable: false
     - name: gptSight
       enable: false
-  git:
+  repo:
     url: 127.0.0.1:8080
     user: user
     pass: pass

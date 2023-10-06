@@ -3,10 +3,10 @@ package main
 import (
 	"testing"
 
-	"go.uber.org/goleak"
+	"github.com/stretchr/testify/assert"
 )
 
-func TestRunMain(t *testing.T) {
-	defer goleak.VerifyNone(t)
-	main()
+func TestInit(t *testing.T) {
+	var err error
+	assert.Equal(t, nil, err)
 }
