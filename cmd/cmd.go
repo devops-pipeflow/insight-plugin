@@ -13,7 +13,11 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/devops-pipeflow/insight-plugin/config"
+	"github.com/devops-pipeflow/insight-plugin/gpt"
 	"github.com/devops-pipeflow/insight-plugin/insight"
+	"github.com/devops-pipeflow/insight-plugin/repo"
+	"github.com/devops-pipeflow/insight-plugin/report"
+	"github.com/devops-pipeflow/insight-plugin/review"
 	"github.com/devops-pipeflow/insight-plugin/sights"
 )
 
@@ -41,6 +45,21 @@ func Run(ctx context.Context) error {
 		return errors.Wrap(err, "failed to init config")
 	}
 
+	gt, err := initGpt(ctx, logger, cfg)
+	if err != nil {
+		return errors.Wrap(err, "failed to init gpt")
+	}
+
+	rp, err := initRepo(ctx, logger, cfg)
+	if err != nil {
+		return errors.Wrap(err, "failed to init repo")
+	}
+
+	rv, err := initReview(ctx, logger, cfg)
+	if err != nil {
+		return errors.Wrap(err, "failed to init review")
+	}
+
 	bs, err := initBuildSight(ctx, logger, cfg)
 	if err != nil {
 		return errors.Wrap(err, "failed to init buildsight")
@@ -56,7 +75,12 @@ func Run(ctx context.Context) error {
 		return errors.Wrap(err, "failed to init gptsight")
 	}
 
-	i, err := initInsight(ctx, logger, cfg, bs, cs, gs)
+	rpt, err := initReport(ctx, logger, cfg)
+	if err != nil {
+		return errors.Wrap(err, "failed to init report")
+	}
+
+	i, err := initInsight(ctx, logger, cfg, gt, rp, rv, bs, cs, gs, rpt)
 	if err != nil {
 		return errors.Wrap(err, "failed to init insight")
 	}
@@ -96,6 +120,48 @@ func initConfig(_ context.Context, logger hclog.Logger, name string) (*config.Co
 	}
 
 	return c, nil
+}
+
+func initGpt(ctx context.Context, logger hclog.Logger, cfg *config.Config) (gpt.Gpt, error) {
+	logger.Debug("cmd: initGpt")
+
+	c := gpt.DefaultConfig()
+	if c == nil {
+		return nil, errors.New("failed to config")
+	}
+
+	c.Config = *cfg
+	c.Logger = logger
+
+	return gpt.New(ctx, c), nil
+}
+
+func initRepo(ctx context.Context, logger hclog.Logger, cfg *config.Config) (repo.Repo, error) {
+	logger.Debug("cmd: initRepo")
+
+	c := repo.DefaultConfig()
+	if c == nil {
+		return nil, errors.New("failed to config")
+	}
+
+	c.Config = *cfg
+	c.Logger = logger
+
+	return repo.New(ctx, c), nil
+}
+
+func initReview(ctx context.Context, logger hclog.Logger, cfg *config.Config) (review.Review, error) {
+	logger.Debug("cmd: initReview")
+
+	c := review.DefaultConfig()
+	if c == nil {
+		return nil, errors.New("failed to config")
+	}
+
+	c.Config = *cfg
+	c.Logger = logger
+
+	return review.New(ctx, c), nil
 }
 
 func initBuildSight(ctx context.Context, logger hclog.Logger, cfg *config.Config) (sights.BuildSight, error) {
@@ -140,9 +206,25 @@ func initGptSight(ctx context.Context, logger hclog.Logger, cfg *config.Config) 
 	return sights.GptSightNew(ctx, c), nil
 }
 
+func initReport(ctx context.Context, logger hclog.Logger, cfg *config.Config) (report.Report, error) {
+	logger.Debug("cmd: initReport")
+
+	c := report.DefaultConfig()
+	if c == nil {
+		return nil, errors.New("failed to config")
+	}
+
+	c.Config = *cfg
+	c.Logger = logger
+
+	return report.New(ctx, c), nil
+}
+
 // nolint: lll
 func initInsight(ctx context.Context, logger hclog.Logger, cfg *config.Config,
-	bs sights.BuildSight, cs sights.CodeSight, gs sights.GptSight) (insight.Insight, error) {
+	gt gpt.Gpt, rp repo.Repo, rv review.Review,
+	bs sights.BuildSight, cs sights.CodeSight, gs sights.GptSight,
+	rpt report.Report) (insight.Insight, error) {
 	logger.Debug("cmd: initInsight")
 
 	c := insight.DefaultConfig()
@@ -153,9 +235,15 @@ func initInsight(ctx context.Context, logger hclog.Logger, cfg *config.Config,
 	c.Config = *cfg
 	c.Logger = logger
 
+	c.Gpt = gt
+	c.Repo = rp
+	c.Review = rv
+
 	c.BuildSight = bs
 	c.CodeSight = cs
 	c.GptSight = gs
+
+	c.Report = rpt
 
 	return insight.New(ctx, c), nil
 }

@@ -7,6 +7,10 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/devops-pipeflow/insight-plugin/config"
+	"github.com/devops-pipeflow/insight-plugin/gpt"
+	"github.com/devops-pipeflow/insight-plugin/repo"
+	"github.com/devops-pipeflow/insight-plugin/report"
+	"github.com/devops-pipeflow/insight-plugin/review"
 	"github.com/devops-pipeflow/insight-plugin/sights"
 )
 
@@ -19,9 +23,13 @@ type Insight interface {
 type Config struct {
 	Config     config.Config
 	Logger     hclog.Logger
+	Gpt        gpt.Gpt
+	Repo       repo.Repo
+	Review     review.Review
 	BuildSight sights.BuildSight
 	CodeSight  sights.CodeSight
 	GptSight   sights.GptSight
+	Report     report.Report
 }
 
 type insight struct {
@@ -41,6 +49,18 @@ func DefaultConfig() *Config {
 func (i *insight) Init(ctx context.Context) error {
 	i.cfg.Logger.Debug("insight: Init")
 
+	if err := i.cfg.Gpt.Init(ctx); err != nil {
+		return errors.Wrap(err, "failed to init gpt")
+	}
+
+	if err := i.cfg.Repo.Init(ctx); err != nil {
+		return errors.Wrap(err, "failed to init repo")
+	}
+
+	if err := i.cfg.Review.Init(ctx); err != nil {
+		return errors.Wrap(err, "failed to init review")
+	}
+
 	if err := i.cfg.BuildSight.Init(ctx); err != nil {
 		return errors.Wrap(err, "failed to init buildsight")
 	}
@@ -53,15 +73,23 @@ func (i *insight) Init(ctx context.Context) error {
 		return errors.Wrap(err, "failed to init gptsight")
 	}
 
+	if err := i.cfg.Report.Init(ctx); err != nil {
+		return errors.Wrap(err, "failed to init report")
+	}
+
 	return nil
 }
 
 func (i *insight) Deinit(ctx context.Context) error {
 	i.cfg.Logger.Debug("insight: Deinit")
 
+	_ = i.cfg.Report.Deinit(ctx)
 	_ = i.cfg.GptSight.Deinit(ctx)
 	_ = i.cfg.CodeSight.Deinit(ctx)
 	_ = i.cfg.BuildSight.Deinit(ctx)
+	_ = i.cfg.Review.Deinit(ctx)
+	_ = i.cfg.Repo.Deinit(ctx)
+	_ = i.cfg.Gpt.Deinit(ctx)
 
 	return nil
 }
