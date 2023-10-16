@@ -82,6 +82,106 @@ spec:
 
 
 
+## Proto
+
+```
+syntax = "proto3";
+
+package server.plugins.insight.proto;
+
+option go_package = "github.com/devops-pipeflow/server/plugins/insight/proto";
+
+service Insight {
+  rpc Config(ConfigRequest) returns (ConfigResponse) {};
+  rpc Streaming(StreamingRequest) returns (stream StreamingResponse) {};
+  rpc Trigger(TriggerRequest) returns (stream TriggerResponse) {};
+}
+
+message ConfigRequest {
+  string plugin_name = 1;
+  repeated SightConfig sights = 2;
+  Repo repo = 3;
+  Review review = 4;
+  GPT gpt = 5;
+}
+
+message SightConfig {
+  string name = 1;
+  bool enable = 2;
+}
+
+message Repo {
+  string url = 1;
+  string user = 2;
+  string pass = 3;
+}
+
+message Review {
+  string url = 1;
+  string user = 2;
+  string pass = 3;
+}
+
+message GPT {
+  string url = 1;
+  string user = 2;
+  string pass = 3;
+}
+
+message ConfigResponse {}
+
+message StreamingRequest {
+  repeated string lines = 1;
+  int64 size = 2;
+}
+
+message StreamingResponse {
+}
+
+message TriggerRequest {
+}
+
+message TriggerResponse {
+  repeated SightOutput sights = 1;
+}
+
+message SightOutput {
+  string name = 1;
+  SightInfo sight = 2;
+  RepoInfo repo = 3;
+  ReviewInfo review =4;
+}
+
+message SightInfo {
+  string file = 1;
+  int64 line = 2;
+  string type = 3;
+  string details = 4;
+}
+
+message RepoInfo {
+  string project = 1;
+  string branch = 2;
+  string commit = 3;
+  string committer = 4;
+  string author = 5;
+  string message = 6;
+  string date = 7;
+}
+
+message ReviewInfo {
+  string project = 1;
+  string branch = 2;
+  int64 change = 3;
+  string owner = 4;
+  string author = 5;
+  string message = 6;
+  string date = 7;
+}
+```
+
+
+
 ## Output
 
 ```json
