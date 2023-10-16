@@ -93,8 +93,8 @@ option go_package = "github.com/devops-pipeflow/server/plugins/insight/proto";
 
 service Insight {
   rpc Config(ConfigRequest) returns (ConfigResponse) {};
-  rpc Streaming(StreamingRequest) returns (stream StreamingResponse) {};
-  rpc Trigger(TriggerRequest) returns (stream TriggerResponse) {};
+  rpc Logging(stream LoggingRequest) returns (LoggingResponse) {};
+  rpc Trigger(TriggerRequest) returns (TriggerResponse) {};
 }
 
 message ConfigRequest {
@@ -130,12 +130,12 @@ message GPT {
 
 message ConfigResponse {}
 
-message StreamingRequest {
+message LoggingRequest {
   repeated string lines = 1;
   int64 size = 2;
 }
 
-message StreamingResponse {
+message LoggingResponse {
 }
 
 message TriggerRequest {
