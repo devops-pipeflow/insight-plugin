@@ -99,10 +99,16 @@ service Insight {
 
 message ConfigRequest {
   string plugin_name = 1;
-  repeated SightConfig sights = 2;
-  Repo repo = 3;
-  Review review = 4;
-  GPT gpt = 5;
+  repeated EnvVariable envs = 2;
+  repeated SightConfig sights = 3;
+  Repo repo = 4;
+  Review review = 5;
+  GPT gpt = 6;
+}
+
+message EnvVariable {
+  string key = 1;
+  string value = 2;
 }
 
 message SightConfig {
