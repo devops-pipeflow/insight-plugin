@@ -189,13 +189,14 @@ message ReviewInfo {
 }
 ```
 
-> `LoggingConfig.start`: Logging lines start
->
-> `LoggingConfig.len`: Logging lines length
->
-> `LoggingConfig.count`: Logging lines count
->
-> Logging lines size: length*count
+> `LoggingConfig`: Logging config
+> > `start`: Logging lines start
+> >
+> > `len`: Logging lines length
+> >
+> > `count`: Logging lines count
+> >
+> Total size: length*count
 
 
 
