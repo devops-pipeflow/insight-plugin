@@ -99,12 +99,12 @@ service Insight {
 }
 
 message ConfigRequest {
-  string plugin_name = 1;
-  repeated EnvVariable envs = 2;
-  repeated SightConfig sights = 3;
-  Repo repo = 4;
-  Review review = 5;
-  GPT gpt = 6;
+  string pluginName = 1;
+  repeated EnvVariable envVariables = 2;
+  BuildConfig buildConfig = 3;
+  CodeConfig codeConfig = 4;
+  GptConfig gptConfig = 5;
+  NodeConfig nodeConfig = 6;
 }
 
 message EnvVariable {
@@ -112,11 +112,17 @@ message EnvVariable {
   string value = 2;
 }
 
-message SightConfig {
-  string name = 1;
-  bool enable = 2;
-  LoggingConfig = 3;
+message BuildConfig {
+  LoggingConfig loggingConfig = 1;
+  RepoConfig repoConfig = 2;
+  ReviewConfig reviewConfig = 3;
 }
+
+message CodeConfig {}
+
+message GptConfig {}
+
+message NodeConfig {}
 
 message LoggingConfig {
   int64 start = 1;
@@ -124,19 +130,13 @@ message LoggingConfig {
   int64 count = 3;
 }
 
-message Repo {
+message RepoConfig {
   string url = 1;
   string user = 2;
   string pass = 3;
 }
 
-message Review {
-  string url = 1;
-  string user = 2;
-  string pass = 3;
-}
-
-message GPT {
+message ReviewConfig {
   string url = 1;
   string user = 2;
   string pass = 3;
@@ -145,23 +145,48 @@ message GPT {
 message ConfigResponse {}
 
 message TriggerRequest {
+  BuildTrigger buildTrigger = 1;
+  CodeTrigger codeTrigger = 2;
+  GptTrigger gptTrigger = 3;
+  NodeTrigger nodeTrigger = 4;
+}
+
+message BuildTrigger {
+  LoggingTrigger loggingTrigger = 1;
+}
+
+message CodeTrigger {}
+
+message GptTrigger {}
+
+message NodeTrigger {}
+
+message LoggingTrigger {
   repeated string lines = 1;
   int64 start = 2;
   int64 len = 3;
 }
 
 message TriggerResponse {
-  repeated SightOutput sights = 1;
+  BuildInfo buildInfo = 1;
+  CodeInfo codeInfo = 2;
+  GptInfo gptInfo = 3;
+  NodeInfo nodeInfo = 4;
 }
 
-message SightOutput {
-  string name = 1;
-  SightInfo sight = 2;
-  RepoInfo repo = 3;
-  ReviewInfo review =4;
+message BuildInfo {
+  LoggingInfo loggingInfo = 1;
+  RepoInfo repoInfo = 2;
+  ReviewInfo reviewInfo =3;
 }
 
-message SightInfo {
+message CodeInfo {}
+
+message GptInfo {}
+
+message NodeInfo {}
+
+message LoggingInfo {
   string file = 1;
   int64 line = 2;
   string type = 3;
@@ -198,52 +223,12 @@ message ReviewInfo {
 > >
 > Total size: length*count
 
-
-
-## Output
-
-```json
-{
-  "sights": [
-    {
-      "name": "buildSight",
-      "sight": {
-        "file": "name",
-        "line": 1,
-        "type": "error",
-        "details": "text"
-      },
-      "repo": {
-        "project": "name",
-        "branch": "name",
-        "commit": "hash",
-        "committer": "name <name@example.com>",
-        "author": "name <name@example.com>",
-        "message": "base64",
-        "date": "2023-01-01T12:34:56+0800"
-      },
-      "review": {
-        "project": "name",
-        "branch": "name",
-        "change": 1,
-        "owner": "name <name@example.com>",
-        "author": "name <name@example.com>",
-        "message": "base64",
-        "date": "2023-01-01T12:34:56+0800"
-      }
-    }
-  ]
-}
-```
-
-> `sights.sight.type`: sight type
-> > The sight type in `sights.sight.type` should be one of below:
+> `LoggingInfo.type`: Logging info type
+> > `error`: Logging error type
 > >
-> > `error`
+> > `warn`: Logging warning type
 > >
-> > `warn`
-> >
-> > `info`
+> > `info`: Logging info type
 
 
 
