@@ -63,9 +63,11 @@ spec:
     - name: buildSight
       enable: true
     - name: codeSight
-      enable: false
+      enable: true
     - name: gptSight
-      enable: false
+      enable: true
+    - name: nodeSight
+      enable: true
   repo:
     url: 127.0.0.1:8080
     user: user
@@ -93,7 +95,6 @@ option go_package = "github.com/devops-pipeflow/server/plugins/insight/proto";
 
 service Insight {
   rpc Config(ConfigRequest) returns (ConfigResponse) {};
-  rpc Logging(stream LoggingRequest) returns (LoggingResponse) {};
   rpc Trigger(TriggerRequest) returns (TriggerResponse) {};
 }
 
@@ -114,6 +115,13 @@ message EnvVariable {
 message SightConfig {
   string name = 1;
   bool enable = 2;
+  LoggingConfig = 3;
+}
+
+message LoggingConfig {
+  int64 start = 1;
+  int64 len = 2;
+  int64 count = 3;
 }
 
 message Repo {
@@ -136,15 +144,10 @@ message GPT {
 
 message ConfigResponse {}
 
-message LoggingRequest {
-  repeated string lines = 1;
-  int64 size = 2;
-}
-
-message LoggingResponse {
-}
-
 message TriggerRequest {
+  repeated string lines = 1;
+  int64 start = 2;
+  int64 len = 3;
 }
 
 message TriggerResponse {
@@ -185,6 +188,14 @@ message ReviewInfo {
   string date = 7;
 }
 ```
+
+> `LoggingConfig.start`: Logging lines start
+>
+> `LoggingConfig.len`: Logging lines length
+>
+> `LoggingConfig.count`: Logging lines count
+>
+> Logging lines size: length*count
 
 
 
