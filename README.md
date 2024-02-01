@@ -122,7 +122,10 @@ message CodeConfig {}
 
 message GptConfig {}
 
-message NodeConfig {}
+message NodeConfig {
+  int64 duration = 1;
+  int64 interval = 2;
+}
 
 message LoggingConfig {
   int64 start = 1;
@@ -159,12 +162,26 @@ message CodeTrigger {}
 
 message GptTrigger {}
 
-message NodeTrigger {}
+message NodeTrigger {
+  repeated NodeConnect nodeConnects = 1;
+}
 
 message LoggingTrigger {
   repeated string lines = 1;
   int64 start = 2;
   int64 len = 3;
+}
+
+message NodeConnect {
+  string host = 1;
+  int64 port = 2;
+  NodeSsh nodeSsh = 3;
+}
+
+message NodeSsh {
+  string user = 1;
+  string pass = 2;
+  string key = 3;
 }
 
 message TriggerResponse {
@@ -184,7 +201,9 @@ message CodeInfo {}
 
 message GptInfo {}
 
-message NodeInfo {}
+message NodeInfo {
+  repeated NodeStat nodeStats = 1;
+}
 
 message LoggingInfo {
   string file = 1;
@@ -211,6 +230,228 @@ message ReviewInfo {
   string author = 5;
   string message = 6;
   string date = 7;
+}
+
+message NodeStat {
+  string host = 1;
+  CpuStat cpuStat = 2;
+  DiskStat diskStat = 3;
+  DockerStat dockerStat = 4;
+  HostStat hostStat = 5;
+  LoadStat loadStat = 6;
+  MemStat memStat = 7;
+  NetStat netStat = 8;
+  ProcessStat processStat = 9;
+}
+
+message CpuStat {
+  int64 physicalCount = 1;
+  int64 logicalCount = 2;
+  repeated float64 cpuPercents = 3;
+  repeated CpuTime cpuTimes = 4;
+}
+
+message DiskStat {
+  repeated DiskPartition diskPartitions = 1;
+  repeated DiskUsage diskUsages = 2;
+}
+
+message DockerStat {
+  repeated string DockerIds = 1;
+  repeated float64 cgroupCpuDockerUsages = 2;
+  repeated float64 cgroupCpuUsages = 3;
+  repeated CgroupDocker cgroupDockers = 4;
+  repeated CgroupMem cgroupMems = 5;
+}
+
+message HostStat {
+  string hostname = 1;
+  uint64 procs = 2;
+  string os = 3;
+  string platform = 4;
+  string platformFamily = 5;
+  string platformVersion = 6;
+  string kernelVersion = 7;
+  string kernelArch = 8;
+  string hostID = 9;
+}
+
+message LoadStat {
+  LoadAvg loadAvg = 1;
+  LoadMisc loadMisc = 2;
+}
+
+message MemStat {
+  repeated MemSwap memSwaps = 1;
+  MemSwap memSwap = 2;
+  MemVirtual memVirtual = 3;
+}
+
+message NetStat {
+  repeated NetIo netIos = 1;
+  repeated NetInterface netInterfaces = 2;
+}
+
+message ProcessStat {
+  repeated ProcessInfo processInfos = 1;
+}
+
+message CpuTime {
+  string cpu = 1;
+  float64 user = 2;
+  float64 system = 3;
+  float64 idle = 4;
+  float64 nice = 5;
+  float64 iowait = 6;
+  float64 irq = 7;
+  float64 softirq = 8;
+  float64 steal = 9;
+  float64 guest = 10;
+  float64 guestNice = 11;
+}
+
+message DiskPartition {
+  string device = 1;
+  string mount = 2;
+  string fstype = 3;
+}
+
+message DiskUsage {
+  string path = 1;
+  string fstype = 2;
+  uint64 total = 3;
+  uint64 free = 4;
+  uint64 used = 5;
+  float64 usedPercent = 6;
+}
+
+message CgroupDocker {
+  string containerId = 1;
+  string name = 2;
+  string image = 3;
+  string status = 4;
+  bool running = 5;
+}
+
+message CgroupMem {
+  uint64 cache = 1;
+  uint64 RSS = 2;
+  uint64 RSSHuge = 3;
+  uint64 MappedFile = 4;
+  uint64 TotalCache = 5;
+  uint64 TotalRSS = 6;
+  uint64 TotalRSSHuge = 7;
+  uint64 TotalMappedFile = 8;
+  uint64 MemUsageInBytes = 9;
+  uint64 MemMaxUsageInBytes = 10;
+  uint64 MemLimitInBytes = 11;
+}
+
+message LoadAvg {
+  float64 load1 = 1;
+  float64 load5 = 2;
+  float64 load15 = 3;
+}
+
+message LoadMisc {
+  int64 procsTotal = 1;
+  int64 ProcsCreated = 2;
+  int64 ProcsRunning = 3;
+  int64 ProcsBlocked = 4;
+  int64 Ctxt = 5;
+}
+
+message MemSwap {
+  string name = 1;
+  uint64 usedBytes = 2;
+  uint64 freeBytes = 3;
+}
+
+message MemSwap {
+  uint64 total = 1;
+  uint64 used = 2;
+  uint64 free = 3;
+  float64 usedPercent = 4;
+}
+
+message MemVirtual {
+  uint64 total = 1;
+  uint64 available = 2;
+  uint64 used = 3;
+  float64 usedPercent = 4;
+  uint64 free = 5;
+  uint64 buffers = 6;
+  uint64 cached = 7;
+  uint64 swapCached = 8;
+  uint64 swapTotal = 9;
+  uint64 swapFree = 10;
+  uint64 mapped = 11;
+  uint64 vmallocTotal = 12;
+  uint64 vmallocUsed = 13;
+  uint64 vmallocChunk = 14;
+  uint64 hugePagesTotal = 15;
+  uint64 hugePagesFree = 16;
+  uint64 hugePagesRsvd = 17;
+  uint64 hugePagesSurp = 18;
+  uint64 hugePageSize = 19;
+  uint64 anonHugePages = 20;
+}
+
+message NetIo {
+  string name = 1;
+  uint64 bytesSent = 2;
+  uint64 bytesRecv = 3;
+  uint64 packetsSent = 4;
+  uint64 packetsRecv = 5;
+}
+
+message NetInterface {
+  int64 index = 1;
+  int64 mtu = 2;
+  string name = 3;
+  string hardwareAddr = 4;
+  repeated string flags = 5;
+  repeated string addrs = 6;
+}
+
+message ProcessInfo {
+  bool background = 1;
+  float64 cpuPercent = 2;
+  repeated int32 children = 3;
+  string cmdline = 4;
+  repeated string environs = 5;
+  int32 ionice = 6;
+  bool isRunning = 7;
+  ProcessMemoryInfo processMemoryInfo = 8;
+  float32 memoryPercent = 9;
+  string name = 10;
+  int32 ionice = 11;
+  int32 numFds = 12;
+  int32 numThreads = 13;
+  int32 parent = 14;
+  float64 percent = 15;
+  int32 ppid = 16;
+  repeated ProcessRlimit processRlimit = 17;
+  repeated string status = 18;
+  repeated int32 uids = 19;
+  string username = 20;
+}
+
+message ProcessMemoryInfo {
+  uint64 RSS = 1;
+  uint64 VMS = 2;
+  uint64 HWM = 3;
+  uint64 Data = 4;
+  uint64 Stack = 5;
+  uint64 Locked = 6;
+  uint64 Swap = 7;
+}
+
+message ProcessRlimit {
+  int32 resource = 1;
+  uint64 soft = 2;
+  uint64 hard = 3;
+  uint64 used = 4;
 }
 ```
 
