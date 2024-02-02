@@ -75,12 +75,17 @@ func Run(ctx context.Context) error {
 		return errors.Wrap(err, "failed to init gptsight")
 	}
 
+	ns, err := initNodeSight(ctx, logger, cfg)
+	if err != nil {
+		return errors.Wrap(err, "failed to init nodesight")
+	}
+
 	rpt, err := initReport(ctx, logger, cfg)
 	if err != nil {
 		return errors.Wrap(err, "failed to init report")
 	}
 
-	i, err := initInsight(ctx, logger, cfg, gt, rp, rv, bs, cs, gs, rpt)
+	i, err := initInsight(ctx, logger, cfg, gt, rp, rv, bs, cs, gs, ns, rpt)
 	if err != nil {
 		return errors.Wrap(err, "failed to init insight")
 	}
@@ -206,6 +211,20 @@ func initGptSight(ctx context.Context, logger hclog.Logger, cfg *config.Config) 
 	return sights.GptSightNew(ctx, c), nil
 }
 
+func initNodeSight(ctx context.Context, logger hclog.Logger, cfg *config.Config) (sights.NodeSight, error) {
+	logger.Debug("cmd: initNodeSight")
+
+	c := sights.DefaultNodeSightConfig()
+	if c == nil {
+		return nil, errors.New("failed to config")
+	}
+
+	c.Config = *cfg
+	c.Logger = logger
+
+	return sights.NodeSightNew(ctx, c), nil
+}
+
 func initReport(ctx context.Context, logger hclog.Logger, cfg *config.Config) (report.Report, error) {
 	logger.Debug("cmd: initReport")
 
@@ -223,7 +242,7 @@ func initReport(ctx context.Context, logger hclog.Logger, cfg *config.Config) (r
 // nolint: lll
 func initInsight(ctx context.Context, logger hclog.Logger, cfg *config.Config,
 	gt gpt.Gpt, rp repo.Repo, rv review.Review,
-	bs sights.BuildSight, cs sights.CodeSight, gs sights.GptSight,
+	bs sights.BuildSight, cs sights.CodeSight, gs sights.GptSight, ns sights.NodeSight,
 	rpt report.Report) (insight.Insight, error) {
 	logger.Debug("cmd: initInsight")
 
@@ -242,6 +261,7 @@ func initInsight(ctx context.Context, logger hclog.Logger, cfg *config.Config,
 	c.BuildSight = bs
 	c.CodeSight = cs
 	c.GptSight = gs
+	c.NodeSight = ns
 
 	c.Report = rpt
 

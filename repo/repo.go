@@ -14,6 +14,15 @@ import (
 )
 
 const (
+	urlConcat = "/+/"
+	urlFormat = "format=JSON"
+	urlHeads  = "refs/heads/"
+	urlLog    = "/+log/"
+	urlSearch = "/?s="
+	urlTags   = "refs/tags/"
+)
+
+const (
 	opBranch    = "branch:"
 	opCommit    = "commit:"
 	opDelimiter = " "
@@ -53,9 +62,9 @@ func DefaultConfig() *Config {
 func (r *repo) Init(ctx context.Context) error {
 	r.cfg.Logger.Debug("repo: Init")
 
-	r.user = r.cfg.Config.Spec.Review.User
-	r.pass = r.cfg.Config.Spec.Review.Pass
-	r.url = r.cfg.Config.Spec.Review.Url
+	r.user = r.cfg.Config.Spec.ReviewConfig.User
+	r.pass = r.cfg.Config.Spec.ReviewConfig.Pass
+	r.url = r.cfg.Config.Spec.ReviewConfig.Url
 
 	return nil
 }
@@ -66,12 +75,17 @@ func (r *repo) Deinit(ctx context.Context) error {
 	return nil
 }
 
-// nolint: lll
+// Get
+//
 // Example:
-// branch:BRANCH: https://android.googlesource.com/platform/build/soong/+/refs/heads/master?format=JSON
+//
+// branch:BRANCH: https://android.googlesource.com/platform/build/soong/+/refs/heads/main?format=JSON
+//
 // commit:COMMIT: https://android.googlesource.com/platform/build/soong/+/42ada5cff3fca011b5a0d017955f14dc63898807?format=JSON
 //
-//	tag:TAG: https://android.googlesource.com/platform/build/soong/+/refs/tags/android-vts-10.0_r4
+// tag:TAG: https://android.googlesource.com/platform/build/soong/+/refs/tags/android-vts-10.0_r4?format=JSON
+//
+// nolint: lll
 func (r *repo) Get(project, operator string) (map[string]interface{}, error) {
 	r.cfg.Logger.Debug("repo: Get")
 
@@ -84,10 +98,13 @@ func (r *repo) Get(project, operator string) (map[string]interface{}, error) {
 
 	if strings.HasPrefix(operator, opBranch) {
 		branch := strings.TrimPrefix(operator, opBranch)
-		buf, err = r.request(r.url+"/"+project+"/+/"+"refs/heads/"+branch+"?format=JSON", r.user, r.pass)
+		buf, err = r.request(r.url+"/"+project+urlConcat+urlHeads+branch+"?"+urlFormat, r.user, r.pass)
 	} else if strings.HasPrefix(operator, opCommit) {
 		commit := strings.TrimPrefix(operator, opCommit)
-		buf, err = r.request(r.url+"/"+project+"/+/"+commit+"?format=JSON", r.user, r.pass)
+		buf, err = r.request(r.url+"/"+project+urlConcat+commit+"?"+urlFormat, r.user, r.pass)
+	} else if strings.HasPrefix(operator, opTag) {
+		tag := strings.TrimPrefix(operator, opTag)
+		buf, err = r.request(r.url+"/"+project+urlConcat+urlTags+tag+"?"+urlFormat, r.user, r.pass)
 	} else {
 		err = errors.New("operator invalid")
 	}
@@ -99,15 +116,19 @@ func (r *repo) Get(project, operator string) (map[string]interface{}, error) {
 	return buf, nil
 }
 
-// nolint: gocyclo,lll
+// Query
+//
 // Example:
 //
-//	branch:BRANCH: https://android.googlesource.com/platform/build/soong/+log/refs/heads/master?format=JSON
+// branch:BRANCH: https://android.googlesource.com/platform/build/soong/+log/refs/heads/main?format=JSON
 //
-// branch:BRANCH commit:COMMIT: https://android.googlesource.com/platform/build/soong/+log/refs/heads/master/?s=42ada5cff3fca011b5a0d017955f14dc63898807&format=JSON
+// branch:BRANCH commit:COMMIT: https://android.googlesource.com/platform/build/soong/+log/refs/heads/main/?s=42ada5cff3fca011b5a0d017955f14dc63898807&format=JSON
 //
-//	              tag:TAG: https://android.googlesource.com/platform/build/soong/+log/refs/tags/android-vts-10.0_r4?format=JSON
-//	tag:TAG commit:COMMIT: https://android.googlesource.com/platform/build/soong/+log/refs/tags/android-vts-10.0_r4/?s=9863d53618714a36c3f254d949497a7eb2d11863&format=JSON
+// tag:TAG: https://android.googlesource.com/platform/build/soong/+log/refs/tags/android-vts-10.0_r4?format=JSON
+//
+// tag:TAG commit:COMMIT: https://android.googlesource.com/platform/build/soong/+log/refs/tags/android-vts-10.0_r4/?s=9863d53618714a36c3f254d949497a7eb2d11863&format=JSON
+//
+// nolint: gocyclo,lll
 func (r *repo) Query(project, operator string) (map[string]interface{}, error) {
 	r.cfg.Logger.Debug("repo: Query")
 
@@ -156,15 +177,15 @@ func (r *repo) Query(project, operator string) (map[string]interface{}, error) {
 
 	if branch != "" {
 		if commit != "" {
-			buf, err = r.request(r.url+"/"+project+"/+log/"+"refs/heads/"+branch+"/?s="+commit+"&format=JSON", r.user, r.pass)
+			buf, err = r.request(r.url+"/"+project+urlLog+urlHeads+branch+urlSearch+commit+"&"+urlFormat, r.user, r.pass)
 		} else {
-			buf, err = r.request(r.url+"/"+project+"/+log/"+"refs/heads/"+branch+"?format=JSON", r.user, r.pass)
+			buf, err = r.request(r.url+"/"+project+urlLog+urlHeads+branch+"?"+urlFormat, r.user, r.pass)
 		}
 	} else if tag != "" {
 		if commit != "" {
-			buf, err = r.request(r.url+"/"+project+"/+log/"+"refs/tags/"+tag+"/?s="+commit+"&format=JSON", r.user, r.pass)
+			buf, err = r.request(r.url+"/"+project+urlLog+urlTags+tag+urlSearch+commit+"&"+urlFormat, r.user, r.pass)
 		} else {
-			buf, err = r.request(r.url+"/"+project+"/+log/"+"refs/tags/"+tag+"?format=JSON", r.user, r.pass)
+			buf, err = r.request(r.url+"/"+project+urlLog+urlTags+tag+"?"+urlFormat, r.user, r.pass)
 		}
 	} else {
 		err = errors.New("operator invalid")

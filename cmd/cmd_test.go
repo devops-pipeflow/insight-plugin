@@ -97,6 +97,14 @@ func TestInitGptSight(t *testing.T) {
 	assert.Equal(t, nil, err)
 }
 
+func TestInitNodeSight(t *testing.T) {
+	logger, _ := initLogger(context.Background(), level)
+	cfg := testInitConfig()
+
+	_, err := initNodeSight(context.Background(), logger, cfg)
+	assert.Equal(t, nil, err)
+}
+
 func TestInitReport(t *testing.T) {
 	logger, _ := initLogger(context.Background(), level)
 	cfg := testInitConfig()
@@ -109,6 +117,6 @@ func TestInitInsight(t *testing.T) {
 	logger, _ := initLogger(context.Background(), level)
 	cfg := testInitConfig()
 
-	_, err := initInsight(context.Background(), logger, cfg, nil, nil, nil, nil, nil, nil, nil)
+	_, err := initInsight(context.Background(), logger, cfg, nil, nil, nil, nil, nil, nil, nil, nil)
 	assert.Equal(t, nil, err)
 }

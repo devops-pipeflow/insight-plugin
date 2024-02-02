@@ -29,6 +29,7 @@ type Config struct {
 	BuildSight sights.BuildSight
 	CodeSight  sights.CodeSight
 	GptSight   sights.GptSight
+	NodeSight  sights.NodeSight
 	Report     report.Report
 }
 
@@ -73,6 +74,10 @@ func (i *insight) Init(ctx context.Context) error {
 		return errors.Wrap(err, "failed to init gptsight")
 	}
 
+	if err := i.cfg.NodeSight.Init(ctx); err != nil {
+		return errors.Wrap(err, "failed to init nodesight")
+	}
+
 	if err := i.cfg.Report.Init(ctx); err != nil {
 		return errors.Wrap(err, "failed to init report")
 	}
@@ -84,6 +89,7 @@ func (i *insight) Deinit(ctx context.Context) error {
 	i.cfg.Logger.Debug("insight: Deinit")
 
 	_ = i.cfg.Report.Deinit(ctx)
+	_ = i.cfg.NodeSight.Deinit(ctx)
 	_ = i.cfg.GptSight.Deinit(ctx)
 	_ = i.cfg.CodeSight.Deinit(ctx)
 	_ = i.cfg.BuildSight.Deinit(ctx)

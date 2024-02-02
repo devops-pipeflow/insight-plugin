@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -15,25 +16,69 @@ import (
 
 	"github.com/hashicorp/go-hclog"
 	"github.com/pkg/errors"
+	"github.com/reviewdog/reviewdog/diff"
 
 	"github.com/devops-pipeflow/insight-plugin/config"
+)
+
+const (
+	TypeError = "Error"
+	TypeInfo  = "Info"
+	TypeWarn  = "Warn"
+)
+
+const (
+	urlChanges   = "/changes/"
+	urlContent   = "/content"
+	urlDetail    = "/detail"
+	urlFiles     = "/files/"
+	urlNumber    = "&n="
+	urlOption    = "&o="
+	urlPatch     = "/patch"
+	urlPrefix    = "/a"
+	urlQuery     = "?q="
+	urlReview    = "/review"
+	urlRevisions = "/revisions/"
 )
 
 const (
 	base64Content = ".base64"
 	base64Message = "message.base64"
 	commitMsg     = "/COMMIT_MSG"
+	commitQuery   = "commit"
+)
+
+const (
+	diffBin    = "Binary files differ"
+	diffSep    = "diff --git"
+	pathPrefix = "b/"
+)
+
+const (
+	voteApproval    = "+1"
+	voteDisapproval = "-1"
+	voteLabel       = "Code-Review"
+	voteMessage     = "Voting Code-Review by pipeflow insight"
 )
 
 type Review interface {
 	Init(context.Context) error
 	Deinit(context.Context) error
-	Clean(string) error
+	Clean(context.Context, string) error
+	Fetch(context.Context, string, string) (string, string, []string, error)
+	Vote(context.Context, string, []Format) error
 }
 
 type Config struct {
 	Config config.Config
 	Logger hclog.Logger
+}
+
+type Format struct {
+	File    string
+	Line    int
+	Type    string
+	Details string
 }
 
 type review struct {
@@ -53,23 +98,23 @@ func DefaultConfig() *Config {
 	return &Config{}
 }
 
-func (r *review) Init(ctx context.Context) error {
+func (r *review) Init(_ context.Context) error {
 	r.cfg.Logger.Debug("review: Init")
 
-	r.user = r.cfg.Config.Spec.Review.User
-	r.pass = r.cfg.Config.Spec.Review.Pass
-	r.url = r.cfg.Config.Spec.Review.Url
+	r.user = r.cfg.Config.Spec.ReviewConfig.User
+	r.pass = r.cfg.Config.Spec.ReviewConfig.Pass
+	r.url = r.cfg.Config.Spec.ReviewConfig.Url
 
 	return nil
 }
 
-func (r *review) Deinit(ctx context.Context) error {
+func (r *review) Deinit(_ context.Context) error {
 	r.cfg.Logger.Debug("review: Deinit")
 
 	return nil
 }
 
-func (r *review) Clean(name string) error {
+func (r *review) Clean(_ context.Context, name string) error {
 	r.cfg.Logger.Debug("review: Clean")
 
 	if err := os.RemoveAll(name); err != nil {
@@ -97,7 +142,7 @@ func (r *review) Fetch(ctx context.Context, root, commit string) (dname, rname s
 	}
 
 	// Query commit
-	buf, err := r.get(ctx, r.urlQuery("commit:"+commit, []string{"CURRENT_REVISION"}, 0))
+	buf, err := r.get(ctx, r.urlQuery(commitQuery+":"+commit, []string{"CURRENT_REVISION"}, 0))
 	if err != nil {
 		return "", "", nil, errors.Wrap(err, "failed to query")
 	}
@@ -161,6 +206,108 @@ func (r *review) Fetch(ctx context.Context, root, commit string) (dname, rname s
 	return path, queryRet["project"].(string), files, nil
 }
 
+// nolint:funlen,gocyclo
+func (r *review) Vote(ctx context.Context, commit string, data []Format) error {
+	match := func(data Format, diffs []*diff.FileDiff) bool {
+		for _, d := range diffs {
+			if strings.Replace(d.PathNew, pathPrefix, "", 1) != data.File {
+				continue
+			}
+			if data.Line <= 0 {
+				return true
+			}
+			for _, h := range d.Hunks {
+				for _, l := range h.Lines {
+					if l.Type == diff.LineAdded && l.LnumNew == data.Line {
+						return true
+					}
+				}
+			}
+		}
+		return false
+	}
+
+	build := func(data []Format, diffs []*diff.FileDiff) (map[string]interface{}, map[string]interface{}, string) {
+		if len(data) == 0 {
+			return nil, map[string]interface{}{voteLabel: voteApproval}, voteMessage
+		}
+		c := map[string]interface{}{}
+		for _, item := range data {
+			if item.Details == "" || (item.File != commitMsg && !match(item, diffs)) {
+				continue
+			}
+			l := item.Line
+			if l <= 0 {
+				l = 1
+			}
+			b := map[string]interface{}{"line": l, "message": item.Details}
+			if _, ok := c[item.File]; !ok {
+				c[item.File] = []map[string]interface{}{b}
+			} else {
+				c[item.File] = append(c[item.File].([]map[string]interface{}), b)
+			}
+		}
+		if len(c) == 0 {
+			return nil, map[string]interface{}{voteLabel: voteApproval}, voteMessage
+		} else {
+			return c, map[string]interface{}{voteLabel: voteDisapproval}, voteMessage
+		}
+	}
+
+	// Query commit
+	ret, err := r.get(ctx, r.urlQuery(commitQuery+":"+commit, []string{"CURRENT_REVISION"}, 0))
+	if err != nil {
+		return errors.Wrap(err, "failed to query")
+	}
+
+	c, err := r.unmarshalList(ret)
+	if err != nil {
+		return errors.Wrap(err, "failed to unmarshalList")
+	}
+
+	revisions := c["revisions"].(map[string]interface{})
+	current := revisions[c["current_revision"].(string)].(map[string]interface{})
+
+	// Get patch
+	ret, err = r.get(ctx, r.urlPatch(int(c["_number"].(float64)), int(current["_number"].(float64))))
+	if err != nil {
+		return errors.Wrap(err, "failed to patch")
+	}
+
+	// Parse diff
+	dec := make([]byte, base64.StdEncoding.DecodedLen(len(ret)))
+	if _, err = base64.StdEncoding.Decode(dec, ret); err != nil {
+		return errors.Wrap(err, "failed to decode")
+	}
+
+	index := bytes.Index(dec, []byte(diffSep))
+	if index < 0 {
+		return errors.New("failed to index")
+	}
+
+	var b []byte
+
+	for _, item := range bytes.SplitAfter(dec[index:], []byte(diffSep)) {
+		if !bytes.Contains(item, []byte(diffBin)) {
+			b = bytes.Join([][]byte{b, item}, []byte(""))
+		}
+	}
+
+	diffs, err := diff.ParseMultiFile(bytes.NewReader(b))
+	if err != nil {
+		return errors.Wrap(err, "failed to parse")
+	}
+
+	// Review commit
+	comments, labels, message := build(data, diffs)
+	buf := map[string]interface{}{"comments": comments, "labels": labels, "message": message}
+	if err := r.post(ctx, r.urlReview(int(c["_number"].(float64)), int(current["_number"].(float64))), buf); err != nil {
+		return errors.Wrap(err, "failed to review")
+	}
+
+	return nil
+}
+
 func (r *review) write(dir, file, data string) error {
 	r.cfg.Logger.Debug("review: write")
 
@@ -212,12 +359,12 @@ func (r *review) unmarshalList(data []byte) (map[string]interface{}, error) {
 func (r *review) urlContent(change, revision int, name string) string {
 	r.cfg.Logger.Debug("review: urlContent")
 
-	buf := r.url + "/changes/" + strconv.Itoa(change) +
-		"/revisions/" + strconv.Itoa(revision) + "/files/" + url.QueryEscape(name) + "/content"
+	buf := r.url + urlChanges + strconv.Itoa(change) +
+		urlRevisions + strconv.Itoa(revision) + urlFiles + url.QueryEscape(name) + urlContent
 
 	if r.user != "" && r.pass != "" {
-		buf = r.url + "/a/changes/" + strconv.Itoa(change) +
-			"/revisions/" + strconv.Itoa(revision) + "/files/" + url.QueryEscape(name) + "/content"
+		buf = r.url + urlPrefix + urlChanges + strconv.Itoa(change) +
+			urlRevisions + strconv.Itoa(revision) + urlFiles + url.QueryEscape(name) + urlContent
 	}
 
 	return buf
@@ -226,10 +373,10 @@ func (r *review) urlContent(change, revision int, name string) string {
 func (r *review) urlDetail(change int) string {
 	r.cfg.Logger.Debug("review: urlDetail")
 
-	buf := r.url + "/changes/" + strconv.Itoa(change) + "/detail"
+	buf := r.url + urlChanges + strconv.Itoa(change) + urlDetail
 
 	if r.user != "" && r.pass != "" {
-		buf = r.url + "/a/changes/" + strconv.Itoa(change) + "/detail"
+		buf = r.url + urlPrefix + urlChanges + strconv.Itoa(change) + urlDetail
 	}
 
 	return buf
@@ -238,12 +385,12 @@ func (r *review) urlDetail(change int) string {
 func (r *review) urlFiles(change, revision int) string {
 	r.cfg.Logger.Debug("review: urlFiles")
 
-	buf := r.url + "/changes/" + strconv.Itoa(change) +
-		"/revisions/" + strconv.Itoa(revision) + "/files/"
+	buf := r.url + urlChanges + strconv.Itoa(change) +
+		urlRevisions + strconv.Itoa(revision) + urlFiles
 
 	if r.user != "" && r.pass != "" {
-		buf = r.url + "/a/changes/" + strconv.Itoa(change) +
-			"/revisions/" + strconv.Itoa(revision) + "/files/"
+		buf = r.url + urlPrefix + urlChanges + strconv.Itoa(change) +
+			urlRevisions + strconv.Itoa(revision) + urlFiles
 	}
 
 	return buf
@@ -252,12 +399,12 @@ func (r *review) urlFiles(change, revision int) string {
 func (r *review) urlPatch(change, revision int) string {
 	r.cfg.Logger.Debug("review: urlPatch")
 
-	buf := r.url + "/changes/" + strconv.Itoa(change) +
-		"/revisions/" + strconv.Itoa(revision) + "/patch"
+	buf := r.url + urlChanges + strconv.Itoa(change) +
+		urlRevisions + strconv.Itoa(revision) + urlPatch
 
 	if r.user != "" && r.pass != "" {
-		buf = r.url + "/a/changes/" + strconv.Itoa(change) +
-			"/revisions/" + strconv.Itoa(revision) + "/patch"
+		buf = r.url + urlPrefix + urlChanges + strconv.Itoa(change) +
+			urlRevisions + strconv.Itoa(revision) + urlPatch
 	}
 
 	return buf
@@ -266,11 +413,11 @@ func (r *review) urlPatch(change, revision int) string {
 func (r *review) urlQuery(search string, option []string, start int) string {
 	r.cfg.Logger.Debug("review: urlQuery")
 
-	query := "?q=" + search + "&o=" + strings.Join(option, "&o=") + "&n=" + strconv.Itoa(start)
+	query := urlQuery + search + urlOption + strings.Join(option, urlOption) + urlNumber + strconv.Itoa(start)
 
-	buf := r.url + "/changes/" + query
+	buf := r.url + urlChanges + query
 	if r.user != "" && r.pass != "" {
-		buf = r.url + "/a/changes/" + query
+		buf = r.url + urlPrefix + urlChanges + query
 	}
 
 	return buf
@@ -279,12 +426,12 @@ func (r *review) urlQuery(search string, option []string, start int) string {
 func (r *review) urlReview(change, revision int) string {
 	r.cfg.Logger.Debug("review: urlReview")
 
-	buf := r.url + "/changes/" + strconv.Itoa(change) +
-		"/revisions/" + strconv.Itoa(revision) + "/review"
+	buf := r.url + urlChanges + strconv.Itoa(change) +
+		urlRevisions + strconv.Itoa(revision) + urlReview
 
 	if r.user != "" && r.pass != "" {
-		buf = r.url + "/a/changes/" + strconv.Itoa(change) +
-			"/revisions/" + strconv.Itoa(revision) + "/review"
+		buf = r.url + urlPrefix + urlChanges + strconv.Itoa(change) +
+			urlRevisions + strconv.Itoa(revision) + urlReview
 	}
 
 	return buf
