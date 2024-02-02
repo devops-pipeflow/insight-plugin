@@ -214,7 +214,7 @@ message LoggingInfo {
   string file = 1;
   int64 line = 2;
   string type = 3;
-  string details = 4;
+  string detail = 4;
 }
 
 message RepoInfo {
@@ -262,7 +262,7 @@ message DiskStat {
 }
 
 message DockerStat {
-  repeated string DockerIds = 1;
+  repeated string dockerIds = 1;
   repeated float64 cgroupCpuDockerUsages = 2;
   repeated float64 cgroupCpuUsages = 3;
   repeated CgroupDocker cgroupDockers = 4;
@@ -287,8 +287,8 @@ message LoadStat {
 }
 
 message MemStat {
-  repeated MemSwap memSwaps = 1;
-  MemSwap memSwap = 2;
+  repeated MemSwapDevice memSwapDevices = 1;
+  MemSwapMemory memSwapMemory = 2;
   MemVirtual memVirtual = 3;
 }
 
@@ -340,16 +340,16 @@ message CgroupDocker {
 
 message CgroupMem {
   uint64 cache = 1;
-  uint64 RSS = 2;
-  uint64 RSSHuge = 3;
-  uint64 MappedFile = 4;
-  uint64 TotalCache = 5;
-  uint64 TotalRSS = 6;
-  uint64 TotalRSSHuge = 7;
-  uint64 TotalMappedFile = 8;
-  uint64 MemUsageInBytes = 9;
-  uint64 MemMaxUsageInBytes = 10;
-  uint64 MemLimitInBytes = 11;
+  uint64 rss = 2;
+  uint64 rssHuge = 3;
+  uint64 mappedFile = 4;
+  uint64 totalCache = 5;
+  uint64 totalRss = 6;
+  uint64 totalRssHuge = 7;
+  uint64 totalMappedFile = 8;
+  uint64 memUsageInBytes = 9;
+  uint64 memMaxUsageInBytes = 10;
+  uint64 memLimitInBytes = 11;
 }
 
 message LoadAvg {
@@ -360,19 +360,19 @@ message LoadAvg {
 
 message LoadMisc {
   int64 procsTotal = 1;
-  int64 ProcsCreated = 2;
-  int64 ProcsRunning = 3;
-  int64 ProcsBlocked = 4;
-  int64 Ctxt = 5;
+  int64 procsCreated = 2;
+  int64 procsRunning = 3;
+  int64 procsBlocked = 4;
+  int64 ctxt = 5;
 }
 
-message MemSwap {
+message MemSwapDevice {
   string name = 1;
   uint64 usedBytes = 2;
   uint64 freeBytes = 3;
 }
 
-message MemSwap {
+message MemSwapMemory {
   uint64 total = 1;
   uint64 used = 2;
   uint64 free = 3;
@@ -385,7 +385,7 @@ message MemVirtual {
   uint64 used = 3;
   float64 usedPercent = 4;
   uint64 free = 5;
-  uint64 buffers = 6;
+  uint64 buffer = 6;
   uint64 cached = 7;
   uint64 swapCached = 8;
   uint64 swapTotal = 9;
@@ -399,7 +399,7 @@ message MemVirtual {
   uint64 hugePagesRsvd = 17;
   uint64 hugePagesSurp = 18;
   uint64 hugePageSize = 19;
-  uint64 anonHugePages = 20;
+  uint64 anonHugePage = 20;
 }
 
 message NetIo {
@@ -443,13 +443,13 @@ message ProcessInfo {
 }
 
 message ProcessMemoryInfo {
-  uint64 RSS = 1;
-  uint64 VMS = 2;
-  uint64 HWM = 3;
-  uint64 Data = 4;
-  uint64 Stack = 5;
-  uint64 Locked = 6;
-  uint64 Swap = 7;
+  uint64 rss = 1;
+  uint64 vms = 2;
+  uint64 hwm = 3;
+  uint64 data = 4;
+  uint64 stack = 5;
+  uint64 locked = 6;
+  uint64 swap = 7;
 }
 
 message ProcessRlimit {
