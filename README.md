@@ -67,19 +67,19 @@ spec:
       start: 1
       len: 2
       count: 3
-    repoConfig:
-      url: 127.0.0.1:8080
-      user: user
-      pass: pass
-    reviewConfig:
-      url: 127.0.0.1:8081
-      user: user
-      pass: pass
   codeConfig:
   gptConfig:
   nodeConfig:
     duration: 1s
     interval: 2s
+  repoConfig:
+    url: 127.0.0.1:8080
+    user: user
+    pass: pass
+  reviewConfig:
+    url: 127.0.0.1:8081
+    user: user
+    pass: pass
 ```
 
 > `nodeConfig`: Node config
