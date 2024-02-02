@@ -431,8 +431,8 @@ message ProcessInfo {
   float32 memoryPercent = 9;
   string name = 10;
   int32 ionice = 11;
-  int32 numFds = 12;
-  int32 numThreads = 13;
+  int32 numFd = 12;
+  int32 numThread = 13;
   int32 parent = 14;
   float64 percent = 15;
   int32 ppid = 16;
