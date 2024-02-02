@@ -16,7 +16,7 @@
 
 ## Prerequisites
 
-- Go >= 1.18.0
+- Go >= 1.21.0
 
 
 
@@ -59,28 +59,33 @@ kind: insight
 metadata:
   name: insight
 spec:
-  sights:
-    - name: buildSight
-      enable: true
-    - name: codeSight
-      enable: true
-    - name: gptSight
-      enable: true
-    - name: nodeSight
-      enable: true
-  repo:
-    url: 127.0.0.1:8080
-    user: user
-    pass: pass
-  review:
-    url: 127.0.0.1:8081
-    user: user
-    pass: pass
-  gpt:
-    url: 127.0.0.1:8082
-    user: user
-    pass: pass
+  envVariables:
+    - key: env
+      value: val
+  buildConfig:
+    loggingConfig:
+      start: 1
+      len: 2
+      count: 3
+    repoConfig:
+      url: 127.0.0.1:8080
+      user: user
+      pass: pass
+    reviewConfig:
+      url: 127.0.0.1:8081
+      user: user
+      pass: pass
+  codeConfig:
+  gptConfig:
+  nodeConfig:
+    duration: 1s
+    interval: 2s
 ```
+
+> `nodeConfig`: Node config
+> > `duration`: Node sight duration (h:hour, m:minute, s:second)
+> >
+> > `interval`: Node sight interval (h:hour, m:minute, s:second)
 
 
 
