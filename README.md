@@ -110,6 +110,8 @@ message ConfigRequest {
   CodeConfig codeConfig = 4;
   GptConfig gptConfig = 5;
   NodeConfig nodeConfig = 6;
+  RepoConfig repoConfig = 7;
+  ReviewConfig reviewConfig = 8;
 }
 
 message EnvVariable {
@@ -119,8 +121,6 @@ message EnvVariable {
 
 message BuildConfig {
   LoggingConfig loggingConfig = 1;
-  RepoConfig repoConfig = 2;
-  ReviewConfig reviewConfig = 3;
 }
 
 message CodeConfig {}
@@ -130,12 +130,6 @@ message GptConfig {}
 message NodeConfig {
   int64 duration = 1;
   int64 interval = 2;
-}
-
-message LoggingConfig {
-  int64 start = 1;
-  int64 len = 2;
-  int64 count = 3;
 }
 
 message RepoConfig {
@@ -148,6 +142,12 @@ message ReviewConfig {
   string url = 1;
   string user = 2;
   string pass = 3;
+}
+
+message LoggingConfig {
+  int64 start = 1;
+  int64 len = 2;
+  int64 count = 3;
 }
 
 message ConfigResponse {}
