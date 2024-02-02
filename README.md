@@ -430,16 +430,15 @@ message ProcessInfo {
   ProcessMemoryInfo processMemoryInfo = 8;
   float32 memoryPercent = 9;
   string name = 10;
-  int32 ionice = 11;
-  int32 numFd = 12;
-  int32 numThread = 13;
-  int32 parent = 14;
-  float64 percent = 15;
-  int32 ppid = 16;
-  repeated ProcessRlimit processRlimit = 17;
-  repeated string statuss = 18;
-  repeated int32 uids = 19;
-  string username = 20;
+  int32 numFd = 11;
+  int32 numThread = 12;
+  int32 parent = 13;
+  float64 percent = 14;
+  int32 ppid = 15;
+  repeated ProcessRlimit processRlimit = 16;
+  repeated string statuss = 17;
+  repeated int32 uids = 18;
+  string username = 19;
 }
 
 message ProcessMemoryInfo {
