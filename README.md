@@ -437,7 +437,7 @@ message ProcessInfo {
   float64 percent = 15;
   int32 ppid = 16;
   repeated ProcessRlimit processRlimit = 17;
-  repeated string status = 18;
+  repeated string statuss = 18;
   repeated int32 uids = 19;
   string username = 20;
 }
