@@ -73,35 +73,12 @@ func TestInitReview(t *testing.T) {
 	assert.Equal(t, nil, err)
 }
 
-func TestInitBuildSight(t *testing.T) {
+// nolint: dogsled
+func TestInitSights(t *testing.T) {
 	logger, _ := initLogger(context.Background(), level)
 	cfg := testInitConfig()
 
-	_, err := initBuildSight(context.Background(), logger, cfg)
-	assert.Equal(t, nil, err)
-}
-
-func TestInitCodeSight(t *testing.T) {
-	logger, _ := initLogger(context.Background(), level)
-	cfg := testInitConfig()
-
-	_, err := initCodeSight(context.Background(), logger, cfg)
-	assert.Equal(t, nil, err)
-}
-
-func TestInitGptSight(t *testing.T) {
-	logger, _ := initLogger(context.Background(), level)
-	cfg := testInitConfig()
-
-	_, err := initGptSight(context.Background(), logger, cfg)
-	assert.Equal(t, nil, err)
-}
-
-func TestInitNodeSight(t *testing.T) {
-	logger, _ := initLogger(context.Background(), level)
-	cfg := testInitConfig()
-
-	_, err := initNodeSight(context.Background(), logger, cfg)
+	_, _, _, _, err := initSights(context.Background(), logger, cfg)
 	assert.Equal(t, nil, err)
 }
 
@@ -113,10 +90,18 @@ func TestInitReport(t *testing.T) {
 	assert.Equal(t, nil, err)
 }
 
+func TestInitSsh(t *testing.T) {
+	logger, _ := initLogger(context.Background(), level)
+	cfg := testInitConfig()
+
+	_, err := initSsh(context.Background(), logger, cfg)
+	assert.Equal(t, nil, err)
+}
+
 func TestInitInsight(t *testing.T) {
 	logger, _ := initLogger(context.Background(), level)
 	cfg := testInitConfig()
 
-	_, err := initInsight(context.Background(), logger, cfg, nil, nil, nil, nil, nil, nil, nil, nil)
+	_, err := initInsight(context.Background(), logger, cfg, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 	assert.Equal(t, nil, err)
 }

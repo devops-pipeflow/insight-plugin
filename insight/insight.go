@@ -12,6 +12,7 @@ import (
 	"github.com/devops-pipeflow/insight-plugin/report"
 	"github.com/devops-pipeflow/insight-plugin/review"
 	"github.com/devops-pipeflow/insight-plugin/sights"
+	"github.com/devops-pipeflow/insight-plugin/ssh"
 )
 
 type Insight interface {
@@ -31,6 +32,7 @@ type Config struct {
 	GptSight   sights.GptSight
 	NodeSight  sights.NodeSight
 	Report     report.Report
+	Ssh        ssh.Ssh
 }
 
 type insight struct {
@@ -82,12 +84,17 @@ func (i *insight) Init(ctx context.Context) error {
 		return errors.Wrap(err, "failed to init report")
 	}
 
+	if err := i.cfg.Ssh.Init(ctx); err != nil {
+		return errors.Wrap(err, "failed to init ssh")
+	}
+
 	return nil
 }
 
 func (i *insight) Deinit(ctx context.Context) error {
 	i.cfg.Logger.Debug("insight: Deinit")
 
+	_ = i.cfg.Ssh.Deinit(ctx)
 	_ = i.cfg.Report.Deinit(ctx)
 	_ = i.cfg.NodeSight.Deinit(ctx)
 	_ = i.cfg.GptSight.Deinit(ctx)

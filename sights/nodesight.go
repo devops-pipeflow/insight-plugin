@@ -36,7 +36,8 @@ type NodeSsh struct {
 }
 
 type NodeInfo struct {
-	NodeStats []NodeStat
+	NodeStats   []NodeStat
+	NodeReports []NodeReport
 }
 
 type NodeStat struct {
@@ -49,6 +50,18 @@ type NodeStat struct {
 	MemStat     MemStat
 	NetStat     NetStat
 	ProcessStat ProcessStat
+}
+
+type NodeReport struct {
+	Host          string
+	CpuReport     string
+	DiskReport    string
+	DockerReport  string
+	HostReport    string
+	LoadReport    string
+	MemReport     string
+	NetReport     string
+	ProcessReport string
 }
 
 type CpuStat struct {
@@ -288,6 +301,18 @@ func (ns *nodesight) Deinit(ctx context.Context) error {
 
 func (ns *nodesight) Run(ctx context.Context) error {
 	ns.cfg.Logger.Debug("nodesight: Run")
+
+	// Node test on ssh connection
+	// TBD: FIXME
+
+	// Node statistic on cpu/disk/docker/host/load/mem/net/process
+	// TBD: FIXME
+
+	// Node report on cpu/disk/docker/host/load/mem/net/process
+	// TBD: FIXME
+
+	// Node report via gpt
+	// TBD: FIXME
 
 	return nil
 }

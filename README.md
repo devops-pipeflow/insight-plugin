@@ -104,19 +104,19 @@ service Insight {
 }
 
 message ConfigRequest {
-  string pluginName = 1;
-  repeated EnvVariable envVariables = 2;
-  BuildConfig buildConfig = 3;
-  CodeConfig codeConfig = 4;
-  GptConfig gptConfig = 5;
-  NodeConfig nodeConfig = 6;
-  RepoConfig repoConfig = 7;
-  ReviewConfig reviewConfig = 8;
+  string pluginName = 1;  // plugin name
+  repeated EnvVariable envVariables = 2;  // environment variables in list
+  BuildConfig buildConfig = 3;  // buildsight config
+  CodeConfig codeConfig = 4;  // codesight config
+  GptConfig gptConfig = 5;  // gptsight config
+  NodeConfig nodeConfig = 6;  // nodesight config
+  RepoConfig repoConfig = 7;  // repo config (Gitiles)
+  ReviewConfig reviewConfig = 8;  // review config (Gerrit, pingview)
 }
 
 message EnvVariable {
-  string name = 1;
-  string value = 2;
+  string name = 1;  // variable name
+  string value = 2;  // variable value
 }
 
 message BuildConfig {
@@ -128,35 +128,35 @@ message CodeConfig {}
 message GptConfig {}
 
 message NodeConfig {
-  int64 duration = 1;
-  int64 interval = 2;
+  int64 duration = 1;  // duration time in string
+  int64 interval = 2;  // interval time in string
 }
 
 message RepoConfig {
-  string url = 1;
-  string user = 2;
-  string pass = 3;
+  string url = 1;  // repo url (Gitiles)
+  string user = 2;  // repo user (Gitiles)
+  string pass = 3;  // repo pass (Gitiles)
 }
 
 message ReviewConfig {
-  string url = 1;
-  string user = 2;
-  string pass = 3;
+  string url = 1;  // review url (Gerrit, pingview)
+  string user = 2;  // review user (Gerrit, pingview)
+  string pass = 3;  // review pass (Gerrit, pingview)
 }
 
 message LoggingConfig {
-  int64 start = 1;
-  int64 len = 2;
-  int64 count = 3;
+  int64 start = 1;  // logging lines start (>=1)
+  int64 len = 2;  // logging lines length
+  int64 count = 3;  // logging lines count (total size: len*count)
 }
 
 message ConfigResponse {}
 
 message TriggerRequest {
-  BuildTrigger buildTrigger = 1;
-  CodeTrigger codeTrigger = 2;
-  GptTrigger gptTrigger = 3;
-  NodeTrigger nodeTrigger = 4;
+  BuildTrigger buildTrigger = 1;  // buildsight trigger
+  CodeTrigger codeTrigger = 2;  // codesight trigger
+  GptTrigger gptTrigger = 3;  // gptsight trigger
+  NodeTrigger nodeTrigger = 4;  // nodesight trigger
 }
 
 message BuildTrigger {
@@ -172,34 +172,34 @@ message NodeTrigger {
 }
 
 message LoggingTrigger {
-  repeated string lines = 1;
-  int64 start = 2;
-  int64 len = 3;
+  repeated string lines = 1;  // logging lines in list
+  int64 start = 2;  // logging lines start (>=1)
+  int64 len = 3;  // logging lines length
 }
 
 message NodeConnect {
-  string host = 1;
-  int64 port = 2;
-  NodeSsh nodeSsh = 3;
+  string host = 1;  // node host (host:port)
+  int64 port = 2;  // node port (host:port)
+  NodeSsh nodeSsh = 3;  // node ssh config
 }
 
 message NodeSsh {
-  string user = 1;
-  string pass = 2;
-  string key = 3;
+  string user = 1;  // node ssh user
+  string pass = 2;  // node ssh pass
+  string key = 3;  // node ssh private key
 }
 
 message TriggerResponse {
-  BuildInfo buildInfo = 1;
-  CodeInfo codeInfo = 2;
-  GptInfo gptInfo = 3;
-  NodeInfo nodeInfo = 4;
+  BuildInfo buildInfo = 1;  // buildsight info
+  CodeInfo codeInfo = 2;  // codesight info
+  GptInfo gptInfo = 3;  // gptsight info
+  NodeInfo nodeInfo = 4;  // nodesight info
 }
 
 message BuildInfo {
-  LoggingInfo loggingInfo = 1;
-  RepoInfo repoInfo = 2;
-  ReviewInfo reviewInfo =3;
+  LoggingInfo loggingInfo = 1;  // logging info
+  RepoInfo repoInfo = 2;  // repo info (Gitiles)
+  ReviewInfo reviewInfo =3;  // review info (Gerrit, pingview)
 }
 
 message CodeInfo {}
@@ -207,98 +207,111 @@ message CodeInfo {}
 message GptInfo {}
 
 message NodeInfo {
-  repeated NodeStat nodeStats = 1;
+  repeated NodeStat nodeStats = 1;  // node statistic in list
+  repeated NodeReport nodeReports = 2;  // node report in list
 }
 
 message LoggingInfo {
-  string file = 1;
-  int64 line = 2;
-  string type = 3;
-  string detail = 4;
+  string file = 1;  // file name
+  int64 line = 2;  // file line
+  string type = 3;  // error type (info, warn, error)
+  string detail = 4;  // error details
 }
 
 message RepoInfo {
-  string project = 1;
-  string branch = 2;
-  string commit = 3;
-  string committer = 4;
-  string author = 5;
-  string message = 6;
-  string date = 7;
+  string project = 1;  // project name in repo
+  string branch = 2;  // branch name in repo
+  string commit = 3;  // commit id in repo
+  string committer = 4;  // committer name in repo
+  string author = 5;  // author name in repo
+  string message = 6;  // commit message in repo
+  string date = 7;  // commit date in repo
 }
 
 message ReviewInfo {
-  string project = 1;
-  string branch = 2;
-  int64 change = 3;
-  string owner = 4;
-  string author = 5;
-  string message = 6;
-  string date = 7;
+  string project = 1;  // project name in review
+  string branch = 2;  // branch name in review
+  int64 change = 3;  // change id in review
+  string owner = 4;  // owner name in review
+  string author = 5;  // author name in review
+  string message = 6;  // commit message in review
+  string date = 7;  // commit date in review
 }
 
 message NodeStat {
-  string host = 1;
-  CpuStat cpuStat = 2;
-  DiskStat diskStat = 3;
-  DockerStat dockerStat = 4;
-  HostStat hostStat = 5;
-  LoadStat loadStat = 6;
-  MemStat memStat = 7;
-  NetStat netStat = 8;
-  ProcessStat processStat = 9;
+  string host = 1;  // node host
+  CpuStat cpuStat = 2;  // cpu statistic
+  DiskStat diskStat = 3;  // dist statistic
+  DockerStat dockerStat = 4;  // docker statistic
+  HostStat hostStat = 5;  // host statistic
+  LoadStat loadStat = 6;  // load statistic
+  MemStat memStat = 7;  // memory statistic
+  NetStat netStat = 8;  // net statistic
+  ProcessStat processStat = 9;  // process statistic
+}
+
+message NodeReport {
+  string host = 1;  // node host
+  string cpuReport = 2; // cpu report
+  string distReport = 3; // disk report
+  string dockerReport = 4; // docker report
+  string hostReport = 5; // host report
+  string loadReport = 6; // load report
+  string memReport = 7; // memory report
+  string netReport = 8; // net report
+  string processReport = 9; // process report
 }
 
 message CpuStat {
-  int64 physicalCount = 1;
-  int64 logicalCount = 2;
-  repeated float64 cpuPercents = 3;
-  repeated CpuTime cpuTimes = 4;
+  int64 physicalCount = 1; // physical cores
+  int64 logicalCount = 2;  // logical cores
+  repeated float64 cpuPercents = 3;  // the percentage of cpu used per cpu in list
+  repeated CpuTime cpuTimes = 4;  // the time of cpu used per cpu in list
 }
 
 message DiskStat {
-  repeated DiskPartition diskPartitions = 1;
-  repeated DiskUsage diskUsages = 2;
+  repeated DiskPartition diskPartitions = 1;  // disk partitions in list (for physical devices only)
+  repeated DiskUsage diskUsages = 2;  // file system usage in list
 }
 
 message DockerStat {
-  repeated string containerIds = 1;
-  repeated float64 cgroupCpuDockerUsages = 2;
-  repeated float64 cgroupCpuUsages = 3;
-  repeated CgroupDocker cgroupDockers = 4;
-  repeated CgroupMem cgroupMems = 5;
+  repeated string containerIds = 1; // container ids in list
+  repeated float64 cgroupCpuDockerUsages = 2;  // cpu usage for docker in list
+  repeated float64 cgroupCpuUsages = 3;  // cpu usage in list
+  repeated CgroupDocker cgroupDockers = 4; // cgroup docker stat in list
+  repeated CgroupMem cgroupMems = 5; // cgroup memory stat in list
 }
 
 message HostStat {
-  string hostname = 1;
-  uint64 procs = 2;
-  string os = 3;
-  string platform = 4;
-  string platformFamily = 5;
-  string platformVersion = 6;
-  string kernelVersion = 7;
-  string kernelArch = 8;
-  string hostID = 9;
+  string hostname = 1;  // host name
+  uint64 procs = 2;  // number of processes
+  string os = 3;  // OS name (linux)
+  string platform = 4;  // platform name (ubuntu)
+  string platformFamily = 5;  // platform family (debian)
+  string platformVersion = 6;  // the complete OS version
+  string kernelVersion = 7;  // the kernel version
+  string kernelArch = 8;  // native cpu architecture (`uname -r`)
+  string hostID = 9;  // host id (uuid)
 }
 
 message LoadStat {
-  LoadAvg loadAvg = 1;
-  LoadMisc loadMisc = 2;
+  LoadAvg loadAvg = 1;  // load average
+  LoadMisc loadMisc = 2;  // load misc
 }
 
 message MemStat {
-  repeated MemSwapDevice memSwapDevices = 1;
-  MemSwapMemory memSwapMemory = 2;
-  MemVirtual memVirtual = 3;
+  repeated MemSwapDevice memSwapDevices = 1;  // swap device in list
+  MemSwapMemory memSwapMemory = 2;  // swap memory
+  MemVirtual memVirtual = 3;  // virtual memory
 }
 
 message NetStat {
-  repeated NetIo netIos = 1;
-  repeated NetInterface netInterfaces = 2;
+  repeated NetIo netIos = 1;  // network I/O statistics in list
+  repeated NetInterface netInterfaces = 2;  // network interface in list
 }
 
 message ProcessStat {
-  repeated ProcessInfo processInfos = 1;
+  repeated ProcessInfo processInfos = 1;  // process info in list
 }
 
 message CpuTime {
@@ -487,6 +500,8 @@ Project License can be found [here](LICENSE).
 
 - [Build AI App on Milvus, Xinference, LangChain and Llama 2-70B](https://mp.weixin.qq.com/s?__biz=MzUzMDI5OTA5NQ==&mid=2247498399&idx=1&sn=e6646dadd9a0d5b4979472e3b41749a0&chksm=fa515b27cd26d23185bf878532bff961f4d579719c47d3fc4e584325752d0806715cb4e5f7e9&xtrack=1&scene=90&subscene=93&sessionid=1693801894&flutter_pos=26&clicktime=1693801963&enterid=1693801963&finder_biz_enter_id=4&ascene=56&fasttmpl_type=0&fasttmpl_fullversion=6837651-zh_CN-zip&fasttmpl_flag=0&realreporttime=1693801963657#rd)
 
-- [Gerrit in Go](https://github.com/devops-lintflow/lintflow/blob/main/review/gerrit.go)
+- [lintflow-gerrit](https://github.com/devops-lintflow/lintflow/blob/main/review/gerrit.go)
 
-- [Gitiles in Go](https://github.com/craftslab/gorepo/blob/master/gitiles/gitiles.go)
+- [gorepo-gitiles](https://github.com/craftslab/gorepo/blob/master/gitiles/gitiles.go)
+
+- [multissh](https://github.com/shanghai-edu/multissh)
