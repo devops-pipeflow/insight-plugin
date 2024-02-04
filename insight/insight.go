@@ -29,7 +29,6 @@ type Config struct {
 	Review     review.Review
 	BuildSight sights.BuildSight
 	CodeSight  sights.CodeSight
-	GptSight   sights.GptSight
 	NodeSight  sights.NodeSight
 	Report     report.Report
 	Ssh        ssh.Ssh
@@ -72,10 +71,6 @@ func (i *insight) Init(ctx context.Context) error {
 		return errors.Wrap(err, "failed to init codesight")
 	}
 
-	if err := i.cfg.GptSight.Init(ctx); err != nil {
-		return errors.Wrap(err, "failed to init gptsight")
-	}
-
 	if err := i.cfg.NodeSight.Init(ctx); err != nil {
 		return errors.Wrap(err, "failed to init nodesight")
 	}
@@ -97,7 +92,6 @@ func (i *insight) Deinit(ctx context.Context) error {
 	_ = i.cfg.Ssh.Deinit(ctx)
 	_ = i.cfg.Report.Deinit(ctx)
 	_ = i.cfg.NodeSight.Deinit(ctx)
-	_ = i.cfg.GptSight.Deinit(ctx)
 	_ = i.cfg.CodeSight.Deinit(ctx)
 	_ = i.cfg.BuildSight.Deinit(ctx)
 	_ = i.cfg.Review.Deinit(ctx)

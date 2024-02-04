@@ -78,7 +78,7 @@ func TestInitSights(t *testing.T) {
 	logger, _ := initLogger(context.Background(), level)
 	cfg := testInitConfig()
 
-	_, _, _, _, err := initSights(context.Background(), logger, cfg)
+	_, _, _, err := initSights(context.Background(), logger, cfg)
 	assert.Equal(t, nil, err)
 }
 
@@ -102,6 +102,6 @@ func TestInitInsight(t *testing.T) {
 	logger, _ := initLogger(context.Background(), level)
 	cfg := testInitConfig()
 
-	_, err := initInsight(context.Background(), logger, cfg, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	_, err := initInsight(context.Background(), logger, cfg, nil, nil, nil, nil, nil, nil, nil, nil)
 	assert.Equal(t, nil, err)
 }
