@@ -64,7 +64,7 @@ type DiskStat struct {
 }
 
 type DockerStat struct {
-	DockerIds             []string
+	ContainerIds          []string
 	CgroupCpuDockerUsages []float64
 	CgroupCpuUsages       []float64
 	CgroupDockers         []CgroupDocker

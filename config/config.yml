@@ -4,7 +4,7 @@ metadata:
   name: insight
 spec:
   envVariables:
-    - key: env
+    - name: env
       value: val
   buildConfig:
     loggingConfig:

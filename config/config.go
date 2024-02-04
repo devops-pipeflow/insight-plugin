@@ -22,7 +22,7 @@ type Spec struct {
 }
 
 type EnvVariable struct {
-	Key   string `yaml:"key"`
+	Name  string `yaml:"name"`
 	Value string `yaml:"value"`
 }
 

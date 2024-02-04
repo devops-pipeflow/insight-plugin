@@ -60,7 +60,7 @@ metadata:
   name: insight
 spec:
   envVariables:
-    - key: env
+    - name: env
       value: val
   buildConfig:
     loggingConfig:
@@ -115,7 +115,7 @@ message ConfigRequest {
 }
 
 message EnvVariable {
-  string key = 1;
+  string name = 1;
   string value = 2;
 }
 
@@ -262,7 +262,7 @@ message DiskStat {
 }
 
 message DockerStat {
-  repeated string dockerIds = 1;
+  repeated string containerIds = 1;
   repeated float64 cgroupCpuDockerUsages = 2;
   repeated float64 cgroupCpuUsages = 3;
   repeated CgroupDocker cgroupDockers = 4;
