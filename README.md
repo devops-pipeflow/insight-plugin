@@ -253,7 +253,7 @@ message NodeStat {
 message NodeReport {
   string host = 1;  // node host
   string cpuReport = 2; // cpu report
-  string distReport = 3; // disk report
+  string diskReport = 3; // disk report
   string dockerReport = 4; // docker report
   string hostReport = 5; // host report
   string loadReport = 6; // load report
