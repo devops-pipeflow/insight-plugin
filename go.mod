@@ -6,10 +6,11 @@ toolchain go1.21.6
 
 require (
 	github.com/alecthomas/kingpin/v2 v2.3.2
-	github.com/hashicorp/go-hclog v1.5.0
+	github.com/hashicorp/go-hclog v1.6.2
 	github.com/pkg/errors v0.9.1
 	github.com/reviewdog/reviewdog v0.17.0
 	github.com/stretchr/testify v1.8.4
+	golang.org/x/crypto v0.18.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 

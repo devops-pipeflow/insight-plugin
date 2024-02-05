@@ -287,19 +287,19 @@ func DefaultNodeSightConfig() *NodeSightConfig {
 	return &NodeSightConfig{}
 }
 
-func (ns *nodesight) Init(ctx context.Context) error {
+func (ns *nodesight) Init(_ context.Context) error {
 	ns.cfg.Logger.Debug("nodesight: Init")
 
 	return nil
 }
 
-func (ns *nodesight) Deinit(ctx context.Context) error {
+func (ns *nodesight) Deinit(_ context.Context) error {
 	ns.cfg.Logger.Debug("nodesight: Deinit")
 
 	return nil
 }
 
-func (ns *nodesight) Run(ctx context.Context) error {
+func (ns *nodesight) Run(_ context.Context) error {
 	ns.cfg.Logger.Debug("nodesight: Run")
 
 	// Node test on ssh connection
