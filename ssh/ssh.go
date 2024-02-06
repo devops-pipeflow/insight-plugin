@@ -20,7 +20,7 @@ const (
 	connInternal = 1
 
 	ptyHeight = 40
-	pytWidth  = 80
+	ptyWidth  = 80
 )
 
 const (
@@ -177,7 +177,7 @@ func (s *ssh) initSession(_ context.Context) (*crypto_ssh.Session, error) {
 		crypto_ssh.TTY_OP_OSPEED: 14400, // output speed = 14.4kbaud
 	}
 
-	if err := session.RequestPty("xterm", ptyHeight, pytWidth, modes); err != nil {
+	if err := session.RequestPty("xterm", ptyHeight, ptyWidth, modes); err != nil {
 		return nil, errors.Wrap(err, "failed to request ssh pty")
 	}
 
