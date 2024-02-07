@@ -1,3 +1,7 @@
+//go:build repo_test
+
+//go test -cover -covermode=atomic -parallel 2 -tags=repo_test -v github.com/devops-pipeflow/insight-plugin/ssh
+
 package repo
 
 import (
