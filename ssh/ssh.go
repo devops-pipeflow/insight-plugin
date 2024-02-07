@@ -132,18 +132,11 @@ func (s *ssh) initSession(ctx context.Context) error {
 		return errors.Wrap(err, "failed to create ssh client")
 	}
 
-	defer func(client *crypto_ssh.Client) {
-		_ = client.Close()
-	}(s.client)
-
 	s.session, err = s.client.NewSession()
 	if err != nil {
+		_ = s.client.Close()
 		return errors.Wrap(err, "failed to create ssh session")
 	}
-
-	defer func(session *crypto_ssh.Session) {
-		_ = session.Close()
-	}(s.session)
 
 	return nil
 }

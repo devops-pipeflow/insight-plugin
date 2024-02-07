@@ -6,6 +6,7 @@ package ssh
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
 
@@ -73,8 +74,10 @@ func TestSshRunSession(t *testing.T) {
 
 	_ = s.initSession(ctx)
 
-	_, err := s.runSession(ctx, "echo \"Hello World!\"")
+	out, err := s.runSession(ctx, "echo \"Hello World!\"")
 	assert.Equal(t, nil, err)
+
+	fmt.Println(out)
 
 	_ = s.deinitSession(ctx)
 }
