@@ -1,3 +1,7 @@
+//go:build ssh_test
+
+//go test -cover -covermode=atomic -parallel 2 -tags=ssh_test -v github.com/devops-pipeflow/insight-plugin/ssh
+
 package ssh
 
 import (
@@ -34,18 +38,15 @@ func initSsh() ssh {
 }
 
 func TestSshInit(t *testing.T) {
-	// PASS
-	assert.Equal(t, nil, nil)
+	t.Skip("Skipping TestSshInit.")
 }
 
-func TestSshDeInit(t *testing.T) {
-	// PASS
-	assert.Equal(t, nil, nil)
+func TestSshDeinit(t *testing.T) {
+	t.Skip("Skipping TestSshDeinit.")
 }
 
 func TestSshRun(t *testing.T) {
-	// PASS
-	assert.Equal(t, nil, nil)
+	t.Skip("Skipping TestSshRun.")
 }
 
 func TestSshInitSession(t *testing.T) {
@@ -53,7 +54,7 @@ func TestSshInitSession(t *testing.T) {
 	s := initSsh()
 
 	err := s.initSession(ctx)
-	assert.NotEqual(t, nil, err)
+	assert.Equal(t, nil, err)
 
 	_ = s.deinitSession(ctx)
 }
@@ -73,7 +74,7 @@ func TestSshRunSession(t *testing.T) {
 	_ = s.initSession(ctx)
 
 	_, err := s.runSession(ctx, "echo \"Hello World!\"")
-	assert.NotEqual(t, nil, err)
+	assert.Equal(t, nil, err)
 
 	_ = s.deinitSession(ctx)
 }
