@@ -1,10 +1,8 @@
 package ssh
 
 import (
-	"bytes"
 	"context"
 	"net"
-	"os"
 	"strconv"
 	"time"
 
@@ -17,10 +15,6 @@ import (
 
 const (
 	connDuration = 30 * time.Second
-	connInternal = 1
-
-	ptyHeight = 40
-	ptyWidth  = 80
 )
 
 const (
@@ -40,10 +34,24 @@ const (
 	keyExchangeDiffieHellmanGroupExchangeSha256 = "diffie-hellman-group-exchange-sha256"
 )
 
+var (
+	ciphers = []string{
+		cipher3DesCbc, cipherAes128Cbc, cipherAes128Ctr, cipherAes128Gcm,
+		cipherAes192Cbc, cipherAes192Ctr, cipherAes256Cbc, cipherAes256Ctr,
+		cipherArcFour128, cipherArcFour256,
+	}
+
+	keyExchanges = []string{
+		keyExchangeDiffieHellmanGroup1Sha1,
+		keyExchangeDiffieHellmanGroupExchangeSha1,
+		keyExchangeDiffieHellmanGroupExchangeSha256,
+	}
+)
+
 type Ssh interface {
 	Init(context.Context) error
 	Deinit(context.Context) error
-	Run(context.Context, []string) error
+	Run(context.Context, string) (string, error)
 }
 
 type SshConfig struct {
@@ -53,6 +61,7 @@ type SshConfig struct {
 
 type ssh struct {
 	cfg     *SshConfig
+	client  *crypto_ssh.Client
 	session *crypto_ssh.Session
 	host    string
 	port    int64
@@ -74,74 +83,39 @@ func DefaultConfig() *SshConfig {
 func (s *ssh) Init(ctx context.Context) error {
 	s.cfg.Logger.Debug("ssh: Init")
 
-	session, err := s.initSession(ctx)
-	if err != nil {
-		return errors.Wrap(err, "failed to init session")
-	}
-
-	s.session = session
-
-	return nil
+	return s.initSession(ctx)
 }
 
-func (s *ssh) Deinit(_ context.Context) error {
+func (s *ssh) Deinit(ctx context.Context) error {
 	s.cfg.Logger.Debug("ssh: Deinit")
 
-	return s.session.Close()
+	return s.deinitSession(ctx)
 }
 
-func (s *ssh) Run(ctx context.Context, cmds []string) error {
+func (s *ssh) Run(ctx context.Context, cmd string) (string, error) {
 	s.cfg.Logger.Debug("ssh: Run")
 
-	return s.runSession(ctx, cmds)
+	return s.runSession(ctx, cmd)
 }
 
-func (s *ssh) initSession(_ context.Context) (*crypto_ssh.Session, error) {
+func (s *ssh) initSession(ctx context.Context) error {
 	s.cfg.Logger.Debug("ssh: initSession")
 
 	var cfg crypto_ssh.Config
-	var signer crypto_ssh.Signer
+	var err error
 
-	auth := make([]crypto_ssh.AuthMethod, 0)
-
-	if s.key != "" {
-		pem, err := os.ReadFile(s.key)
-		if err != nil {
-			return nil, errors.Wrap(err, "failed to read key")
-		}
-		if s.pass != "" {
-			signer, err = crypto_ssh.ParsePrivateKeyWithPassphrase(pem, []byte(s.pass))
-		} else {
-			signer, err = crypto_ssh.ParsePrivateKey(pem)
-		}
-		if err != nil {
-			return nil, errors.Wrap(err, "failed to parse private key")
-		}
-		auth = append(auth, crypto_ssh.PublicKeys(signer))
-	} else {
-		auth = append(auth, crypto_ssh.Password(s.pass))
+	auth, err := s.setAuth(ctx)
+	if err != nil {
+		return errors.Wrap(err, "failed to set auth")
 	}
 
-	cfg.Ciphers = []string{
-		cipher3DesCbc, cipherAes128Cbc, cipherAes128Ctr, cipherAes128Gcm,
-		cipherAes192Cbc, cipherAes192Ctr, cipherAes256Cbc, cipherAes256Ctr,
-		cipherArcFour128, cipherArcFour256,
+	timeout, err := s.setTimeout(ctx)
+	if err != nil {
+		return errors.Wrap(err, "failed to set timeout")
 	}
 
-	cfg.KeyExchanges = []string{
-		keyExchangeDiffieHellmanGroup1Sha1,
-		keyExchangeDiffieHellmanGroupExchangeSha1,
-		keyExchangeDiffieHellmanGroupExchangeSha256,
-	}
-
-	timeout := connDuration
-	if s.cfg.Config.Spec.NodeConfig.Duration != "" {
-		t, err := strconv.ParseInt(s.cfg.Config.Spec.NodeConfig.Duration, 10, 64)
-		if err != nil {
-			return nil, errors.Wrap(err, "failed to parse int")
-		}
-		timeout = time.Duration(t)
-	}
+	cfg.Ciphers = ciphers
+	cfg.KeyExchanges = keyExchanges
 
 	_config := &crypto_ssh.ClientConfig{
 		User:    s.user,
@@ -153,68 +127,91 @@ func (s *ssh) initSession(_ context.Context) (*crypto_ssh.Session, error) {
 		},
 	}
 
-	conn, err := crypto_ssh.Dial("tcp", s.host+":"+strconv.FormatInt(s.port, 10), _config)
+	s.client, err = crypto_ssh.Dial("tcp", s.host+":"+strconv.FormatInt(s.port, 10), _config)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to create ssh client")
+		return errors.Wrap(err, "failed to create ssh client")
 	}
 
-	defer func(conn *crypto_ssh.Client) {
-		_ = conn.Close()
-	}(conn)
+	defer func(client *crypto_ssh.Client) {
+		_ = client.Close()
+	}(s.client)
 
-	session, err := conn.NewSession()
+	s.session, err = s.client.NewSession()
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to create ssh session")
+		return errors.Wrap(err, "failed to create ssh session")
 	}
 
 	defer func(session *crypto_ssh.Session) {
 		_ = session.Close()
-	}(session)
+	}(s.session)
 
-	modes := crypto_ssh.TerminalModes{
-		crypto_ssh.ECHO:          0,     // disable echoing
-		crypto_ssh.TTY_OP_ISPEED: 14400, // input speed = 14.4kbaud
-		crypto_ssh.TTY_OP_OSPEED: 14400, // output speed = 14.4kbaud
-	}
-
-	if err := session.RequestPty("xterm", ptyHeight, ptyWidth, modes); err != nil {
-		return nil, errors.Wrap(err, "failed to request ssh pty")
-	}
-
-	return session, nil
+	return nil
 }
 
-func (s *ssh) runSession(_ context.Context, cmds []string) error {
-	s.cfg.Logger.Debug("ssh: runSession")
-
-	var outBuf, errBuf bytes.Buffer
-
-	stdinBuf, _ := s.session.StdinPipe()
-	s.session.Stdout = &outBuf
-	s.session.Stderr = &errBuf
-
-	err := s.session.Shell()
-	if err != nil {
-		return errors.Wrap(err, "failed to run shell")
+func (s *ssh) deinitSession(_ context.Context) error {
+	if s.client != nil {
+		_ = s.client.Close()
 	}
 
-	cmds = append(cmds, "exit 0")
-	for _, item := range cmds {
-		item += "\n"
-		_, err = stdinBuf.Write([]byte(item))
-		if err != nil {
-			return errors.Wrap(err, "failed to write buffer")
-		}
-	}
-
-	err = s.session.Wait()
-	if err != nil {
-		return errors.Wrap(err, "failed to wait session")
-	}
-
-	if errBuf.String() != "" {
-		return errors.New(errBuf.String())
+	if s.session != nil {
+		_ = s.session.Close()
 	}
 
 	return nil
+}
+
+func (s *ssh) runSession(_ context.Context, cmd string) (string, error) {
+	s.cfg.Logger.Debug("ssh: runSession")
+
+	if s.session == nil {
+		return "", errors.New("invalid session")
+	}
+
+	out, err := s.session.CombinedOutput(cmd)
+	if err != nil {
+		return string(out), errors.Wrap(err, "failed to run cmd")
+	}
+
+	return string(out), nil
+}
+
+func (s *ssh) setAuth(_ context.Context) ([]crypto_ssh.AuthMethod, error) {
+	s.cfg.Logger.Debug("ssh: setAuth")
+
+	var err error
+	var signer crypto_ssh.Signer
+
+	auth := make([]crypto_ssh.AuthMethod, 0)
+
+	if s.key != "" {
+		if s.pass != "" {
+			signer, err = crypto_ssh.ParsePrivateKeyWithPassphrase([]byte(s.key), []byte(s.pass))
+		} else {
+			signer, err = crypto_ssh.ParsePrivateKey([]byte(s.key))
+		}
+		if err != nil {
+			return nil, errors.Wrap(err, "failed to parse private key")
+		}
+		auth = append(auth, crypto_ssh.PublicKeys(signer))
+	} else {
+		auth = append(auth, crypto_ssh.Password(s.pass))
+	}
+
+	return auth, nil
+}
+
+func (s *ssh) setTimeout(_ context.Context) (time.Duration, error) {
+	s.cfg.Logger.Debug("ssh: setTimeout")
+
+	var err error
+	timeout := connDuration
+
+	if s.cfg.Config.Spec.NodeConfig.Duration != "" {
+		timeout, err = time.ParseDuration(s.cfg.Config.Spec.NodeConfig.Duration)
+		if err != nil {
+			return 0, errors.Wrap(err, "failed to parse duration")
+		}
+	}
+
+	return timeout, nil
 }
