@@ -1,3 +1,7 @@
+//go:build review_test
+
+//go test -cover -covermode=atomic -parallel 2 -tags=review_test -v github.com/devops-pipeflow/insight-plugin/ssh
+
 package review
 
 import (
