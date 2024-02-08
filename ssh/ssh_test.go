@@ -8,7 +8,6 @@ import (
 	"context"
 	"fmt"
 	"testing"
-	"time"
 
 	"github.com/hashicorp/go-hclog"
 	"github.com/stretchr/testify/assert"
@@ -89,33 +88,4 @@ func TestSshSetAuth(t *testing.T) {
 	auth, err := s.setAuth(ctx)
 	assert.Equal(t, nil, err)
 	assert.Equal(t, 1, len(auth))
-}
-
-func TestSshSetTimeout(t *testing.T) {
-	ctx := context.Background()
-	s := initSsh()
-
-	s.cfg.Config.Spec.NodeConfig.Duration = ""
-
-	duration, err := s.setTimeout(ctx)
-	assert.Equal(t, nil, err)
-	assert.Equal(t, connDuration, duration)
-
-	s.cfg.Config.Spec.NodeConfig.Duration = "1s"
-
-	duration, err = s.setTimeout(ctx)
-	assert.Equal(t, nil, err)
-	assert.Equal(t, 1*time.Second, duration)
-
-	s.cfg.Config.Spec.NodeConfig.Duration = "10m"
-
-	duration, err = s.setTimeout(ctx)
-	assert.Equal(t, nil, err)
-	assert.Equal(t, 10*time.Minute, duration)
-
-	s.cfg.Config.Spec.NodeConfig.Duration = "100h"
-
-	duration, err = s.setTimeout(ctx)
-	assert.Equal(t, nil, err)
-	assert.Equal(t, 100*time.Hour, duration)
 }

@@ -4,17 +4,12 @@ import (
 	"context"
 	"net"
 	"strconv"
-	"time"
 
 	"github.com/hashicorp/go-hclog"
 	"github.com/pkg/errors"
 	crypto_ssh "golang.org/x/crypto/ssh"
 
 	"github.com/devops-pipeflow/insight-plugin/config"
-)
-
-const (
-	connDuration = 30 * time.Second
 )
 
 const (
@@ -109,18 +104,13 @@ func (s *ssh) initSession(ctx context.Context) error {
 		return errors.Wrap(err, "failed to set auth")
 	}
 
-	timeout, err := s.setTimeout(ctx)
-	if err != nil {
-		return errors.Wrap(err, "failed to set timeout")
-	}
-
 	cfg.Ciphers = ciphers
 	cfg.KeyExchanges = keyExchanges
 
 	_config := &crypto_ssh.ClientConfig{
 		User:    s.user,
 		Auth:    auth,
-		Timeout: timeout,
+		Timeout: 0,
 		Config:  cfg,
 		HostKeyCallback: func(hostname string, remote net.Addr, key crypto_ssh.PublicKey) error {
 			return nil
@@ -142,6 +132,8 @@ func (s *ssh) initSession(ctx context.Context) error {
 }
 
 func (s *ssh) deinitSession(_ context.Context) error {
+	s.cfg.Logger.Debug("ssh: deinitSession")
+
 	if s.client != nil {
 		_ = s.client.Close()
 	}
@@ -191,20 +183,4 @@ func (s *ssh) setAuth(_ context.Context) ([]crypto_ssh.AuthMethod, error) {
 	}
 
 	return auth, nil
-}
-
-func (s *ssh) setTimeout(_ context.Context) (time.Duration, error) {
-	s.cfg.Logger.Debug("ssh: setTimeout")
-
-	var err error
-	timeout := connDuration
-
-	if s.cfg.Config.Spec.NodeConfig.Duration != "" {
-		timeout, err = time.ParseDuration(s.cfg.Config.Spec.NodeConfig.Duration)
-		if err != nil {
-			return 0, errors.Wrap(err, "failed to parse duration")
-		}
-	}
-
-	return timeout, nil
 }

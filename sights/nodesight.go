@@ -2,25 +2,31 @@ package sights
 
 import (
 	"context"
+	"time"
 
 	"github.com/hashicorp/go-hclog"
+	"github.com/pkg/errors"
+	"golang.org/x/sync/errgroup"
 
 	"github.com/devops-pipeflow/insight-plugin/config"
+)
+
+const (
+	nodeDuration = 30 * time.Second
+	nodeInterval = 1
+
+	routineNum = 10
 )
 
 type NodeSight interface {
 	Init(context.Context) error
 	Deinit(context.Context) error
-	Run(context.Context) error
+	Run(context.Context, []NodeConnect) (NodeInfo, error)
 }
 
 type NodeSightConfig struct {
 	Config config.Config
 	Logger hclog.Logger
-}
-
-type NodeSightTrigger struct {
-	NodeConnects []NodeConnect
 }
 
 type NodeConnect struct {
@@ -299,20 +305,91 @@ func (ns *nodesight) Deinit(_ context.Context) error {
 	return nil
 }
 
-func (ns *nodesight) Run(_ context.Context) error {
+func (ns *nodesight) Run(ctx context.Context, connects []NodeConnect) (NodeInfo, error) {
 	ns.cfg.Logger.Debug("nodesight: Run")
 
-	// Node test on ssh connection
+	conns, err := ns.runDetect(ctx, connects)
+	if err != nil {
+		return NodeInfo{}, errors.Wrap(err, "failed to run detect")
+	}
+
+	info, err := ns.buildInfo(ctx, conns)
+	if err != nil {
+		return NodeInfo{}, errors.Wrap(err, "failed to build info")
+	}
+
+	if err := ns.runStat(ctx, info); err != nil {
+		return NodeInfo{}, errors.Wrap(err, "failed to run stat")
+	}
+
+	if err := ns.runReport(ctx, info); err != nil {
+		return NodeInfo{}, errors.Wrap(err, "failed to run report")
+	}
+
+	if err := ns.runGpt(ctx, info); err != nil {
+		return NodeInfo{}, errors.Wrap(err, "failed to run gpt")
+	}
+
+	return info, nil
+}
+
+func (ns *nodesight) runDetect(ctx context.Context, conns []NodeConnect) ([]NodeConnect, error) {
+	ns.cfg.Logger.Debug("nodesight: runDetect")
+
+	g, _ := errgroup.WithContext(ctx)
+	g.SetLimit(routineNum)
+
 	// TBD: FIXME
 
-	// Node statistic on cpu/disk/docker/host/load/mem/net/process
+	return nil, nil
+}
+
+func (ns *nodesight) buildInfo(ctx context.Context, conns []NodeConnect) (NodeInfo, error) {
+	ns.cfg.Logger.Debug("nodesight: buildInfo")
+
+	var info NodeInfo
+
 	// TBD: FIXME
 
-	// Node report on cpu/disk/docker/host/load/mem/net/process
-	// TBD: FIXME
+	return info, nil
+}
 
-	// Node report via gpt
+func (ns *nodesight) runStat(_ context.Context, info NodeInfo) error {
+	ns.cfg.Logger.Debug("nodesight: runStat")
+
 	// TBD: FIXME
 
 	return nil
+}
+
+func (ns *nodesight) runReport(_ context.Context, info NodeInfo) error {
+	ns.cfg.Logger.Debug("nodesight: runReport")
+
+	// TBD: FIXME
+
+	return nil
+}
+
+func (ns *nodesight) runGpt(_ context.Context, info NodeInfo) error {
+	ns.cfg.Logger.Debug("nodesight: runGpt")
+
+	// TBD: FIXME
+
+	return nil
+}
+
+func (ns *nodesight) setTimeout(_ context.Context) (time.Duration, error) {
+	ns.cfg.Logger.Debug("nodesight: setTimeout")
+
+	var err error
+	timeout := nodeDuration
+
+	if ns.cfg.Config.Spec.NodeConfig.Duration != "" {
+		timeout, err = time.ParseDuration(ns.cfg.Config.Spec.NodeConfig.Duration)
+		if err != nil {
+			return 0, errors.Wrap(err, "failed to parse duration")
+		}
+	}
+
+	return timeout, nil
 }
