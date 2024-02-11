@@ -4,12 +4,17 @@ import (
 	"context"
 	"net"
 	"strconv"
+	"time"
 
 	"github.com/hashicorp/go-hclog"
 	"github.com/pkg/errors"
 	crypto_ssh "golang.org/x/crypto/ssh"
 
 	"github.com/devops-pipeflow/insight-plugin/config"
+)
+
+const (
+	clientTimeout = 30 * time.Second
 )
 
 const (
@@ -63,6 +68,7 @@ type ssh struct {
 	user    string
 	pass    string
 	key     string
+	timeout time.Duration
 }
 
 func New(_ context.Context, cfg *SshConfig) Ssh {
@@ -110,7 +116,7 @@ func (s *ssh) initSession(ctx context.Context) error {
 	_config := &crypto_ssh.ClientConfig{
 		User:    s.user,
 		Auth:    auth,
-		Timeout: 0,
+		Timeout: s.timeout,
 		Config:  cfg,
 		HostKeyCallback: func(hostname string, remote net.Addr, key crypto_ssh.PublicKey) error {
 			return nil
@@ -134,12 +140,12 @@ func (s *ssh) initSession(ctx context.Context) error {
 func (s *ssh) deinitSession(_ context.Context) error {
 	s.cfg.Logger.Debug("ssh: deinitSession")
 
-	if s.client != nil {
-		_ = s.client.Close()
-	}
-
 	if s.session != nil {
 		_ = s.session.Close()
+	}
+
+	if s.client != nil {
+		_ = s.client.Close()
 	}
 
 	return nil

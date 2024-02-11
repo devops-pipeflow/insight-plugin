@@ -13,13 +13,8 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/devops-pipeflow/insight-plugin/config"
-	"github.com/devops-pipeflow/insight-plugin/gpt"
 	"github.com/devops-pipeflow/insight-plugin/insight"
-	"github.com/devops-pipeflow/insight-plugin/repo"
-	"github.com/devops-pipeflow/insight-plugin/report"
-	"github.com/devops-pipeflow/insight-plugin/review"
 	"github.com/devops-pipeflow/insight-plugin/sights"
-	"github.com/devops-pipeflow/insight-plugin/ssh"
 )
 
 const (
@@ -46,37 +41,12 @@ func Run(ctx context.Context) error {
 		return errors.Wrap(err, "failed to init config")
 	}
 
-	gt, err := initGpt(ctx, logger, cfg)
-	if err != nil {
-		return errors.Wrap(err, "failed to init gpt")
-	}
-
-	rp, err := initRepo(ctx, logger, cfg)
-	if err != nil {
-		return errors.Wrap(err, "failed to init repo")
-	}
-
-	rv, err := initReview(ctx, logger, cfg)
-	if err != nil {
-		return errors.Wrap(err, "failed to init review")
-	}
-
 	bs, cs, ns, err := initSights(ctx, logger, cfg)
 	if err != nil {
 		return errors.Wrap(err, "failed to init sights")
 	}
 
-	rpt, err := initReport(ctx, logger, cfg)
-	if err != nil {
-		return errors.Wrap(err, "failed to init report")
-	}
-
-	_ssh, err := initSsh(ctx, logger, cfg)
-	if err != nil {
-		return errors.Wrap(err, "failed to init ssh")
-	}
-
-	i, err := initInsight(ctx, logger, cfg, gt, rp, rv, bs, cs, ns, rpt, _ssh)
+	i, err := initInsight(ctx, logger, cfg, bs, cs, ns)
 	if err != nil {
 		return errors.Wrap(err, "failed to init insight")
 	}
@@ -118,48 +88,6 @@ func initConfig(_ context.Context, logger hclog.Logger, name string) (*config.Co
 	return c, nil
 }
 
-func initGpt(ctx context.Context, logger hclog.Logger, cfg *config.Config) (gpt.Gpt, error) {
-	logger.Debug("cmd: initGpt")
-
-	c := gpt.DefaultConfig()
-	if c == nil {
-		return nil, errors.New("failed to config")
-	}
-
-	c.Config = *cfg
-	c.Logger = logger
-
-	return gpt.New(ctx, c), nil
-}
-
-func initRepo(ctx context.Context, logger hclog.Logger, cfg *config.Config) (repo.Repo, error) {
-	logger.Debug("cmd: initRepo")
-
-	c := repo.DefaultConfig()
-	if c == nil {
-		return nil, errors.New("failed to config")
-	}
-
-	c.Config = *cfg
-	c.Logger = logger
-
-	return repo.New(ctx, c), nil
-}
-
-func initReview(ctx context.Context, logger hclog.Logger, cfg *config.Config) (review.Review, error) {
-	logger.Debug("cmd: initReview")
-
-	c := review.DefaultConfig()
-	if c == nil {
-		return nil, errors.New("failed to config")
-	}
-
-	c.Config = *cfg
-	c.Logger = logger
-
-	return review.New(ctx, c), nil
-}
-
 // nolint: lll
 func initSights(ctx context.Context, logger hclog.Logger, cfg *config.Config) (sights.BuildSight, sights.CodeSight, sights.NodeSight, error) {
 	buildSight := func(ctx context.Context, logger hclog.Logger, cfg *config.Config) sights.BuildSight {
@@ -188,39 +116,8 @@ func initSights(ctx context.Context, logger hclog.Logger, cfg *config.Config) (s
 	return buildSight(ctx, logger, cfg), codeSight(ctx, logger, cfg), nodeSight(ctx, logger, cfg), nil
 }
 
-func initReport(ctx context.Context, logger hclog.Logger, cfg *config.Config) (report.Report, error) {
-	logger.Debug("cmd: initReport")
-
-	c := report.DefaultConfig()
-	if c == nil {
-		return nil, errors.New("failed to config")
-	}
-
-	c.Config = *cfg
-	c.Logger = logger
-
-	return report.New(ctx, c), nil
-}
-
-func initSsh(ctx context.Context, logger hclog.Logger, cfg *config.Config) (ssh.Ssh, error) {
-	logger.Debug("cmd: initSsh")
-
-	c := ssh.DefaultConfig()
-	if c == nil {
-		return nil, errors.New("failed to config")
-	}
-
-	c.Config = *cfg
-	c.Logger = logger
-
-	return ssh.New(ctx, c), nil
-}
-
-// nolint: lll
 func initInsight(ctx context.Context, logger hclog.Logger, cfg *config.Config,
-	gt gpt.Gpt, rp repo.Repo, rv review.Review,
-	bs sights.BuildSight, cs sights.CodeSight, ns sights.NodeSight,
-	rpt report.Report, _ssh ssh.Ssh) (insight.Insight, error) {
+	bs sights.BuildSight, cs sights.CodeSight, ns sights.NodeSight) (insight.Insight, error) {
 	logger.Debug("cmd: initInsight")
 
 	c := insight.DefaultConfig()
@@ -231,16 +128,9 @@ func initInsight(ctx context.Context, logger hclog.Logger, cfg *config.Config,
 	c.Config = *cfg
 	c.Logger = logger
 
-	c.Gpt = gt
-	c.Repo = rp
-	c.Review = rv
-
 	c.BuildSight = bs
 	c.CodeSight = cs
 	c.NodeSight = ns
-
-	c.Report = rpt
-	c.Ssh = _ssh
 
 	return insight.New(ctx, c), nil
 }
