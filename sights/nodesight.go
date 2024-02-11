@@ -12,10 +12,8 @@ import (
 )
 
 const (
-	nodeDuration = 30 * time.Second
-	nodeInterval = 1
-
-	routineNum = 10
+	nodeTimeout = 30 * time.Second
+	routineNum  = -1
 )
 
 type NodeSight interface {
@@ -280,7 +278,8 @@ type ProcessRlimit struct {
 }
 
 type nodesight struct {
-	cfg *NodeSightConfig
+	cfg      *NodeSightConfig
+	duration time.Duration
 }
 
 func NodeSightNew(_ context.Context, cfg *NodeSightConfig) NodeSight {
@@ -293,8 +292,15 @@ func DefaultNodeSightConfig() *NodeSightConfig {
 	return &NodeSightConfig{}
 }
 
-func (ns *nodesight) Init(_ context.Context) error {
+func (ns *nodesight) Init(ctx context.Context) error {
 	ns.cfg.Logger.Debug("nodesight: Init")
+
+	var err error
+
+	ns.duration, err = ns.setTimeout(ctx)
+	if err != nil {
+		return errors.Wrap(err, "failed to set timieout")
+	}
 
 	return nil
 }
@@ -305,84 +311,47 @@ func (ns *nodesight) Deinit(_ context.Context) error {
 	return nil
 }
 
-func (ns *nodesight) Run(ctx context.Context, connects []NodeConnect) (NodeInfo, error) {
+func (ns *nodesight) Run(ctx context.Context, conns []NodeConnect) (NodeInfo, error) {
 	ns.cfg.Logger.Debug("nodesight: Run")
-
-	conns, err := ns.runDetect(ctx, connects)
-	if err != nil {
-		return NodeInfo{}, errors.Wrap(err, "failed to run detect")
-	}
-
-	info, err := ns.buildInfo(ctx, conns)
-	if err != nil {
-		return NodeInfo{}, errors.Wrap(err, "failed to build info")
-	}
-
-	if err := ns.runStat(ctx, info); err != nil {
-		return NodeInfo{}, errors.Wrap(err, "failed to run stat")
-	}
-
-	if err := ns.runReport(ctx, info); err != nil {
-		return NodeInfo{}, errors.Wrap(err, "failed to run report")
-	}
-
-	if err := ns.runGpt(ctx, info); err != nil {
-		return NodeInfo{}, errors.Wrap(err, "failed to run gpt")
-	}
-
-	return info, nil
-}
-
-func (ns *nodesight) runDetect(ctx context.Context, conns []NodeConnect) ([]NodeConnect, error) {
-	ns.cfg.Logger.Debug("nodesight: runDetect")
-
-	g, _ := errgroup.WithContext(ctx)
-	g.SetLimit(routineNum)
-
-	// TBD: FIXME
-
-	return nil, nil
-}
-
-func (ns *nodesight) buildInfo(ctx context.Context, conns []NodeConnect) (NodeInfo, error) {
-	ns.cfg.Logger.Debug("nodesight: buildInfo")
 
 	var info NodeInfo
 
-	// TBD: FIXME
+	info.NodeStats = make([]NodeStat, len(conns))
+	info.NodeReports = make([]NodeReport, len(conns))
+
+	g, ctx := errgroup.WithContext(ctx)
+	g.SetLimit(routineNum)
+
+	for i := range conns {
+		i := i
+		g.Go(func() error {
+			if err := ns.runDetect(ctx, conns[i]); err != nil {
+				info.NodeStats[i] = NodeStat{Host: conns[i].Host}
+				info.NodeReports[i] = NodeReport{Host: conns[i].Host}
+				return nil
+			}
+			if stat, err := ns.runStat(ctx, conns[i]); err == nil {
+				info.NodeStats[i] = *stat
+			}
+			if report, err := ns.runReport(ctx, &info.NodeStats[i]); err == nil {
+				info.NodeReports[i] = *report
+			}
+			return nil
+		})
+	}
+
+	if err := g.Wait(); err != nil {
+		return NodeInfo{}, errors.Wrap(err, "failed to wait routine")
+	}
 
 	return info, nil
-}
-
-func (ns *nodesight) runStat(_ context.Context, info NodeInfo) error {
-	ns.cfg.Logger.Debug("nodesight: runStat")
-
-	// TBD: FIXME
-
-	return nil
-}
-
-func (ns *nodesight) runReport(_ context.Context, info NodeInfo) error {
-	ns.cfg.Logger.Debug("nodesight: runReport")
-
-	// TBD: FIXME
-
-	return nil
-}
-
-func (ns *nodesight) runGpt(_ context.Context, info NodeInfo) error {
-	ns.cfg.Logger.Debug("nodesight: runGpt")
-
-	// TBD: FIXME
-
-	return nil
 }
 
 func (ns *nodesight) setTimeout(_ context.Context) (time.Duration, error) {
 	ns.cfg.Logger.Debug("nodesight: setTimeout")
 
 	var err error
-	timeout := nodeDuration
+	timeout := nodeTimeout
 
 	if ns.cfg.Config.Spec.NodeConfig.Duration != "" {
 		timeout, err = time.ParseDuration(ns.cfg.Config.Spec.NodeConfig.Duration)
@@ -392,4 +361,32 @@ func (ns *nodesight) setTimeout(_ context.Context) (time.Duration, error) {
 	}
 
 	return timeout, nil
+}
+
+func (ns *nodesight) runDetect(_ context.Context, conn NodeConnect) error {
+	ns.cfg.Logger.Debug("nodesight: runDetect")
+
+	// TBD: FIXME
+
+	return nil
+}
+
+func (ns *nodesight) runStat(_ context.Context, conn NodeConnect) (*NodeStat, error) {
+	ns.cfg.Logger.Debug("nodesight: runStat")
+
+	var stat NodeStat
+
+	// TBD: FIXME
+
+	return &stat, nil
+}
+
+func (ns *nodesight) runReport(_ context.Context, stat *NodeStat) (*NodeReport, error) {
+	ns.cfg.Logger.Debug("nodesight: runReport")
+
+	var report NodeReport
+
+	// TBD: FIXME
+
+	return &report, nil
 }

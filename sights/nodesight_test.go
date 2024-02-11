@@ -38,26 +38,6 @@ func TestNodeSightRun(t *testing.T) {
 	t.Skip("Skipping TestNodeSightRun.")
 }
 
-func TestNodeSightRunDetect(t *testing.T) {
-	// TBD: FIXME
-}
-
-func TestNodeSightBuildInfo(t *testing.T) {
-	// TBD: FIXME
-}
-
-func TestNodeSightRunStat(t *testing.T) {
-	// TBD: FIXME
-}
-
-func TestNodeSightRunReport(t *testing.T) {
-	// TBD: FIXME
-}
-
-func TestNodeSightRunGpt(t *testing.T) {
-	// TBD: FIXME
-}
-
 func TestNodeSightSetTimeout(t *testing.T) {
 	ctx := context.Background()
 	ns := initNodeSight()
@@ -66,7 +46,7 @@ func TestNodeSightSetTimeout(t *testing.T) {
 
 	duration, err := ns.setTimeout(ctx)
 	assert.Equal(t, nil, err)
-	assert.Equal(t, nodeDuration, duration)
+	assert.Equal(t, nodeTimeout, duration)
 
 	ns.cfg.Config.Spec.NodeConfig.Duration = "1s"
 
@@ -85,4 +65,16 @@ func TestNodeSightSetTimeout(t *testing.T) {
 	duration, err = ns.setTimeout(ctx)
 	assert.Equal(t, nil, err)
 	assert.Equal(t, 100*time.Hour, duration)
+}
+
+func TestNodeSightRunDetect(t *testing.T) {
+	// TBD: FIXME
+}
+
+func TestNodeSightRunStat(t *testing.T) {
+	// TBD: FIXME
+}
+
+func TestNodeSightRunReport(t *testing.T) {
+	// TBD: FIXME
 }
