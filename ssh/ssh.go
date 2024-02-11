@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	clientTimeout = 30 * time.Second
+	sshTimeout = 10 * time.Second
 )
 
 const (
@@ -55,20 +55,20 @@ type Ssh interface {
 }
 
 type SshConfig struct {
-	Config config.Config
-	Logger hclog.Logger
+	Config  config.Config
+	Logger  hclog.Logger
+	Host    string
+	Port    int64
+	User    string
+	Pass    string
+	Key     string
+	Timeout time.Duration
 }
 
 type ssh struct {
 	cfg     *SshConfig
 	client  *crypto_ssh.Client
 	session *crypto_ssh.Session
-	host    string
-	port    int64
-	user    string
-	pass    string
-	key     string
-	timeout time.Duration
 }
 
 func New(_ context.Context, cfg *SshConfig) Ssh {
@@ -114,16 +114,16 @@ func (s *ssh) initSession(ctx context.Context) error {
 	cfg.KeyExchanges = keyExchanges
 
 	_config := &crypto_ssh.ClientConfig{
-		User:    s.user,
+		User:    s.cfg.User,
 		Auth:    auth,
-		Timeout: s.timeout,
+		Timeout: s.cfg.Timeout,
 		Config:  cfg,
 		HostKeyCallback: func(hostname string, remote net.Addr, key crypto_ssh.PublicKey) error {
 			return nil
 		},
 	}
 
-	s.client, err = crypto_ssh.Dial("tcp", s.host+":"+strconv.FormatInt(s.port, 10), _config)
+	s.client, err = crypto_ssh.Dial("tcp", s.cfg.Host+":"+strconv.FormatInt(s.cfg.Port, 10), _config)
 	if err != nil {
 		return errors.Wrap(err, "failed to create ssh client")
 	}
@@ -174,18 +174,18 @@ func (s *ssh) setAuth(_ context.Context) ([]crypto_ssh.AuthMethod, error) {
 
 	auth := make([]crypto_ssh.AuthMethod, 0)
 
-	if s.key != "" {
-		if s.pass != "" {
-			signer, err = crypto_ssh.ParsePrivateKeyWithPassphrase([]byte(s.key), []byte(s.pass))
+	if s.cfg.Key != "" {
+		if s.cfg.Pass != "" {
+			signer, err = crypto_ssh.ParsePrivateKeyWithPassphrase([]byte(s.cfg.Key), []byte(s.cfg.Pass))
 		} else {
-			signer, err = crypto_ssh.ParsePrivateKey([]byte(s.key))
+			signer, err = crypto_ssh.ParsePrivateKey([]byte(s.cfg.Key))
 		}
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to parse private key")
 		}
 		auth = append(auth, crypto_ssh.PublicKeys(signer))
 	} else {
-		auth = append(auth, crypto_ssh.Password(s.pass))
+		auth = append(auth, crypto_ssh.Password(s.cfg.Pass))
 	}
 
 	return auth, nil

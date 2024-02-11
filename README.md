@@ -70,8 +70,7 @@ spec:
   codeConfig:
   gptConfig:
   nodeConfig:
-    duration: 1s
-    interval: 2s
+    duration: 10s
   repoConfig:
     url: 127.0.0.1:8080
     user: user
@@ -80,12 +79,20 @@ spec:
     url: 127.0.0.1:8081
     user: user
     pass: pass
+  sshConfig:
+    host: 127.0.0.1
+    port: 22
+    user: user
+    pass: pass
+    key: key
+    timeout: 10s
 ```
 
 > `nodeConfig`: Node config
 > > `duration`: Node sight duration (h:hour, m:minute, s:second)
-> >
-> > `interval`: Node sight interval (h:hour, m:minute, s:second)
+
+> `sshConfig`: SSH config
+> > `timeout`: SSH connection timeout (h:hour, m:minute, s:second)
 
 
 
@@ -112,6 +119,7 @@ message ConfigRequest {
   NodeConfig nodeConfig = 6;  // nodesight config
   RepoConfig repoConfig = 7;  // repo config (Gitiles)
   ReviewConfig reviewConfig = 8;  // review config (Gerrit, pingview)
+  SshConfig sshConfig = 9;  // ssh config
 }
 
 message EnvVariable {
@@ -129,7 +137,6 @@ message GptConfig {}
 
 message NodeConfig {
   int64 duration = 1;  // duration time in string
-  int64 interval = 2;  // interval time in string
 }
 
 message RepoConfig {
@@ -144,6 +151,15 @@ message ReviewConfig {
   string pass = 3;  // review pass (Gerrit, pingview)
 }
 
+message SshConfig {
+  string host = 1;  // ssh host
+  int64 port = 2;  // ssh port
+  string user = 3;  // ssh user
+  string pass = 4;  // ssh pass
+  string key = 5;  // ssh private key
+  string timeout = 6; // ssh connection timeout
+}
+
 message LoggingConfig {
   int64 start = 1;  // logging lines start (>=1)
   int64 len = 2;  // logging lines length
@@ -155,8 +171,7 @@ message ConfigResponse {}
 message TriggerRequest {
   BuildTrigger buildTrigger = 1;  // buildsight trigger
   CodeTrigger codeTrigger = 2;  // codesight trigger
-  GptTrigger gptTrigger = 3;  // gptsight trigger
-  NodeTrigger nodeTrigger = 4;  // nodesight trigger
+  NodeTrigger nodeTrigger = 3;  // nodesight trigger
 }
 
 message BuildTrigger {
@@ -165,28 +180,12 @@ message BuildTrigger {
 
 message CodeTrigger {}
 
-message GptTrigger {}
-
-message NodeTrigger {
-  repeated NodeConnect nodeConnects = 1;
-}
+message NodeTrigger {}
 
 message LoggingTrigger {
   repeated string lines = 1;  // logging lines in list
   int64 start = 2;  // logging lines start (>=1)
   int64 len = 3;  // logging lines length
-}
-
-message NodeConnect {
-  string host = 1;  // node host (host:port)
-  int64 port = 2;  // node port (host:port)
-  NodeSsh nodeSsh = 3;  // node ssh config
-}
-
-message NodeSsh {
-  string user = 1;  // node ssh user
-  string pass = 2;  // node ssh pass
-  string key = 3;  // node ssh private key
 }
 
 message TriggerResponse {
@@ -204,8 +203,8 @@ message BuildInfo {
 message CodeInfo {}
 
 message NodeInfo {
-  repeated NodeStat nodeStats = 1;  // node statistic in list
-  repeated NodeReport nodeReports = 2;  // node report in list
+  NodeStat nodeStat = 1;  // node statistic
+  NodeReport nodeReport = 2;  // node report
 }
 
 message LoggingInfo {

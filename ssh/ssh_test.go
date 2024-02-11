@@ -20,12 +20,6 @@ func initSsh() ssh {
 		cfg:     DefaultConfig(),
 		client:  nil,
 		session: nil,
-		host:    "127.0.0.1",
-		port:    22,
-		user:    "user",
-		pass:    "pass",
-		key:     "",
-		timeout: clientTimeout,
 	}
 
 	s.cfg.Config = config.Config{}
@@ -34,6 +28,13 @@ func initSsh() ssh {
 		Name:  "ssh",
 		Level: hclog.LevelFromString("INFO"),
 	})
+
+	s.cfg.Host = "127.0.0.1"
+	s.cfg.Port = 22
+	s.cfg.User = "user"
+	s.cfg.Pass = "pass"
+	s.cfg.Key = ""
+	s.cfg.Timeout = sshTimeout
 
 	return s
 }

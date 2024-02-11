@@ -19,6 +19,7 @@ type Spec struct {
 	NodeConfig   NodeConfig    `yaml:"nodeConfig"`
 	RepoConfig   RepoConfig    `yaml:"repoConfig"`
 	ReviewConfig ReviewConfig  `yaml:"reviewConfig"`
+	SshConfig    SshConfig     `yaml:"sshConfig"`
 }
 
 type EnvVariable struct {
@@ -38,7 +39,6 @@ type GptConfig struct {
 
 type NodeConfig struct {
 	Duration string `yaml:"duration"`
-	Interval string `yaml:"interval"`
 }
 
 type RepoConfig struct {
@@ -51,6 +51,15 @@ type ReviewConfig struct {
 	Url  string `yaml:"url"`
 	User string `yaml:"user"`
 	Pass string `yaml:"pass"`
+}
+
+type SshConfig struct {
+	Host    string `yaml:"host"`
+	Port    int64  `yaml:"port"`
+	User    string `yaml:"user"`
+	Pass    string `yaml:"pass"`
+	Key     string `yaml:"key"`
+	Timeout string `yaml:"timeout"`
 }
 
 type LoggingConfig struct {

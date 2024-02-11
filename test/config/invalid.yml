@@ -14,8 +14,7 @@ spec:
   codeConfig:
   gptConfig:
   nodeConfig:
-    duration: 1s
-    interval: 2s
+    duration: 10s
   repoConfig:
     url: 127.0.0.1:8080
     user: user
@@ -23,4 +22,11 @@ spec:
   reviewConfig:
     url: 127.0.0.1:8081
     user: user
-    pass
+    pass: pass
+  sshConfig:
+    host: 127.0.0.1
+    port: 22
+    user: user
+    pass: pass
+    key: key
+    timeout

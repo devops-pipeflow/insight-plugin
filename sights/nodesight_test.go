@@ -38,31 +38,31 @@ func TestNodeSightRun(t *testing.T) {
 	t.Skip("Skipping TestNodeSightRun.")
 }
 
-func TestNodeSightSetTimeout(t *testing.T) {
+func TestNodeSightSetDuration(t *testing.T) {
 	ctx := context.Background()
 	ns := initNodeSight()
 
 	ns.cfg.Config.Spec.NodeConfig.Duration = ""
 
-	duration, err := ns.setTimeout(ctx)
+	duration, err := ns.setDuration(ctx)
 	assert.Equal(t, nil, err)
-	assert.Equal(t, nodeTimeout, duration)
+	assert.Equal(t, nodeDuration, duration)
 
 	ns.cfg.Config.Spec.NodeConfig.Duration = "1s"
 
-	duration, err = ns.setTimeout(ctx)
+	duration, err = ns.setDuration(ctx)
 	assert.Equal(t, nil, err)
 	assert.Equal(t, 1*time.Second, duration)
 
 	ns.cfg.Config.Spec.NodeConfig.Duration = "10m"
 
-	duration, err = ns.setTimeout(ctx)
+	duration, err = ns.setDuration(ctx)
 	assert.Equal(t, nil, err)
 	assert.Equal(t, 10*time.Minute, duration)
 
 	ns.cfg.Config.Spec.NodeConfig.Duration = "100h"
 
-	duration, err = ns.setTimeout(ctx)
+	duration, err = ns.setDuration(ctx)
 	assert.Equal(t, nil, err)
 	assert.Equal(t, 100*time.Hour, duration)
 }

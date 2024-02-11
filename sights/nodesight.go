@@ -12,14 +12,14 @@ import (
 )
 
 const (
-	nodeTimeout = 30 * time.Second
-	routineNum  = -1
+	nodeDuration = 10 * time.Second
+	routineNum   = -1
 )
 
 type NodeSight interface {
 	Init(context.Context) error
 	Deinit(context.Context) error
-	Run(context.Context, []NodeConnect) (NodeInfo, error)
+	Run(context.Context) (NodeInfo, error)
 }
 
 type NodeSightConfig struct {
@@ -27,21 +27,9 @@ type NodeSightConfig struct {
 	Logger hclog.Logger
 }
 
-type NodeConnect struct {
-	Host    string
-	Port    int64
-	NodeSsh NodeSsh
-}
-
-type NodeSsh struct {
-	User string
-	Pass string
-	Key  string
-}
-
 type NodeInfo struct {
-	NodeStats   []NodeStat
-	NodeReports []NodeReport
+	NodeStat   NodeStat
+	NodeReport NodeReport
 }
 
 type NodeStat struct {
@@ -297,7 +285,7 @@ func (ns *nodesight) Init(ctx context.Context) error {
 
 	var err error
 
-	ns.duration, err = ns.setTimeout(ctx)
+	ns.duration, err = ns.setDuration(ctx)
 	if err != nil {
 		return errors.Wrap(err, "failed to set timieout")
 	}
@@ -311,34 +299,28 @@ func (ns *nodesight) Deinit(_ context.Context) error {
 	return nil
 }
 
-func (ns *nodesight) Run(ctx context.Context, conns []NodeConnect) (NodeInfo, error) {
+func (ns *nodesight) Run(ctx context.Context) (NodeInfo, error) {
 	ns.cfg.Logger.Debug("nodesight: Run")
 
 	var info NodeInfo
 
-	info.NodeStats = make([]NodeStat, len(conns))
-	info.NodeReports = make([]NodeReport, len(conns))
-
 	g, ctx := errgroup.WithContext(ctx)
 	g.SetLimit(routineNum)
 
-	for i := range conns {
-		i := i
-		g.Go(func() error {
-			if err := ns.runDetect(ctx, conns[i]); err != nil {
-				info.NodeStats[i] = NodeStat{Host: conns[i].Host}
-				info.NodeReports[i] = NodeReport{Host: conns[i].Host}
-				return nil
-			}
-			if stat, err := ns.runStat(ctx, conns[i]); err == nil {
-				info.NodeStats[i] = *stat
-			}
-			if report, err := ns.runReport(ctx, &info.NodeStats[i]); err == nil {
-				info.NodeReports[i] = *report
-			}
+	g.Go(func() error {
+		if err := ns.runDetect(ctx); err != nil {
+			info.NodeStat.Host = ns.cfg.Config.Spec.SshConfig.Host
+			info.NodeReport.Host = ns.cfg.Config.Spec.SshConfig.Host
 			return nil
-		})
-	}
+		}
+		if stat, err := ns.runStat(ctx); err == nil {
+			info.NodeStat = *stat
+		}
+		if report, err := ns.runReport(ctx, &info.NodeStat); err == nil {
+			info.NodeReport = *report
+		}
+		return nil
+	})
 
 	if err := g.Wait(); err != nil {
 		return NodeInfo{}, errors.Wrap(err, "failed to wait routine")
@@ -347,23 +329,25 @@ func (ns *nodesight) Run(ctx context.Context, conns []NodeConnect) (NodeInfo, er
 	return info, nil
 }
 
-func (ns *nodesight) setTimeout(_ context.Context) (time.Duration, error) {
-	ns.cfg.Logger.Debug("nodesight: setTimeout")
+func (ns *nodesight) setDuration(_ context.Context) (time.Duration, error) {
+	ns.cfg.Logger.Debug("nodesight: setDuration")
 
+	var duration time.Duration
 	var err error
-	timeout := nodeTimeout
 
 	if ns.cfg.Config.Spec.NodeConfig.Duration != "" {
-		timeout, err = time.ParseDuration(ns.cfg.Config.Spec.NodeConfig.Duration)
+		duration, err = time.ParseDuration(ns.cfg.Config.Spec.NodeConfig.Duration)
 		if err != nil {
 			return 0, errors.Wrap(err, "failed to parse duration")
 		}
+	} else {
+		duration = nodeDuration
 	}
 
-	return timeout, nil
+	return duration, nil
 }
 
-func (ns *nodesight) runDetect(_ context.Context, conn NodeConnect) error {
+func (ns *nodesight) runDetect(_ context.Context) error {
 	ns.cfg.Logger.Debug("nodesight: runDetect")
 
 	// TBD: FIXME
@@ -371,7 +355,7 @@ func (ns *nodesight) runDetect(_ context.Context, conn NodeConnect) error {
 	return nil
 }
 
-func (ns *nodesight) runStat(_ context.Context, conn NodeConnect) (*NodeStat, error) {
+func (ns *nodesight) runStat(_ context.Context) (*NodeStat, error) {
 	ns.cfg.Logger.Debug("nodesight: runStat")
 
 	var stat NodeStat
