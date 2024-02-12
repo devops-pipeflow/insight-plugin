@@ -9,19 +9,24 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/devops-pipeflow/insight-plugin/config"
+	"github.com/devops-pipeflow/insight-plugin/gpt"
+	"github.com/devops-pipeflow/insight-plugin/ssh"
 )
 
 func initNodeSight() nodesight {
+	ctx := context.Background()
+
 	ns := nodesight{
 		cfg: DefaultNodeSightConfig(),
 	}
 
 	ns.cfg.Config = config.Config{}
-
 	ns.cfg.Logger = hclog.New(&hclog.LoggerOptions{
 		Name:  "nodesight",
 		Level: hclog.LevelFromString("INFO"),
 	})
+	ns.cfg.Gpt = gpt.New(ctx, gpt.DefaultConfig())
+	ns.cfg.Ssh = ssh.New(ctx, ssh.DefaultConfig())
 
 	return ns
 }

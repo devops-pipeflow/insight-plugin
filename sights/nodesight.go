@@ -9,6 +9,8 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"github.com/devops-pipeflow/insight-plugin/config"
+	"github.com/devops-pipeflow/insight-plugin/gpt"
+	"github.com/devops-pipeflow/insight-plugin/ssh"
 )
 
 const (
@@ -25,6 +27,8 @@ type NodeSight interface {
 type NodeSightConfig struct {
 	Config config.Config
 	Logger hclog.Logger
+	Gpt    gpt.Gpt
+	Ssh    ssh.Ssh
 }
 
 type NodeInfo struct {
@@ -304,6 +308,8 @@ func (ns *nodesight) Run(ctx context.Context) (NodeInfo, error) {
 
 	var info NodeInfo
 
+	// TBD: FIXME (duration)
+
 	g, ctx := errgroup.WithContext(ctx)
 	g.SetLimit(routineNum)
 
@@ -347,10 +353,14 @@ func (ns *nodesight) setDuration(_ context.Context) (time.Duration, error) {
 	return duration, nil
 }
 
-func (ns *nodesight) runDetect(_ context.Context) error {
+func (ns *nodesight) runDetect(ctx context.Context) error {
 	ns.cfg.Logger.Debug("nodesight: runDetect")
 
-	// TBD: FIXME
+	if err := ns.cfg.Ssh.Init(ctx); err != nil {
+		return errors.Wrap(err, "failed to init ssh")
+	}
+
+	_ = ns.cfg.Ssh.Deinit(ctx)
 
 	return nil
 }
@@ -359,6 +369,8 @@ func (ns *nodesight) runStat(_ context.Context) (*NodeStat, error) {
 	ns.cfg.Logger.Debug("nodesight: runStat")
 
 	var stat NodeStat
+
+	stat.Host = ns.cfg.Config.Spec.SshConfig.Host
 
 	// TBD: FIXME
 
@@ -369,6 +381,8 @@ func (ns *nodesight) runReport(_ context.Context, stat *NodeStat) (*NodeReport, 
 	ns.cfg.Logger.Debug("nodesight: runReport")
 
 	var report NodeReport
+
+	report.Host = ns.cfg.Config.Spec.SshConfig.Host
 
 	// TBD: FIXME
 

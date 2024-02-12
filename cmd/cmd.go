@@ -13,8 +13,12 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/devops-pipeflow/insight-plugin/config"
+	"github.com/devops-pipeflow/insight-plugin/gpt"
 	"github.com/devops-pipeflow/insight-plugin/insight"
+	"github.com/devops-pipeflow/insight-plugin/repo"
+	"github.com/devops-pipeflow/insight-plugin/review"
 	"github.com/devops-pipeflow/insight-plugin/sights"
+	"github.com/devops-pipeflow/insight-plugin/ssh"
 )
 
 const (
@@ -94,6 +98,9 @@ func initSights(ctx context.Context, logger hclog.Logger, cfg *config.Config) (s
 		c := sights.DefaultBuildSightConfig()
 		c.Config = *cfg
 		c.Logger = logger
+		c.Gpt = gpt.New(ctx, gpt.DefaultConfig())
+		c.Repo = repo.New(ctx, repo.DefaultConfig())
+		c.Review = review.New(ctx, review.DefaultConfig())
 		return sights.BuildSightNew(ctx, c)
 	}
 
@@ -101,6 +108,9 @@ func initSights(ctx context.Context, logger hclog.Logger, cfg *config.Config) (s
 		c := sights.DefaultCodeSightConfig()
 		c.Config = *cfg
 		c.Logger = logger
+		c.Gpt = gpt.New(ctx, gpt.DefaultConfig())
+		c.Repo = repo.New(ctx, repo.DefaultConfig())
+		c.Review = review.New(ctx, review.DefaultConfig())
 		return sights.CodeSightNew(ctx, c)
 	}
 
@@ -108,6 +118,8 @@ func initSights(ctx context.Context, logger hclog.Logger, cfg *config.Config) (s
 		c := sights.DefaultNodeSightConfig()
 		c.Config = *cfg
 		c.Logger = logger
+		c.Gpt = gpt.New(ctx, gpt.DefaultConfig())
+		c.Ssh = ssh.New(ctx, ssh.DefaultConfig())
 		return sights.NodeSightNew(ctx, c)
 	}
 

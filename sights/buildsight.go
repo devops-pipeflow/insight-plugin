@@ -6,6 +6,9 @@ import (
 	"github.com/hashicorp/go-hclog"
 
 	"github.com/devops-pipeflow/insight-plugin/config"
+	"github.com/devops-pipeflow/insight-plugin/gpt"
+	"github.com/devops-pipeflow/insight-plugin/repo"
+	"github.com/devops-pipeflow/insight-plugin/review"
 )
 
 type BuildSight interface {
@@ -17,6 +20,9 @@ type BuildSight interface {
 type BuildSightConfig struct {
 	Config config.Config
 	Logger hclog.Logger
+	Gpt    gpt.Gpt
+	Repo   repo.Repo
+	Review review.Review
 }
 
 type buildsight struct {

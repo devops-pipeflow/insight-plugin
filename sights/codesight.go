@@ -6,6 +6,9 @@ import (
 	"github.com/hashicorp/go-hclog"
 
 	"github.com/devops-pipeflow/insight-plugin/config"
+	"github.com/devops-pipeflow/insight-plugin/gpt"
+	"github.com/devops-pipeflow/insight-plugin/repo"
+	"github.com/devops-pipeflow/insight-plugin/review"
 )
 
 type CodeSight interface {
@@ -17,6 +20,9 @@ type CodeSight interface {
 type CodeSightConfig struct {
 	Config config.Config
 	Logger hclog.Logger
+	Gpt    gpt.Gpt
+	Repo   repo.Repo
+	Review review.Review
 }
 
 type codesight struct {
