@@ -55,14 +55,8 @@ type Ssh interface {
 }
 
 type SshConfig struct {
-	Config  config.Config
-	Logger  hclog.Logger
-	Host    string
-	Port    int64
-	User    string
-	Pass    string
-	Key     string
-	Timeout time.Duration
+	Config config.Config
+	Logger hclog.Logger
 }
 
 type ssh struct {
@@ -113,17 +107,24 @@ func (s *ssh) initSession(ctx context.Context) error {
 	cfg.Ciphers = ciphers
 	cfg.KeyExchanges = keyExchanges
 
+	timeout, err := s.setTimeout(ctx)
+	if err != nil {
+		return errors.Wrap(err, "failed to set timeout")
+	}
+
 	_config := &crypto_ssh.ClientConfig{
-		User:    s.cfg.User,
+		User:    s.cfg.Config.Spec.SshConfig.User,
 		Auth:    auth,
-		Timeout: s.cfg.Timeout,
+		Timeout: timeout,
 		Config:  cfg,
 		HostKeyCallback: func(hostname string, remote net.Addr, key crypto_ssh.PublicKey) error {
 			return nil
 		},
 	}
 
-	s.client, err = crypto_ssh.Dial("tcp", s.cfg.Host+":"+strconv.FormatInt(s.cfg.Port, 10), _config)
+	addr := s.cfg.Config.Spec.SshConfig.Host + ":" + strconv.FormatInt(s.cfg.Config.Spec.SshConfig.Port, 10)
+
+	s.client, err = crypto_ssh.Dial("tcp", addr, _config)
 	if err != nil {
 		return errors.Wrap(err, "failed to create ssh client")
 	}
@@ -174,19 +175,37 @@ func (s *ssh) setAuth(_ context.Context) ([]crypto_ssh.AuthMethod, error) {
 
 	auth := make([]crypto_ssh.AuthMethod, 0)
 
-	if s.cfg.Key != "" {
-		if s.cfg.Pass != "" {
-			signer, err = crypto_ssh.ParsePrivateKeyWithPassphrase([]byte(s.cfg.Key), []byte(s.cfg.Pass))
+	if s.cfg.Config.Spec.SshConfig.Key != "" {
+		if s.cfg.Config.Spec.SshConfig.Pass != "" {
+			signer, err = crypto_ssh.ParsePrivateKeyWithPassphrase([]byte(s.cfg.Config.Spec.SshConfig.Key), []byte(s.cfg.Config.Spec.SshConfig.Pass))
 		} else {
-			signer, err = crypto_ssh.ParsePrivateKey([]byte(s.cfg.Key))
+			signer, err = crypto_ssh.ParsePrivateKey([]byte(s.cfg.Config.Spec.SshConfig.Key))
 		}
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to parse private key")
 		}
 		auth = append(auth, crypto_ssh.PublicKeys(signer))
 	} else {
-		auth = append(auth, crypto_ssh.Password(s.cfg.Pass))
+		auth = append(auth, crypto_ssh.Password(s.cfg.Config.Spec.SshConfig.Pass))
 	}
 
 	return auth, nil
+}
+
+func (s *ssh) setTimeout(_ context.Context) (time.Duration, error) {
+	s.cfg.Logger.Debug("ssh: setTimeout")
+
+	var timeout time.Duration
+	var err error
+
+	if s.cfg.Config.Spec.SshConfig.Timeout != "" {
+		timeout, err = time.ParseDuration(s.cfg.Config.Spec.SshConfig.Timeout)
+		if err != nil {
+			return 0, errors.Wrap(err, "failed to parse duration")
+		}
+	} else {
+		timeout = sshTimeout
+	}
+
+	return timeout, nil
 }

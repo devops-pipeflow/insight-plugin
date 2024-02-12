@@ -29,12 +29,12 @@ func initSsh() ssh {
 		Level: hclog.LevelFromString("INFO"),
 	})
 
-	s.cfg.Host = "127.0.0.1"
-	s.cfg.Port = 22
-	s.cfg.User = "user"
-	s.cfg.Pass = "pass"
-	s.cfg.Key = ""
-	s.cfg.Timeout = sshTimeout
+	s.cfg.Config.Spec.SshConfig.Host = "127.0.0.1"
+	s.cfg.Config.Spec.SshConfig.Port = 22
+	s.cfg.Config.Spec.SshConfig.User = "user"
+	s.cfg.Config.Spec.SshConfig.Pass = "pass"
+	s.cfg.Config.Spec.SshConfig.Key = ""
+	s.cfg.Config.Spec.SshConfig.Timeout = "10s"
 
 	return s
 }
