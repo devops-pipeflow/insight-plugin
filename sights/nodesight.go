@@ -308,8 +308,6 @@ func (ns *nodesight) Run(ctx context.Context) (NodeInfo, error) {
 
 	var info NodeInfo
 
-	// TBD: FIXME (duration)
-
 	g, ctx := errgroup.WithContext(ctx)
 	g.SetLimit(routineNum)
 
@@ -317,19 +315,23 @@ func (ns *nodesight) Run(ctx context.Context) (NodeInfo, error) {
 		if err := ns.runDetect(ctx); err != nil {
 			info.NodeStat.Host = ns.cfg.Config.Spec.SshConfig.Host
 			info.NodeReport.Host = ns.cfg.Config.Spec.SshConfig.Host
-			return nil
+			return errors.Wrap(err, "failed to run detect")
 		}
-		if stat, err := ns.runStat(ctx); err == nil {
-			info.NodeStat = *stat
+		stat, err := ns.runStat(ctx)
+		if err != nil {
+			return errors.Wrap(err, "failed to run stat")
 		}
-		if report, err := ns.runReport(ctx, &info.NodeStat); err == nil {
-			info.NodeReport = *report
+		info.NodeStat = *stat
+		report, err := ns.runReport(ctx, stat)
+		if err != nil {
+			return errors.Wrap(err, "failed to run report")
 		}
+		info.NodeReport = *report
 		return nil
 	})
 
 	if err := g.Wait(); err != nil {
-		return NodeInfo{}, errors.Wrap(err, "failed to wait routine")
+		return info, errors.Wrap(err, "failed to wait routine")
 	}
 
 	return info, nil
@@ -372,7 +374,7 @@ func (ns *nodesight) runStat(_ context.Context) (*NodeStat, error) {
 
 	stat.Host = ns.cfg.Config.Spec.SshConfig.Host
 
-	// TBD: FIXME
+	// TBD: FIXME (set duration in cmd)
 
 	return &stat, nil
 }

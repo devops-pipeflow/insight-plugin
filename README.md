@@ -136,7 +136,7 @@ message CodeConfig {}
 message GptConfig {}
 
 message NodeConfig {
-  int64 duration = 1;  // duration time in string
+  string duration = 1;  // node duration time in string (h:hour, m:minute, s:second)
 }
 
 message RepoConfig {
@@ -157,7 +157,7 @@ message SshConfig {
   string user = 3;  // ssh user
   string pass = 4;  // ssh pass
   string key = 5;  // ssh private key
-  string timeout = 6; // ssh connection timeout
+  string timeout = 6; // ssh timeout time in string (h:hour, m:minute, s:second)
 }
 
 message LoggingConfig {
@@ -467,22 +467,6 @@ message ProcessRlimit {
   uint64 used = 4;
 }
 ```
-
-> `LoggingConfig`: Logging config
-> > `start`: Logging lines start
-> >
-> > `len`: Logging lines length
-> >
-> > `count`: Logging lines count
-> >
-> Total size: length*count
-
-> `LoggingInfo.type`: Logging info type
-> > `error`: Logging error type
-> >
-> > `warn`: Logging warning type
-> >
-> > `info`: Logging info type
 
 
 
