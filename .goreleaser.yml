@@ -1,5 +1,20 @@
 ---
 builds:
+  - id: agent
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin
+      - linux
+      - windows
+    goarch:
+      - amd64
+    dir: agent
+    main: agent.go
+    binary: agent
+    flags:
+      - -trimpath
+    ldflags: -s -w
   - id: insight
     env:
       - CGO_ENABLED=0
@@ -10,7 +25,7 @@ builds:
     goarch:
       - amd64
     dir: example
-    main: main.go
+    main: example.go
     binary: insight
     flags:
       - -trimpath
