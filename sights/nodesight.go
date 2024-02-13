@@ -2,6 +2,7 @@ package sights
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/hashicorp/go-hclog"
@@ -14,8 +15,10 @@ import (
 )
 
 const (
+	nodeCommand  = "nodesight --duration %d"
 	nodeDuration = 10 * time.Second
-	routineNum   = -1
+
+	routineNum = -1
 )
 
 type NodeSight interface {
@@ -367,14 +370,28 @@ func (ns *nodesight) runDetect(ctx context.Context) error {
 	return nil
 }
 
-func (ns *nodesight) runStat(_ context.Context) (*NodeStat, error) {
+func (ns *nodesight) runStat(ctx context.Context) (*NodeStat, error) {
 	ns.cfg.Logger.Debug("nodesight: runStat")
 
 	var stat NodeStat
 
 	stat.Host = ns.cfg.Config.Spec.SshConfig.Host
 
-	// TBD: FIXME (set duration in cmd)
+	if err := ns.cfg.Ssh.Init(ctx); err != nil {
+		return &stat, errors.Wrap(err, "failed to init ssh")
+	}
+
+	defer func() {
+		_ = ns.cfg.Ssh.Deinit(ctx)
+	}()
+
+	out, err := ns.cfg.Ssh.Run(ctx, fmt.Sprintf(nodeCommand, ns.duration))
+	if err != nil {
+		return &stat, errors.Wrap(err, "failed to run ssh")
+	}
+
+	// TBD: FIXME (parse out)
+	fmt.Printf("%s\n", out)
 
 	return &stat, nil
 }
