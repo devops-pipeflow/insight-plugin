@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	nodeCommand  = "nodesight --duration %d"
+	nodeCommand  = "nodesight --duration-time=%d"
 	nodeDuration = 10 * time.Second
 
 	routineNum = -1
@@ -320,7 +320,7 @@ func (ns *nodesight) Run(ctx context.Context) (NodeInfo, error) {
 			info.NodeReport.Host = ns.cfg.Config.Spec.SshConfig.Host
 			return errors.Wrap(err, "failed to run detect")
 		}
-		stat, err := ns.runStat(ctx, ns.cfg.Config.Spec.SshConfig.Host)
+		stat, err := ns.runStat(ctx, ns.cfg.Config.Spec.SshConfig.Host, fmt.Sprintf(nodeCommand, ns.duration))
 		if err != nil {
 			return errors.Wrap(err, "failed to run stat")
 		}
@@ -370,7 +370,7 @@ func (ns *nodesight) runDetect(ctx context.Context) error {
 	return nil
 }
 
-func (ns *nodesight) runStat(ctx context.Context, host string) (*NodeStat, error) {
+func (ns *nodesight) runStat(ctx context.Context, host, cmd string) (*NodeStat, error) {
 	ns.cfg.Logger.Debug("nodesight: runStat")
 
 	var stat NodeStat
@@ -385,7 +385,7 @@ func (ns *nodesight) runStat(ctx context.Context, host string) (*NodeStat, error
 		_ = ns.cfg.Ssh.Deinit(ctx)
 	}()
 
-	out, err := ns.cfg.Ssh.Run(ctx, fmt.Sprintf(nodeCommand, ns.duration))
+	out, err := ns.cfg.Ssh.Run(ctx, cmd)
 	if err != nil {
 		return &stat, errors.Wrap(err, "failed to run ssh")
 	}

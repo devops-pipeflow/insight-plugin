@@ -27,7 +27,7 @@ const (
 )
 
 var (
-	app        = kingpin.New(name, "insight plugin").Version(config.Version + "-build-" + config.Build)
+	app        = kingpin.New(name, "insight plugin")
 	configFile = app.Flag("config-file", "Config file (.yml)").Required().String()
 	logLevel   = app.Flag("log-level", "Log level (DEBUG|INFO|WARN|ERROR)").Default(level).String()
 )

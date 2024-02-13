@@ -23,6 +23,13 @@
 ## Run
 
 ```bash
+# Run agent
+version=latest make build
+./bin/agent --duration-time=10s
+```
+
+```bash
+# Run insight
 version=latest make build
 ./bin/insight --config-file="$PWD"/config/config.yml
 ```
@@ -32,15 +39,25 @@ version=latest make build
 ## Usage
 
 ```
+usage: agent --duration-time=DURATION-TIME [<flags>]
+
+insight agent
+
+
+Flags:
+  --[no-]help                    Show context-sensitive help (also try --help-long and --help-man).
+  --duration-time=DURATION-TIME  Duration time ((h:hour, m:minute, s:second)
+  --log-level="INFO"             Log level (DEBUG|INFO|WARN|ERROR)
+```
+
+```
 usage: insight --config-file=CONFIG-FILE [<flags>]
 
 insight plugin
 
 
 Flags:
-  --[no-]help                Show context-sensitive help (also try --help-long
-                             and --help-man).
-  --[no-]version             Show application version.
+  --[no-]help                Show context-sensitive help (also try --help-long and --help-man).
   --config-file=CONFIG-FILE  Config file (.yml)
   --log-level="INFO"         Log level (DEBUG|INFO|WARN|ERROR)
 ```
