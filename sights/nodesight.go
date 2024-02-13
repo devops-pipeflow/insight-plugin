@@ -292,7 +292,7 @@ func (ns *nodesight) Init(ctx context.Context) error {
 
 	var err error
 
-	ns.duration, err = ns.setDuration(ctx)
+	ns.duration, err = ns.setDuration(ctx, ns.cfg.Config.Spec.NodeConfig.Duration)
 	if err != nil {
 		return errors.Wrap(err, "failed to set timieout")
 	}
@@ -320,12 +320,12 @@ func (ns *nodesight) Run(ctx context.Context) (NodeInfo, error) {
 			info.NodeReport.Host = ns.cfg.Config.Spec.SshConfig.Host
 			return errors.Wrap(err, "failed to run detect")
 		}
-		stat, err := ns.runStat(ctx)
+		stat, err := ns.runStat(ctx, ns.cfg.Config.Spec.SshConfig.Host)
 		if err != nil {
 			return errors.Wrap(err, "failed to run stat")
 		}
 		info.NodeStat = *stat
-		report, err := ns.runReport(ctx, stat)
+		report, err := ns.runReport(ctx, ns.cfg.Config.Spec.SshConfig.Host, stat)
 		if err != nil {
 			return errors.Wrap(err, "failed to run report")
 		}
@@ -340,22 +340,22 @@ func (ns *nodesight) Run(ctx context.Context) (NodeInfo, error) {
 	return info, nil
 }
 
-func (ns *nodesight) setDuration(_ context.Context) (time.Duration, error) {
+func (ns *nodesight) setDuration(_ context.Context, duration string) (time.Duration, error) {
 	ns.cfg.Logger.Debug("nodesight: setDuration")
 
-	var duration time.Duration
+	var d time.Duration
 	var err error
 
-	if ns.cfg.Config.Spec.NodeConfig.Duration != "" {
-		duration, err = time.ParseDuration(ns.cfg.Config.Spec.NodeConfig.Duration)
+	if duration != "" {
+		d, err = time.ParseDuration(duration)
 		if err != nil {
 			return 0, errors.Wrap(err, "failed to parse duration")
 		}
 	} else {
-		duration = nodeDuration
+		d = nodeDuration
 	}
 
-	return duration, nil
+	return d, nil
 }
 
 func (ns *nodesight) runDetect(ctx context.Context) error {
@@ -370,12 +370,12 @@ func (ns *nodesight) runDetect(ctx context.Context) error {
 	return nil
 }
 
-func (ns *nodesight) runStat(ctx context.Context) (*NodeStat, error) {
+func (ns *nodesight) runStat(ctx context.Context, host string) (*NodeStat, error) {
 	ns.cfg.Logger.Debug("nodesight: runStat")
 
 	var stat NodeStat
 
-	stat.Host = ns.cfg.Config.Spec.SshConfig.Host
+	stat.Host = host
 
 	if err := ns.cfg.Ssh.Init(ctx); err != nil {
 		return &stat, errors.Wrap(err, "failed to init ssh")
@@ -396,12 +396,12 @@ func (ns *nodesight) runStat(ctx context.Context) (*NodeStat, error) {
 	return &stat, nil
 }
 
-func (ns *nodesight) runReport(_ context.Context, stat *NodeStat) (*NodeReport, error) {
+func (ns *nodesight) runReport(_ context.Context, host string, stat *NodeStat) (*NodeReport, error) {
 	ns.cfg.Logger.Debug("nodesight: runReport")
 
 	var report NodeReport
 
-	report.Host = ns.cfg.Config.Spec.SshConfig.Host
+	report.Host = host
 
 	// TBD: FIXME
 

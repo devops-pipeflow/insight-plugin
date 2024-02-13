@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	sshTimeout = 10 * time.Second
+	connTimeout = 10 * time.Second
 )
 
 const (
@@ -78,7 +78,9 @@ func DefaultConfig() *SshConfig {
 func (s *ssh) Init(ctx context.Context) error {
 	s.cfg.Logger.Debug("ssh: Init")
 
-	return s.initSession(ctx)
+	return s.initSession(ctx, s.cfg.Config.Spec.SshConfig.Host, s.cfg.Config.Spec.SshConfig.Port,
+		s.cfg.Config.Spec.SshConfig.User, s.cfg.Config.Spec.SshConfig.Pass, s.cfg.Config.Spec.SshConfig.Key,
+		s.cfg.Config.Spec.SshConfig.Timeout)
 }
 
 func (s *ssh) Deinit(ctx context.Context) error {
@@ -93,13 +95,13 @@ func (s *ssh) Run(ctx context.Context, cmd string) (string, error) {
 	return s.runSession(ctx, cmd)
 }
 
-func (s *ssh) initSession(ctx context.Context) error {
+func (s *ssh) initSession(ctx context.Context, host string, port int64, user, pass, key, timeout string) error {
 	s.cfg.Logger.Debug("ssh: initSession")
 
 	var cfg crypto_ssh.Config
 	var err error
 
-	auth, err := s.setAuth(ctx)
+	auth, err := s.setAuth(ctx, pass, key)
 	if err != nil {
 		return errors.Wrap(err, "failed to set auth")
 	}
@@ -107,22 +109,22 @@ func (s *ssh) initSession(ctx context.Context) error {
 	cfg.Ciphers = ciphers
 	cfg.KeyExchanges = keyExchanges
 
-	timeout, err := s.setTimeout(ctx)
+	t, err := s.setTimeout(ctx, timeout)
 	if err != nil {
 		return errors.Wrap(err, "failed to set timeout")
 	}
 
 	_config := &crypto_ssh.ClientConfig{
-		User:    s.cfg.Config.Spec.SshConfig.User,
+		User:    user,
 		Auth:    auth,
-		Timeout: timeout,
+		Timeout: t,
 		Config:  cfg,
 		HostKeyCallback: func(hostname string, remote net.Addr, key crypto_ssh.PublicKey) error {
 			return nil
 		},
 	}
 
-	addr := s.cfg.Config.Spec.SshConfig.Host + ":" + strconv.FormatInt(s.cfg.Config.Spec.SshConfig.Port, 10)
+	addr := host + ":" + strconv.FormatInt(port, 10)
 
 	s.client, err = crypto_ssh.Dial("tcp", addr, _config)
 	if err != nil {
@@ -167,7 +169,7 @@ func (s *ssh) runSession(_ context.Context, cmd string) (string, error) {
 	return string(out), nil
 }
 
-func (s *ssh) setAuth(_ context.Context) ([]crypto_ssh.AuthMethod, error) {
+func (s *ssh) setAuth(_ context.Context, pass, key string) ([]crypto_ssh.AuthMethod, error) {
 	s.cfg.Logger.Debug("ssh: setAuth")
 
 	var err error
@@ -175,37 +177,37 @@ func (s *ssh) setAuth(_ context.Context) ([]crypto_ssh.AuthMethod, error) {
 
 	auth := make([]crypto_ssh.AuthMethod, 0)
 
-	if s.cfg.Config.Spec.SshConfig.Key != "" {
-		if s.cfg.Config.Spec.SshConfig.Pass != "" {
-			signer, err = crypto_ssh.ParsePrivateKeyWithPassphrase([]byte(s.cfg.Config.Spec.SshConfig.Key), []byte(s.cfg.Config.Spec.SshConfig.Pass))
+	if key != "" {
+		if pass != "" {
+			signer, err = crypto_ssh.ParsePrivateKeyWithPassphrase([]byte(key), []byte(pass))
 		} else {
-			signer, err = crypto_ssh.ParsePrivateKey([]byte(s.cfg.Config.Spec.SshConfig.Key))
+			signer, err = crypto_ssh.ParsePrivateKey([]byte(key))
 		}
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to parse private key")
 		}
 		auth = append(auth, crypto_ssh.PublicKeys(signer))
 	} else {
-		auth = append(auth, crypto_ssh.Password(s.cfg.Config.Spec.SshConfig.Pass))
+		auth = append(auth, crypto_ssh.Password(pass))
 	}
 
 	return auth, nil
 }
 
-func (s *ssh) setTimeout(_ context.Context) (time.Duration, error) {
+func (s *ssh) setTimeout(_ context.Context, timeout string) (time.Duration, error) {
 	s.cfg.Logger.Debug("ssh: setTimeout")
 
-	var timeout time.Duration
+	var t time.Duration
 	var err error
 
-	if s.cfg.Config.Spec.SshConfig.Timeout != "" {
-		timeout, err = time.ParseDuration(s.cfg.Config.Spec.SshConfig.Timeout)
+	if timeout != "" {
+		t, err = time.ParseDuration(timeout)
 		if err != nil {
 			return 0, errors.Wrap(err, "failed to parse duration")
 		}
 	} else {
-		timeout = sshTimeout
+		t = connTimeout
 	}
 
-	return timeout, nil
+	return t, nil
 }
