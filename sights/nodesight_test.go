@@ -3,10 +3,8 @@ package sights
 import (
 	"context"
 	"testing"
-	"time"
 
 	"github.com/hashicorp/go-hclog"
-	"github.com/stretchr/testify/assert"
 
 	"github.com/devops-pipeflow/insight-plugin/config"
 	"github.com/devops-pipeflow/insight-plugin/gpt"
@@ -43,33 +41,12 @@ func TestNodeSightRun(t *testing.T) {
 	t.Skip("Skipping TestNodeSightRun.")
 }
 
-func TestNodeSightSetDuration(t *testing.T) {
-	ctx := context.Background()
-	ns := initNodeSight()
-
-	duration, err := ns.setDuration(ctx, "")
-	assert.Equal(t, nil, err)
-	assert.Equal(t, nodeDuration, duration)
-
-	duration, err = ns.setDuration(ctx, "1s")
-	assert.Equal(t, nil, err)
-	assert.Equal(t, 1*time.Second, duration)
-
-	duration, err = ns.setDuration(ctx, "10m")
-	assert.Equal(t, nil, err)
-	assert.Equal(t, 10*time.Minute, duration)
-
-	duration, err = ns.setDuration(ctx, "100h")
-	assert.Equal(t, nil, err)
-	assert.Equal(t, 100*time.Hour, duration)
-}
-
 func TestNodeSightRunDetect(t *testing.T) {
-	// TBD: FIXME
+	t.Skip("Skipping TestNodeSightRunDetect.")
 }
 
 func TestNodeSightRunStat(t *testing.T) {
-	// TBD: FIXME
+	t.Skip("Skipping TestNodeSightRunStat.")
 }
 
 func TestNodeSightRunReport(t *testing.T) {

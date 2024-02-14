@@ -3,7 +3,6 @@ package sights
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/hashicorp/go-hclog"
 	"github.com/pkg/errors"
@@ -15,10 +14,8 @@ import (
 )
 
 const (
-	nodeCommand  = "nodesight --duration-time=%d"
-	nodeDuration = 10 * time.Second
-
-	routineNum = -1
+	nodeCommand = "/tmp/nodesight --duration-time=%s"
+	routineNum  = -1
 )
 
 type NodeSight interface {
@@ -40,241 +37,239 @@ type NodeInfo struct {
 }
 
 type NodeStat struct {
-	Host        string
-	CpuStat     CpuStat
-	DiskStat    DiskStat
-	DockerStat  DockerStat
-	HostStat    HostStat
-	LoadStat    LoadStat
-	MemStat     MemStat
-	NetStat     NetStat
-	ProcessStat ProcessStat
+	CpuStat     CpuStat     `json:"cpuStat"`
+	DiskStat    DiskStat    `json:"diskStat"`
+	DockerStat  DockerStat  `json:"dockerStat"`
+	HostStat    HostStat    `json:"hostStat"`
+	LoadStat    LoadStat    `json:"loadStat"`
+	MemStat     MemStat     `json:"memStat"`
+	NetStat     NetStat     `json:"netStat"`
+	ProcessStat ProcessStat `json:"processStat"`
 }
 
 type NodeReport struct {
-	Host          string
-	CpuReport     string
-	DiskReport    string
-	DockerReport  string
-	HostReport    string
-	LoadReport    string
-	MemReport     string
-	NetReport     string
-	ProcessReport string
+	CpuReport     string `json:"cpuReport"`
+	DiskReport    string `json:"diskReport"`
+	DockerReport  string `json:"dockerReport"`
+	HostReport    string `json:"hostReport"`
+	LoadReport    string `json:"loadReport"`
+	MemReport     string `json:"memReport"`
+	NetReport     string `json:"netReport"`
+	ProcessReport string `json:"processReport"`
 }
 
 type CpuStat struct {
-	PhysicalCount int64
-	LogicalCount  int64
-	CpuPercents   []float64
-	CpuTimes      []CpuTime
+	PhysicalCount int64     `json:"physicalCount"`
+	LogicalCount  int64     `json:"logicalCount"`
+	CpuPercents   []float64 `json:"cpuPercents"`
+	CpuTimes      []CpuTime `json:"cpuTimes"`
 }
 
 type DiskStat struct {
-	DiskPartitions []DiskPartition
-	DiskUsages     []DiskUsage
+	DiskPartitions []DiskPartition `json:"diskPartitions"`
+	DiskUsage      DiskUsage       `json:"diskUsage"`
 }
 
 type DockerStat struct {
-	ContainerIds          []string
-	CgroupCpuDockerUsages []float64
-	CgroupCpuUsages       []float64
-	CgroupDockers         []CgroupDocker
-	CgroupMems            []CgroupMem
+	ContainerIds          []string       `json:"containerIds"`
+	CgroupCpuDockerUsages []float64      `json:"cgroupCpuDockerUsages"`
+	CgroupCpuUsages       []float64      `json:"cgroupCpuUsages"`
+	CgroupDockers         []CgroupDocker `json:"cgroupDockers"`
+	CgroupMems            []CgroupMem    `json:"cgroupMems"`
 }
 
 type HostStat struct {
-	Hostname        string
-	Procs           uint64
-	Os              string
-	Platform        string
-	PlatformFamily  string
-	PlatformVersion string
-	KernelVersion   string
-	KernelArch      string
-	HostID          string
+	Hostname        string `json:"hostname"`
+	Procs           uint64 `json:"procs"`
+	Os              string `json:"os"`
+	Platform        string `json:"platform"`
+	PlatformFamily  string `json:"platformFamily"`
+	PlatformVersion string `json:"platformVersion"`
+	KernelVersion   string `json:"kernelVersion"`
+	KernelArch      string `json:"kernelArch"`
+	HostID          string `json:"hostID"`
 }
 
 type LoadStat struct {
-	LoadAvg  LoadAvg
-	LoadMisc LoadMisc
+	LoadAvg  LoadAvg  `json:"loadAvg"`
+	LoadMisc LoadMisc `json:"loadMisc"`
 }
 
 type MemStat struct {
-	MemSwapDevices []MemSwapDevice
-	MemSwapMemory  MemSwapMemory
-	MemVirtual     MemVirtual
+	MemSwapDevices []MemSwapDevice `json:"memSwapDevices"`
+	MemSwapMemory  MemSwapMemory   `json:"memSwapMemory"`
+	MemVirtual     MemVirtual      `json:"memVirtual"`
 }
 
 type NetStat struct {
-	NetIos        []NetIo
-	NetInterfaces []NetInterface
+	NetIos        []NetIo        `json:"netIos"`
+	NetInterfaces []NetInterface `json:"netInterfaces"`
 }
 
 type ProcessStat struct {
-	ProcessInfos []ProcessInfo
+	ProcessInfos []ProcessInfo `json:"processInfos"`
 }
 
 type CpuTime struct {
-	Cpu       string
-	User      float64
-	System    float64
-	Idle      float64
-	Nice      float64
-	Iowait    float64
-	Irq       float64
-	Softirq   float64
-	Steal     float64
-	Guest     float64
-	GuestNice float64
+	Cpu       string  `json:"cpu"`
+	User      float64 `json:"user"`
+	System    float64 `json:"system"`
+	Idle      float64 `json:"idle"`
+	Nice      float64 `json:"nice"`
+	Iowait    float64 `json:"iowait"`
+	Irq       float64 `json:"irq"`
+	Softirq   float64 `json:"softirq"`
+	Steal     float64 `json:"steal"`
+	Guest     float64 `json:"guest"`
+	GuestNice float64 `json:"guestNice"`
 }
 
 type DiskPartition struct {
-	Device string
-	Mount  string
-	Fstype string
+	Device     string   `json:"device"`
+	Mountpoint string   `json:"mountpoint"`
+	Fstype     string   `json:"fstype"`
+	Opts       []string `json:"opts"`
 }
 
 type DiskUsage struct {
-	Path        string
-	Fstype      string
-	Total       uint64
-	Free        uint64
-	Used        uint64
-	UsedPercent float64
+	Path        string  `json:"path"`
+	Fstype      string  `json:"fstype"`
+	Total       uint64  `json:"total"`
+	Free        uint64  `json:"free"`
+	Used        uint64  `json:"used"`
+	UsedPercent float64 `json:"usedPercent"`
 }
 
 type CgroupDocker struct {
-	ContainerId string
-	Name        string
-	Image       string
-	Status      string
-	Running     bool
+	ContainerId string `json:"containerId"`
+	Name        string `json:"name"`
+	Image       string `json:"image"`
+	Status      string `json:"status"`
+	Running     bool   `json:"running"`
 }
 
 type CgroupMem struct {
-	Cache              uint64
-	Rss                uint64
-	RssHuge            uint64
-	MappedFile         uint64
-	TotalCache         uint64
-	TotalRss           uint64
-	TotalRssHuge       uint64
-	TotalMappedFile    uint64
-	MemUsageInBytes    uint64
-	MemMaxUsageInBytes uint64
-	MemLimitInBytes    uint64
+	Cache              uint64 `json:"cache"`
+	Rss                uint64 `json:"rss"`
+	RssHuge            uint64 `json:"rssHuge"`
+	MappedFile         uint64 `json:"mappedFile"`
+	TotalCache         uint64 `json:"totalCache"`
+	TotalRss           uint64 `json:"totalRss"`
+	TotalRssHuge       uint64 `json:"totalRssHuge"`
+	TotalMappedFile    uint64 `json:"totalMappedFile"`
+	MemUsageInBytes    uint64 `json:"memUsageInBytes"`
+	MemMaxUsageInBytes uint64 `json:"memMaxUsageInBytes"`
+	MemLimitInBytes    uint64 `json:"memLimitInBytes"`
 }
 
 type LoadAvg struct {
-	Load1  float64
-	Load5  float64
-	Load15 float64
+	Load1  float64 `json:"load1"`
+	Load5  float64 `json:"load5"`
+	Load15 float64 `json:"load15"`
 }
 
 type LoadMisc struct {
-	ProcsTotal   int64
-	ProcsCreated int64
-	ProcsRunning int64
-	ProcsBlocked int64
-	Ctxt         int64
+	ProcsTotal   int64 `json:"procsTotal"`
+	ProcsCreated int64 `json:"procsCreated"`
+	ProcsRunning int64 `json:"procsRunning"`
+	ProcsBlocked int64 `json:"procsBlocked"`
+	Ctxt         int64 `json:"ctxt"`
 }
 
 type MemSwapDevice struct {
-	Name      string
-	UsedBytes uint64
-	FreeBytes uint64
+	Name      string `json:"name"`
+	UsedBytes uint64 `json:"usedBytes"`
+	FreeBytes uint64 `json:"freeBytes"`
 }
 
 type MemSwapMemory struct {
-	Total       uint64
-	Used        uint64
-	Free        uint64
-	UsedPercent float64
+	Total       uint64  `json:"total"`
+	Used        uint64  `json:"used"`
+	Free        uint64  `json:"free"`
+	UsedPercent float64 `json:"usedPercent"`
 }
 
 type MemVirtual struct {
-	Total          uint64
-	Available      uint64
-	Used           uint64
-	UsedPercent    float64
-	Free           uint64
-	Buffer         uint64
-	Cached         uint64
-	SwapCached     uint64
-	SwapTotal      uint64
-	SwapFree       uint64
-	Mapped         uint64
-	VmallocTotal   uint64
-	VmallocUsed    uint64
-	VmallocChunk   uint64
-	HugePagesTotal uint64
-	HugePagesFree  uint64
-	HugePagesRsvd  uint64
-	HugePagesSurp  uint64
-	HugePageSize   uint64
-	AnonHugePage   uint64
+	Total          uint64  `json:"total"`
+	Available      uint64  `json:"available"`
+	Used           uint64  `json:"used"`
+	UsedPercent    float64 `json:"usedPercent"`
+	Free           uint64  `json:"free"`
+	Buffer         uint64  `json:"buffer"`
+	Cached         uint64  `json:"cached"`
+	SwapCached     uint64  `json:"swapCached"`
+	SwapTotal      uint64  `json:"swapTotal"`
+	SwapFree       uint64  `json:"swapFree"`
+	Mapped         uint64  `json:"mapped"`
+	VmallocTotal   uint64  `json:"vmallocTotal"`
+	VmallocUsed    uint64  `json:"vmallocUsed"`
+	VmallocChunk   uint64  `json:"vmallocChunk"`
+	HugePagesTotal uint64  `json:"hugePagesTotal"`
+	HugePagesFree  uint64  `json:"hugePagesFree"`
+	HugePagesRsvd  uint64  `json:"hugePagesRsvd"`
+	HugePagesSurp  uint64  `json:"hugePagesSurp"`
+	HugePageSize   uint64  `json:"hugePageSize"`
+	AnonHugePage   uint64  `json:"anonHugePage"`
 }
 
 type NetIo struct {
-	Name        string
-	BytesSent   uint64
-	BytesRecv   uint64
-	PacketsSent uint64
-	PacketsRecv uint64
+	Name        string `json:"name"`
+	BytesSent   uint64 `json:"bytesSent"`
+	BytesRecv   uint64 `json:"bytesRecv"`
+	PacketsSent uint64 `json:"packetsSent"`
+	PacketsRecv uint64 `json:"packetsRecv"`
 }
 
 type NetInterface struct {
-	Index        int64
-	Mtu          int64
-	Name         string
-	HardwareAddr string
-	Flags        []string
-	Addrs        []string
+	Index        int64    `json:"index"`
+	Mtu          int64    `json:"mtu"`
+	Name         string   `json:"name"`
+	HardwareAddr string   `json:"hardwareAddr"`
+	Flags        []string `json:"flags"`
+	Addrs        []string `json:"addrs"`
 }
 
 type ProcessInfo struct {
-	Background        bool
-	CpuPercent        float64
-	Children          []int32
-	Cmdline           string
-	Environs          []string
-	Ionice            int32
-	IsRunning         bool
-	ProcessMemoryInfo ProcessMemoryInfo
-	MemoryPercent     float32
-	Name              string
-	NumFd             int32
-	NumThread         int32
-	Parent            int32
-	Percent           float64
-	Ppid              int32
-	ProcessRlimits    []ProcessRlimit
-	Statuss           []string
-	Uids              []int32
-	Username          string
+	Background        bool              `json:"background"`
+	CpuPercent        float64           `json:"cpuPercent"`
+	Children          []int32           `json:"children"`
+	Cmdline           string            `json:"cmdline"`
+	Environs          []string          `json:"environs"`
+	Ionice            int32             `json:"ionice"`
+	IsRunning         bool              `json:"isRunning"`
+	ProcessMemoryInfo ProcessMemoryInfo `json:"processMemoryInfo"`
+	MemoryPercent     float32           `json:"memoryPercent"`
+	Name              string            `json:"name"`
+	NumFd             int32             `json:"numFd"`
+	NumThread         int32             `json:"numThread"`
+	Parent            int32             `json:"parent"`
+	Percent           float64           `json:"percent"`
+	Ppid              int32             `json:"ppid"`
+	ProcessRlimits    []ProcessRlimit   `json:"processRlimits"`
+	Statuss           []string          `json:"statuss"`
+	Uids              []int32           `json:"uids"`
+	Username          string            `json:"username"`
 }
 
 type ProcessMemoryInfo struct {
-	Rss    uint64
-	Vms    uint64
-	Hwm    uint64
-	Data   uint64
-	Stack  uint64
-	Locked uint64
-	Swap   uint64
+	Rss    uint64 `json:"rss"`
+	Vms    uint64 `json:"vms"`
+	Hwm    uint64 `json:"hwm"`
+	Data   uint64 `json:"data"`
+	Stack  uint64 `json:"stack"`
+	Locked uint64 `json:"locked"`
+	Swap   uint64 `json:"swap"`
 }
 
 type ProcessRlimit struct {
-	Resource int32
-	Soft     uint64
-	Hard     uint64
-	Used     uint64
+	Resource int32  `json:"resource"`
+	Soft     uint64 `json:"soft"`
+	Hard     uint64 `json:"hard"`
+	Used     uint64 `json:"used"`
 }
 
 type nodesight struct {
-	cfg      *NodeSightConfig
-	duration time.Duration
+	cfg *NodeSightConfig
 }
 
 func NodeSightNew(_ context.Context, cfg *NodeSightConfig) NodeSight {
@@ -289,13 +284,6 @@ func DefaultNodeSightConfig() *NodeSightConfig {
 
 func (ns *nodesight) Init(ctx context.Context) error {
 	ns.cfg.Logger.Debug("nodesight: Init")
-
-	var err error
-
-	ns.duration, err = ns.setDuration(ctx, ns.cfg.Config.Spec.NodeConfig.Duration)
-	if err != nil {
-		return errors.Wrap(err, "failed to set timieout")
-	}
 
 	return nil
 }
@@ -316,16 +304,14 @@ func (ns *nodesight) Run(ctx context.Context) (NodeInfo, error) {
 
 	g.Go(func() error {
 		if err := ns.runDetect(ctx); err != nil {
-			info.NodeStat.Host = ns.cfg.Config.Spec.SshConfig.Host
-			info.NodeReport.Host = ns.cfg.Config.Spec.SshConfig.Host
 			return errors.Wrap(err, "failed to run detect")
 		}
-		stat, err := ns.runStat(ctx, ns.cfg.Config.Spec.SshConfig.Host, fmt.Sprintf(nodeCommand, ns.duration))
+		stat, err := ns.runStat(ctx, fmt.Sprintf(nodeCommand, ns.cfg.Config.Spec.NodeConfig.Duration))
 		if err != nil {
 			return errors.Wrap(err, "failed to run stat")
 		}
 		info.NodeStat = *stat
-		report, err := ns.runReport(ctx, ns.cfg.Config.Spec.SshConfig.Host, stat)
+		report, err := ns.runReport(ctx, stat)
 		if err != nil {
 			return errors.Wrap(err, "failed to run report")
 		}
@@ -340,24 +326,6 @@ func (ns *nodesight) Run(ctx context.Context) (NodeInfo, error) {
 	return info, nil
 }
 
-func (ns *nodesight) setDuration(_ context.Context, duration string) (time.Duration, error) {
-	ns.cfg.Logger.Debug("nodesight: setDuration")
-
-	var d time.Duration
-	var err error
-
-	if duration != "" {
-		d, err = time.ParseDuration(duration)
-		if err != nil {
-			return 0, errors.Wrap(err, "failed to parse duration")
-		}
-	} else {
-		d = nodeDuration
-	}
-
-	return d, nil
-}
-
 func (ns *nodesight) runDetect(ctx context.Context) error {
 	ns.cfg.Logger.Debug("nodesight: runDetect")
 
@@ -370,12 +338,10 @@ func (ns *nodesight) runDetect(ctx context.Context) error {
 	return nil
 }
 
-func (ns *nodesight) runStat(ctx context.Context, host, cmd string) (*NodeStat, error) {
+func (ns *nodesight) runStat(ctx context.Context, cmd string) (*NodeStat, error) {
 	ns.cfg.Logger.Debug("nodesight: runStat")
 
 	var stat NodeStat
-
-	stat.Host = host
 
 	if err := ns.cfg.Ssh.Init(ctx); err != nil {
 		return &stat, errors.Wrap(err, "failed to init ssh")
@@ -396,12 +362,10 @@ func (ns *nodesight) runStat(ctx context.Context, host, cmd string) (*NodeStat, 
 	return &stat, nil
 }
 
-func (ns *nodesight) runReport(_ context.Context, host string, stat *NodeStat) (*NodeReport, error) {
+func (ns *nodesight) runReport(_ context.Context, stat *NodeStat) (*NodeReport, error) {
 	ns.cfg.Logger.Debug("nodesight: runReport")
 
 	var report NodeReport
-
-	report.Host = host
 
 	// TBD: FIXME
 

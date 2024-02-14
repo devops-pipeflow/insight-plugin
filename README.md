@@ -252,7 +252,6 @@ message ReviewInfo {
 }
 
 message NodeStat {
-  string host = 1;  // node host
   CpuStat cpuStat = 2;  // cpu statistic
   DiskStat diskStat = 3;  // dist statistic
   DockerStat dockerStat = 4;  // docker statistic
@@ -264,7 +263,6 @@ message NodeStat {
 }
 
 message NodeReport {
-  string host = 1;  // node host
   string cpuReport = 2; // cpu report
   string diskReport = 3; // disk report
   string dockerReport = 4; // docker report
@@ -284,7 +282,7 @@ message CpuStat {
 
 message DiskStat {
   repeated DiskPartition diskPartitions = 1;  // disk partitions in list (for physical devices only)
-  repeated DiskUsage diskUsages = 2;  // file system usage in list
+  DiskUsage diskUsage = 2;  // file system usage
 }
 
 message DockerStat {
@@ -343,8 +341,9 @@ message CpuTime {
 
 message DiskPartition {
   string device = 1;
-  string mount = 2;
+  string mountpoint = 2;
   string fstype = 3;
+  repeated string opts = 4;
 }
 
 message DiskUsage {
