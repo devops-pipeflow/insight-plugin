@@ -2,6 +2,7 @@ package sights
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/hashicorp/go-hclog"
@@ -71,11 +72,9 @@ type DiskStat struct {
 }
 
 type DockerStat struct {
-	ContainerIds          []string       `json:"containerIds"`
-	CgroupCpuDockerUsages []float64      `json:"cgroupCpuDockerUsages"`
-	CgroupCpuUsages       []float64      `json:"cgroupCpuUsages"`
-	CgroupDockers         []CgroupDocker `json:"cgroupDockers"`
-	CgroupMems            []CgroupMem    `json:"cgroupMems"`
+	CgroupCpuDockerUsages []float64          `json:"cgroupCpuDockerUsages"`
+	CgroupDockerStats     []CgroupDockerStat `json:"cgroupDockerStats"`
+	CgroupMemDockers      []CgroupMemDocker  `json:"cgroupMemDockers"`
 }
 
 type HostStat struct {
@@ -140,7 +139,7 @@ type DiskUsage struct {
 	UsedPercent float64 `json:"usedPercent"`
 }
 
-type CgroupDocker struct {
+type CgroupDockerStat struct {
 	ContainerId string `json:"containerId"`
 	Name        string `json:"name"`
 	Image       string `json:"image"`
@@ -148,7 +147,7 @@ type CgroupDocker struct {
 	Running     bool   `json:"running"`
 }
 
-type CgroupMem struct {
+type CgroupMemDocker struct {
 	Cache              uint64 `json:"cache"`
 	Rss                uint64 `json:"rss"`
 	RssHuge            uint64 `json:"rssHuge"`
@@ -243,7 +242,6 @@ type ProcessInfo struct {
 	NumFd             int32             `json:"numFd"`
 	NumThread         int32             `json:"numThread"`
 	Parent            int32             `json:"parent"`
-	Percent           float64           `json:"percent"`
 	Ppid              int32             `json:"ppid"`
 	ProcessRlimits    []ProcessRlimit   `json:"processRlimits"`
 	Statuss           []string          `json:"statuss"`
@@ -356,8 +354,9 @@ func (ns *nodesight) runStat(ctx context.Context, cmd string) (*NodeStat, error)
 		return &stat, errors.Wrap(err, "failed to run ssh")
 	}
 
-	// TBD: FIXME (parse out)
-	fmt.Printf("%s\n", out)
+	if err := json.Unmarshal([]byte(out), &stat); err != nil {
+		return &stat, errors.Wrap(err, "failed to unmarshal json")
+	}
 
 	return &stat, nil
 }

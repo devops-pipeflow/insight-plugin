@@ -66,25 +66,67 @@ func TestFetchDiskStat(t *testing.T) {
 }
 
 func TestFetchDockerStat(t *testing.T) {
-	// TBD: FIXME
+	ctx := context.Background()
+	logger, _ := initLogger(ctx, agentLevel)
+
+	stat, err := fetchDockerStat(ctx, logger, agentDuration)
+	assert.Equal(t, nil, err)
+
+	buf, _ := json.Marshal(stat)
+	fmt.Println(string(buf))
 }
 
 func TestFetchHostStat(t *testing.T) {
-	// TBD: FIXME
+	ctx := context.Background()
+	logger, _ := initLogger(ctx, agentLevel)
+
+	stat, err := fetchHostStat(ctx, logger, agentDuration)
+	assert.Equal(t, nil, err)
+
+	buf, _ := json.Marshal(stat)
+	fmt.Println(string(buf))
 }
 
 func TestFetchLoadStat(t *testing.T) {
-	// TBD: FIXME
+	ctx := context.Background()
+	logger, _ := initLogger(ctx, agentLevel)
+
+	stat, err := fetchLoadStat(ctx, logger, agentDuration)
+	assert.Equal(t, nil, err)
+
+	buf, _ := json.Marshal(stat)
+	fmt.Println(string(buf))
 }
 
 func TestFetchMemStat(t *testing.T) {
-	// TBD: FIXME
+	ctx := context.Background()
+	logger, _ := initLogger(ctx, agentLevel)
+
+	stat, err := fetchMemStat(ctx, logger, agentDuration)
+	assert.Equal(t, nil, err)
+
+	buf, _ := json.Marshal(stat)
+	fmt.Println(string(buf))
 }
 
 func TestFetchNetStat(t *testing.T) {
-	// TBD: FIXME
+	ctx := context.Background()
+	logger, _ := initLogger(ctx, agentLevel)
+
+	stat, err := fetchNetStat(ctx, logger, agentDuration)
+	assert.Equal(t, nil, err)
+
+	buf, _ := json.Marshal(stat)
+	fmt.Println(string(buf))
 }
 
 func TestFetchProcessStat(t *testing.T) {
-	// TBD: FIXME
+	ctx := context.Background()
+	logger, _ := initLogger(ctx, agentLevel)
+
+	stat, err := fetchProcessStat(ctx, logger, agentDuration)
+	assert.Equal(t, nil, err)
+
+	buf, _ := json.Marshal(stat)
+	fmt.Println(string(buf))
 }

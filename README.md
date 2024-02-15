@@ -252,25 +252,25 @@ message ReviewInfo {
 }
 
 message NodeStat {
-  CpuStat cpuStat = 2;  // cpu statistic
-  DiskStat diskStat = 3;  // dist statistic
-  DockerStat dockerStat = 4;  // docker statistic
-  HostStat hostStat = 5;  // host statistic
-  LoadStat loadStat = 6;  // load statistic
-  MemStat memStat = 7;  // memory statistic
-  NetStat netStat = 8;  // net statistic
-  ProcessStat processStat = 9;  // process statistic
+  CpuStat cpuStat = 1;  // cpu statistic
+  DiskStat diskStat = 2;  // dist statistic
+  DockerStat dockerStat = 3;  // docker statistic
+  HostStat hostStat = 4;  // host statistic
+  LoadStat loadStat = 5;  // load statistic
+  MemStat memStat = 6;  // memory statistic
+  NetStat netStat = 7;  // net statistic
+  ProcessStat processStat = 8;  // process statistic
 }
 
 message NodeReport {
-  string cpuReport = 2; // cpu report
-  string diskReport = 3; // disk report
-  string dockerReport = 4; // docker report
-  string hostReport = 5; // host report
-  string loadReport = 6; // load report
-  string memReport = 7; // memory report
-  string netReport = 8; // net report
-  string processReport = 9; // process report
+  string cpuReport = 1; // cpu report
+  string diskReport = 2; // disk report
+  string dockerReport = 3; // docker report
+  string hostReport = 4; // host report
+  string loadReport = 5; // load report
+  string memReport = 6; // memory report
+  string netReport = 7; // net report
+  string processReport = 8; // process report
 }
 
 message CpuStat {
@@ -286,11 +286,9 @@ message DiskStat {
 }
 
 message DockerStat {
-  repeated string containerIds = 1; // container ids in list
-  repeated float64 cgroupCpuDockerUsages = 2;  // cpu usage for docker in list
-  repeated float64 cgroupCpuUsages = 3;  // cpu usage in list
-  repeated CgroupDocker cgroupDockers = 4; // cgroup docker stat in list
-  repeated CgroupMem cgroupMems = 5; // cgroup memory stat in list
+  repeated float64 cgroupCpuDockerUsages = 1;  // cpu usage for docker in list
+  repeated CgroupDockerStat cgroupDockerStats = 2; // cgroup docker stat in list
+  repeated CgroupMemDocker cgroupMemDockers = 3; // cgroup memory stat in list
 }
 
 message HostStat {
@@ -355,7 +353,7 @@ message DiskUsage {
   float64 usedPercent = 6;
 }
 
-message CgroupDocker {
+message CgroupDockerStat {
   string containerId = 1;
   string name = 2;
   string image = 3;
@@ -363,7 +361,7 @@ message CgroupDocker {
   bool running = 5;
 }
 
-message CgroupMem {
+message CgroupMemDocker {
   uint64 cache = 1;
   uint64 rss = 2;
   uint64 rssHuge = 3;
@@ -458,7 +456,6 @@ message ProcessInfo {
   int32 numFd = 11;
   int32 numThread = 12;
   int32 parent = 13;
-  float64 percent = 14;
   int32 ppid = 15;
   repeated ProcessRlimit processRlimit = 16;
   repeated string statuss = 17;
