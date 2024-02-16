@@ -36,17 +36,23 @@ func DefaultConfig() *Config {
 func (g *gpt) Init(ctx context.Context) error {
 	g.cfg.Logger.Debug("gpt: Init")
 
+	// TBD: FIXME
+
 	return nil
 }
 
 func (g *gpt) Deinit(ctx context.Context) error {
 	g.cfg.Logger.Debug("gpt: Deinit")
 
+	// TBD: FIXME
+
 	return nil
 }
 
 func (g *gpt) Run(ctx context.Context) error {
 	g.cfg.Logger.Debug("gpt: Run")
+
+	// TBD: FIXME
 
 	return nil
 }

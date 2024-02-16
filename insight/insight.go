@@ -69,5 +69,7 @@ func (i *insight) Deinit(ctx context.Context) error {
 func (i *insight) Run(ctx context.Context) error {
 	i.cfg.Logger.Debug("insight: Run")
 
+	// TBD: FIXME
+
 	return nil
 }

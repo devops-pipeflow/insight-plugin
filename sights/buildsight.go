@@ -42,17 +42,23 @@ func DefaultBuildSightConfig() *BuildSightConfig {
 func (bs *buildsight) Init(ctx context.Context) error {
 	bs.cfg.Logger.Debug("buildsight: Init")
 
+	// TBD: FIXME
+
 	return nil
 }
 
 func (bs *buildsight) Deinit(ctx context.Context) error {
 	bs.cfg.Logger.Debug("buildsight: Deinit")
 
+	// TBD: FIXME
+
 	return nil
 }
 
 func (bs *buildsight) Run(ctx context.Context) error {
 	bs.cfg.Logger.Debug("buildsight: Run")
+
+	// TBD: FIXME
 
 	return nil
 }

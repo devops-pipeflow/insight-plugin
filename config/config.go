@@ -68,11 +68,6 @@ type LoggingConfig struct {
 	Count int64 `yaml:"count"`
 }
 
-var (
-	Build   string
-	Version string
-)
-
 func New() *Config {
 	return &Config{}
 }

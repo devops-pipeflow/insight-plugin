@@ -71,5 +71,5 @@ func TestQuery(t *testing.T) {
 }
 
 func TestRequest(t *testing.T) {
-	assert.Equal(t, nil, nil)
+	t.Skip("Skipping TestRequest.")
 }

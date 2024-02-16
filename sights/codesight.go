@@ -42,17 +42,23 @@ func DefaultCodeSightConfig() *CodeSightConfig {
 func (cs *codesight) Init(ctx context.Context) error {
 	cs.cfg.Logger.Debug("codesight: Init")
 
+	// TBD: FIXME
+
 	return nil
 }
 
 func (cs *codesight) Deinit(ctx context.Context) error {
 	cs.cfg.Logger.Debug("codesight: Deinit")
 
+	// TBD: FIXME
+
 	return nil
 }
 
 func (cs *codesight) Run(ctx context.Context) error {
 	cs.cfg.Logger.Debug("codesight: Run")
+
+	// TBD: FIXME
 
 	return nil
 }
