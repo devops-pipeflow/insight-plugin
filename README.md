@@ -86,14 +86,18 @@ spec:
       count: 3
   codeConfig:
   gptConfig:
-  nodeConfig:
-    duration: 10s
-  repoConfig:
+  artifactConfig:
     url: 127.0.0.1:8080
     user: user
     pass: pass
-  reviewConfig:
+  nodeConfig:
+    duration: 10s
+  repoConfig:
     url: 127.0.0.1:8081
+    user: user
+    pass: pass
+  reviewConfig:
+    url: 127.0.0.1:8082
     user: user
     pass: pass
   sshConfig:
@@ -133,10 +137,11 @@ message ConfigRequest {
   BuildConfig buildConfig = 3;  // buildsight config
   CodeConfig codeConfig = 4;  // codesight config
   GptConfig gptConfig = 5;  // gptsight config
-  NodeConfig nodeConfig = 6;  // nodesight config
-  RepoConfig repoConfig = 7;  // repo config (Gitiles)
-  ReviewConfig reviewConfig = 8;  // review config (Gerrit, pingview)
-  SshConfig sshConfig = 9;  // ssh config
+  ArtifactConfig artifactConfig = 6;  // artifactory config
+  NodeConfig nodeConfig = 7;  // nodesight config
+  RepoConfig repoConfig = 8;  // repo config (Gitiles)
+  ReviewConfig reviewConfig = 9;  // review config (Gerrit, pingview)
+  SshConfig sshConfig = 10;  // ssh config
 }
 
 message EnvVariable {
@@ -151,6 +156,12 @@ message BuildConfig {
 message CodeConfig {}
 
 message GptConfig {}
+
+message ArtifactConfig {
+  string url = 1;  // artifactory url
+  string user = 2;  // artifactory user
+  string pass = 3;  // artifactory pass
+}
 
 message NodeConfig {
   string duration = 1;  // node duration time in string (h:hour, m:minute, s:second)

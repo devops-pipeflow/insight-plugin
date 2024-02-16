@@ -51,7 +51,6 @@ var (
 type Ssh interface {
 	Init(context.Context) error
 	Deinit(context.Context) error
-	Copy(context.Context, string) error
 	Run(context.Context, string) (string, error)
 }
 
@@ -88,14 +87,6 @@ func (s *ssh) Deinit(ctx context.Context) error {
 	s.cfg.Logger.Debug("ssh: Deinit")
 
 	return s.deinitSession(ctx)
-}
-
-func (s *ssh) Copy(ctx context.Context, cmd string) error {
-	s.cfg.Logger.Debug("ssh: Copy")
-
-	// TBD: FIXME
-
-	return nil
 }
 
 func (s *ssh) Run(ctx context.Context, cmd string) (string, error) {

@@ -12,14 +12,15 @@ type MetaData struct {
 }
 
 type Spec struct {
-	EnvVariables []EnvVariable `yaml:"envVariables"`
-	BuildConfig  BuildConfig   `yaml:"buildConfig"`
-	CodeConfig   CodeConfig    `yaml:"codeConfig"`
-	GptConfig    GptConfig     `yaml:"gptConfig"`
-	NodeConfig   NodeConfig    `yaml:"nodeConfig"`
-	RepoConfig   RepoConfig    `yaml:"repoConfig"`
-	ReviewConfig ReviewConfig  `yaml:"reviewConfig"`
-	SshConfig    SshConfig     `yaml:"sshConfig"`
+	EnvVariables   []EnvVariable  `yaml:"envVariables"`
+	BuildConfig    BuildConfig    `yaml:"buildConfig"`
+	CodeConfig     CodeConfig     `yaml:"codeConfig"`
+	GptConfig      GptConfig      `yaml:"gptConfig"`
+	ArtifactConfig ArtifactConfig `yaml:"artifactConfig"`
+	NodeConfig     NodeConfig     `yaml:"nodeConfig"`
+	RepoConfig     RepoConfig     `yaml:"repoConfig"`
+	ReviewConfig   ReviewConfig   `yaml:"reviewConfig"`
+	SshConfig      SshConfig      `yaml:"sshConfig"`
 }
 
 type EnvVariable struct {
@@ -35,6 +36,12 @@ type CodeConfig struct {
 }
 
 type GptConfig struct {
+}
+
+type ArtifactConfig struct {
+	Url  string `yaml:"url"`
+	User string `yaml:"user"`
+	Pass string `yaml:"pass"`
 }
 
 type NodeConfig struct {

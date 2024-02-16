@@ -343,8 +343,6 @@ func (ns *nodesight) runDetect(ctx context.Context) error {
 		_ = ns.cfg.Ssh.Deinit(ctx)
 	}()
 
-	// TBD: FIXME (Ssh.Copy for agentScript)
-
 	cmd := filepath.Join(agentPath, agentScript)
 
 	out, err := ns.cfg.Ssh.Run(ctx, cmd)

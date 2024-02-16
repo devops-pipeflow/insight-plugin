@@ -50,11 +50,6 @@ func TestSshDeinit(t *testing.T) {
 	t.Skip("Skipping TestSshDeinit.")
 }
 
-func TestSshCopy(t *testing.T) {
-	// TBD: FIXME
-	assert.Equal(t, nil, nil)
-}
-
 func TestSshRun(t *testing.T) {
 	t.Skip("Skipping TestSshRun.")
 }
