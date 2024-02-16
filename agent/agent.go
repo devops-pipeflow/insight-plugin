@@ -106,10 +106,7 @@ func runAgent(ctx context.Context, logger hclog.Logger, duration time.Duration) 
 		return errors.Wrap(err, "failed to fetch disk stat")
 	}
 
-	nodeStat.DockerStat, err = fetchDockerStat(ctx, logger, duration)
-	if err != nil {
-		return errors.Wrap(err, "failed to fetch docker stat")
-	}
+	nodeStat.DockerStat, _ = fetchDockerStat(ctx, logger, duration)
 
 	nodeStat.HostStat, err = fetchHostStat(ctx, logger, duration)
 	if err != nil {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"path/filepath"
 
 	"github.com/hashicorp/go-hclog"
 	"github.com/pkg/errors"
@@ -15,8 +16,15 @@ import (
 )
 
 const (
-	nodeCommand = "/tmp/nodesight --duration-time=%s"
-	routineNum  = -1
+	agentExec   = "nodesight"
+	agentPath   = "/tmp"
+	agentScript = agentExec + ".sh"
+
+	argDurationTime = "--duration-time"
+	argLogLevel     = "--log-level"
+	argSep          = "="
+
+	routineNum = -1
 )
 
 type NodeSight interface {
@@ -304,7 +312,7 @@ func (ns *nodesight) Run(ctx context.Context) (NodeInfo, error) {
 		if err := ns.runDetect(ctx); err != nil {
 			return errors.Wrap(err, "failed to run detect")
 		}
-		stat, err := ns.runStat(ctx, fmt.Sprintf(nodeCommand, ns.cfg.Config.Spec.NodeConfig.Duration))
+		stat, err := ns.runStat(ctx)
 		if err != nil {
 			return errors.Wrap(err, "failed to run stat")
 		}
@@ -331,12 +339,27 @@ func (ns *nodesight) runDetect(ctx context.Context) error {
 		return errors.Wrap(err, "failed to init ssh")
 	}
 
-	_ = ns.cfg.Ssh.Deinit(ctx)
+	defer func() {
+		_ = ns.cfg.Ssh.Deinit(ctx)
+	}()
+
+	// TBD: FIXME (Ssh.Copy for agentScript)
+
+	cmd := filepath.Join(agentPath, agentScript)
+
+	out, err := ns.cfg.Ssh.Run(ctx, cmd)
+	if err != nil {
+		return errors.Wrap(err, "failed to run ssh")
+	}
+
+	if out != "" {
+		return errors.Wrap(errors.New(out), "failed to deploy agent")
+	}
 
 	return nil
 }
 
-func (ns *nodesight) runStat(ctx context.Context, cmd string) (*NodeStat, error) {
+func (ns *nodesight) runStat(ctx context.Context) (*NodeStat, error) {
 	ns.cfg.Logger.Debug("nodesight: runStat")
 
 	var stat NodeStat
@@ -348,6 +371,11 @@ func (ns *nodesight) runStat(ctx context.Context, cmd string) (*NodeStat, error)
 	defer func() {
 		_ = ns.cfg.Ssh.Deinit(ctx)
 	}()
+
+	cmd := fmt.Sprintf("%s %s %s",
+		filepath.Join(agentPath, agentExec),
+		argDurationTime+argSep+ns.cfg.Config.Spec.NodeConfig.Duration,
+		argLogLevel+argSep+"ERROR")
 
 	out, err := ns.cfg.Ssh.Run(ctx, cmd)
 	if err != nil {
