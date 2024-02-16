@@ -287,7 +287,7 @@ message NodeReport {
 message CpuStat {
   int64 physicalCount = 1; // physical cores
   int64 logicalCount = 2;  // logical cores
-  repeated float64 cpuPercents = 3;  // the percentage of cpu used per cpu in list
+  repeated double cpuPercents = 3;  // the percentage of cpu used per cpu in list
   repeated CpuTime cpuTimes = 4;  // the time of cpu used per cpu in list
 }
 
@@ -297,7 +297,7 @@ message DiskStat {
 }
 
 message DockerStat {
-  repeated float64 cgroupCpuDockerUsages = 1;  // cpu usage for docker in list
+  repeated double cgroupCpuDockerUsages = 1;  // cpu usage for docker in list
   repeated CgroupDockerStat cgroupDockerStats = 2; // cgroup docker stat in list
   repeated CgroupMemDocker cgroupMemDockers = 3; // cgroup memory stat in list
 }
@@ -336,16 +336,16 @@ message ProcessStat {
 
 message CpuTime {
   string cpu = 1;
-  float64 user = 2;
-  float64 system = 3;
-  float64 idle = 4;
-  float64 nice = 5;
-  float64 iowait = 6;
-  float64 irq = 7;
-  float64 softirq = 8;
-  float64 steal = 9;
-  float64 guest = 10;
-  float64 guestNice = 11;
+  double user = 2;
+  double system = 3;
+  double idle = 4;
+  double nice = 5;
+  double iowait = 6;
+  double irq = 7;
+  double softirq = 8;
+  double steal = 9;
+  double guest = 10;
+  double guestNice = 11;
 }
 
 message DiskPartition {
@@ -361,7 +361,7 @@ message DiskUsage {
   uint64 total = 3;
   uint64 free = 4;
   uint64 used = 5;
-  float64 usedPercent = 6;
+  double usedPercent = 6;
 }
 
 message CgroupDockerStat {
@@ -387,9 +387,9 @@ message CgroupMemDocker {
 }
 
 message LoadAvg {
-  float64 load1 = 1;
-  float64 load5 = 2;
-  float64 load15 = 3;
+  double load1 = 1;
+  double load5 = 2;
+  double load15 = 3;
 }
 
 message LoadMisc {
@@ -410,14 +410,14 @@ message MemSwapMemory {
   uint64 total = 1;
   uint64 used = 2;
   uint64 free = 3;
-  float64 usedPercent = 4;
+  double usedPercent = 4;
 }
 
 message MemVirtual {
   uint64 total = 1;
   uint64 available = 2;
   uint64 used = 3;
-  float64 usedPercent = 4;
+  double usedPercent = 4;
   uint64 free = 5;
   uint64 buffer = 6;
   uint64 cached = 7;
@@ -455,14 +455,14 @@ message NetInterface {
 
 message ProcessInfo {
   bool background = 1;
-  float64 cpuPercent = 2;
+  double cpuPercent = 2;
   repeated int32 children = 3;
   string cmdline = 4;
   repeated string environs = 5;
   int32 ionice = 6;
   bool isRunning = 7;
   ProcessMemoryInfo processMemoryInfo = 8;
-  float32 memoryPercent = 9;
+  float memoryPercent = 9;
   string name = 10;
   int32 numFd = 11;
   int32 numThread = 12;
