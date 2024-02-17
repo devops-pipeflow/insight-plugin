@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"path/filepath"
 
 	"github.com/hashicorp/go-hclog"
 	"github.com/pkg/errors"
@@ -17,12 +16,14 @@ import (
 
 const (
 	agentExec   = "nodesight"
-	agentPath   = "/tmp"
+	agentPath   = "/tmp/"
 	agentScript = agentExec + ".sh"
 
 	argDurationTime = "--duration-time"
 	argLogLevel     = "--log-level"
 	argSep          = "="
+
+	artifactPath = "/devops-pipeflow/plugins/insight/agent"
 
 	routineNum = -1
 )
@@ -343,15 +344,30 @@ func (ns *nodesight) runDetect(ctx context.Context) error {
 		_ = ns.cfg.Ssh.Deinit(ctx)
 	}()
 
-	cmd := filepath.Join(agentPath, agentScript)
-
-	out, err := ns.cfg.Ssh.Run(ctx, cmd)
-	if err != nil {
-		return errors.Wrap(err, "failed to run ssh")
+	cmds := []string{
+		fmt.Sprintf("curl -s -u%s:%s -L %s -o %s",
+			ns.cfg.Config.Spec.ArtifactConfig.User,
+			ns.cfg.Config.Spec.ArtifactConfig.Pass,
+			ns.cfg.Config.Spec.ArtifactConfig.Url+artifactPath+agentScript,
+			agentPath+agentScript),
+		fmt.Sprintf("cd %s; bash %s %s %s %s %s",
+			agentPath,
+			agentScript,
+			ns.cfg.Config.Spec.ArtifactConfig.User,
+			ns.cfg.Config.Spec.ArtifactConfig.Pass,
+			ns.cfg.Config.Spec.ArtifactConfig.Url+artifactPath+agentExec,
+			agentPath+agentExec),
+		fmt.Sprintf("rm -f %s", agentPath+agentScript),
 	}
 
-	if out != "" {
-		return errors.Wrap(errors.New(out), "failed to deploy agent")
+	for i := range cmds {
+		out, err := ns.cfg.Ssh.Run(ctx, cmds[i])
+		if err != nil {
+			return errors.Wrap(err, "failed to run ssh")
+		}
+		if out != "" {
+			return errors.Wrap(errors.New(out), "failed to deploy agent")
+		}
 	}
 
 	return nil
@@ -371,7 +387,7 @@ func (ns *nodesight) runStat(ctx context.Context) (*NodeStat, error) {
 	}()
 
 	cmd := fmt.Sprintf("%s %s %s",
-		filepath.Join(agentPath, agentExec),
+		agentPath+agentExec,
 		argDurationTime+argSep+ns.cfg.Config.Spec.NodeConfig.Duration,
 		argLogLevel+argSep+"ERROR")
 
