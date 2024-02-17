@@ -162,15 +162,15 @@ func runInsight(ctx context.Context, logger hclog.Logger, i insight.Insight) err
 	// kill -9 is syscall.SIGKILL but can"t be caught, so don't need add it
 	signal.Notify(s, syscall.SIGINT, syscall.SIGTERM)
 
-	go func(c context.Context) {
+	go func(ctx context.Context) {
 		logger.Debug("cmd: runInsight: Run")
-		_ = i.Run(c)
+		_ = i.Run(ctx)
 	}(ctx)
 
-	go func(c context.Context, i insight.Insight, s chan os.Signal) {
+	go func(ctx context.Context, i insight.Insight, s chan os.Signal) {
 		logger.Debug("cmd: runInsight: Deinit")
 		<-s
-		_ = i.Deinit(c)
+		_ = i.Deinit(ctx)
 		done <- true
 	}(ctx, i, s)
 

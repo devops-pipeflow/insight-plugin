@@ -2,11 +2,16 @@ package insight
 
 import (
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
-func TestInsight(t *testing.T) {
-	// TBD: FIXME
-	assert.Equal(t, nil, nil)
+func TestInsightInit(t *testing.T) {
+	t.Skip("Skipping TestInsightInit.")
+}
+
+func TestInsightDeinit(t *testing.T) {
+	t.Skip("Skipping TestInsightDeinit.")
+}
+
+func TestInsightRun(t *testing.T) {
+	t.Skip("Skipping TestInsightRun.")
 }

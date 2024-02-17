@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/go-hclog"
+	"github.com/stretchr/testify/assert"
 
 	"github.com/devops-pipeflow/insight-plugin/config"
 	"github.com/devops-pipeflow/insight-plugin/gpt"
@@ -50,5 +51,8 @@ func TestNodeSightRunStat(t *testing.T) {
 }
 
 func TestNodeSightRunReport(t *testing.T) {
+	_ = initNodeSight()
+
 	// TBD: FIXME
+	assert.Equal(t, nil, nil)
 }
