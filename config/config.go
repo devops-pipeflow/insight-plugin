@@ -15,9 +15,9 @@ type Spec struct {
 	EnvVariables   []EnvVariable  `yaml:"envVariables"`
 	BuildConfig    BuildConfig    `yaml:"buildConfig"`
 	CodeConfig     CodeConfig     `yaml:"codeConfig"`
-	GptConfig      GptConfig      `yaml:"gptConfig"`
-	ArtifactConfig ArtifactConfig `yaml:"artifactConfig"`
 	NodeConfig     NodeConfig     `yaml:"nodeConfig"`
+	ArtifactConfig ArtifactConfig `yaml:"artifactConfig"`
+	GptConfig      GptConfig      `yaml:"gptConfig"`
 	RepoConfig     RepoConfig     `yaml:"repoConfig"`
 	ReviewConfig   ReviewConfig   `yaml:"reviewConfig"`
 	SshConfig      SshConfig      `yaml:"sshConfig"`
@@ -35,7 +35,8 @@ type BuildConfig struct {
 type CodeConfig struct {
 }
 
-type GptConfig struct {
+type NodeConfig struct {
+	Duration string `yaml:"duration"`
 }
 
 type ArtifactConfig struct {
@@ -44,8 +45,7 @@ type ArtifactConfig struct {
 	Pass string `yaml:"pass"`
 }
 
-type NodeConfig struct {
-	Duration string `yaml:"duration"`
+type GptConfig struct {
 }
 
 type RepoConfig struct {

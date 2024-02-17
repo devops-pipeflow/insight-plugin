@@ -85,13 +85,13 @@ spec:
       len: 2
       count: 3
   codeConfig:
-  gptConfig:
+  nodeConfig:
+    duration: 10s
   artifactConfig:
     url: 127.0.0.1:8080
     user: user
     pass: pass
-  nodeConfig:
-    duration: 10s
+  gptConfig:
   repoConfig:
     url: 127.0.0.1:8081
     user: user
@@ -136,9 +136,9 @@ message ConfigRequest {
   repeated EnvVariable envVariables = 2;  // environment variables in list
   BuildConfig buildConfig = 3;  // buildsight config
   CodeConfig codeConfig = 4;  // codesight config
-  GptConfig gptConfig = 5;  // gptsight config
+  NodeConfig nodeConfig = 5;  // nodesight config
   ArtifactConfig artifactConfig = 6;  // artifactory config
-  NodeConfig nodeConfig = 7;  // nodesight config
+  GptConfig gptConfig = 7;  // gptsight config
   RepoConfig repoConfig = 8;  // repo config (Gitiles)
   ReviewConfig reviewConfig = 9;  // review config (Gerrit, pingview)
   SshConfig sshConfig = 10;  // ssh config
@@ -155,7 +155,9 @@ message BuildConfig {
 
 message CodeConfig {}
 
-message GptConfig {}
+message NodeConfig {
+  string duration = 1;  // node duration time in string (h:hour, m:minute, s:second)
+}
 
 message ArtifactConfig {
   string url = 1;  // artifactory url
@@ -163,9 +165,7 @@ message ArtifactConfig {
   string pass = 3;  // artifactory pass
 }
 
-message NodeConfig {
-  string duration = 1;  // node duration time in string (h:hour, m:minute, s:second)
-}
+message GptConfig {}
 
 message RepoConfig {
   string url = 1;  // repo url (Gitiles)
