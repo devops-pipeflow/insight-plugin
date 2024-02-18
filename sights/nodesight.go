@@ -253,7 +253,7 @@ type ProcessInfo struct {
 	Parent            int32             `json:"parent"`
 	Ppid              int32             `json:"ppid"`
 	ProcessRlimits    []ProcessRlimit   `json:"processRlimits"`
-	Statuss           []string          `json:"statuss"`
+	Statuses          []string          `json:"statuses"`
 	Uids              []int32           `json:"uids"`
 	Username          string            `json:"username"`
 }
