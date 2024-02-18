@@ -519,7 +519,7 @@ func fetchProcessStat(ctx context.Context, logger hclog.Logger, duration time.Du
 			parent, _ := processes[i].ParentWithContext(ctx)
 			ppid, _ := processes[i].PpidWithContext(ctx)
 			rlimits, _ := processes[i].RlimitWithContext(ctx)
-			statuss, _ := processes[i].StatusWithContext(ctx)
+			statuses, _ := processes[i].StatusWithContext(ctx)
 			uids, _ := processes[i].UidsWithContext(ctx)
 			username, _ := processes[i].UsernameWithContext(ctx)
 			buf = append(buf, sights.ProcessInfo{
@@ -538,7 +538,7 @@ func fetchProcessStat(ctx context.Context, logger hclog.Logger, duration time.Du
 				Parent:            parent.Pid,
 				Ppid:              ppid,
 				ProcessRlimits:    processRlimitHelper(rlimits),
-				Statuss:           statuss,
+				Statuses:          statuses,
 				Uids:              uids,
 				Username:          username,
 			})
