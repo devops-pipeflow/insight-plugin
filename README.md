@@ -467,11 +467,11 @@ message ProcessInfo {
   int32 numFd = 11;
   int32 numThread = 12;
   int32 parent = 13;
-  int32 ppid = 15;
-  repeated ProcessRlimit processRlimit = 16;
-  repeated string statuss = 17;
-  repeated int32 uids = 18;
-  string username = 19;
+  int32 ppid = 14;
+  repeated ProcessRlimit processRlimits = 15;
+  repeated string statuses = 16;
+  repeated int32 uids = 17;
+  string username = 18;
 }
 
 message ProcessMemoryInfo {
