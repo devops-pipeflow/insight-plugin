@@ -1,7 +1,10 @@
 #!/bin/bash
 
-# NOTES
-# checksum=$(shasum -a 256 /path/to/agent) sed -i "s:^CHECKSUM=$:CHECKSUM=\"$checksum\":g" agent.sh && ./agent.sh
+# Usage: Generate checksum
+# checksum=$(shasum -a 256 /path/to/agent) sed -i "s:^CHECKSUM=$:CHECKSUM=\"$checksum\":g" agent.sh
+
+# Usage: Deploy agent
+# ./agent.sh "$ARTIFACT_USER" "$ARTIFACT_PASS" "$ARTIFACT_URL" "$AGENT_PATH"
 
 # Generate checksum
 CHECKSUM=
