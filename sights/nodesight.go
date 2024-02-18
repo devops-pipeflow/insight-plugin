@@ -23,7 +23,7 @@ const (
 	argLogLevel     = "--log-level"
 	argSep          = "="
 
-	artifactPath = "/devops-pipeflow/plugins/insight/agent"
+	artifactPath = "/devops-pipeflow/plugins/agent"
 
 	routineNum = -1
 )
