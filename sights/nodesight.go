@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	agentExec   = "nodesight"
+	agentExec   = "agent"
 	agentPath   = "/tmp/"
 	agentScript = agentExec + ".sh"
 
@@ -23,7 +23,7 @@ const (
 	argLogLevel     = "--log-level"
 	argSep          = "="
 
-	artifactPath = "/devops-pipeflow/plugins/agent"
+	artifactPath = "/devops-pipeflow/plugins/"
 
 	routineNum = -1
 )
