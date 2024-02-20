@@ -11,6 +11,7 @@ import (
 
 	"github.com/devops-pipeflow/insight-plugin/config"
 	"github.com/devops-pipeflow/insight-plugin/sights"
+	pluginsInsight "github.com/devops-pipeflow/server/plugins/insight"
 )
 
 const (
@@ -76,7 +77,7 @@ func (i *insight) Deinit(ctx context.Context) error {
 func (i *insight) Run(ctx context.Context) error {
 	i.cfg.Logger.Debug("insight: Run")
 
-	var nodeInfo sights.NodeInfo
+	var nodeInfo pluginsInsight.NodeInfo
 
 	g, ctx := errgroup.WithContext(ctx)
 	g.SetLimit(routineNum)
