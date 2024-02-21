@@ -164,7 +164,7 @@ func runInsight(ctx context.Context, logger hclog.Logger, i insight.Insight) err
 
 	go func(ctx context.Context) {
 		logger.Debug("cmd: runInsight: Run")
-		_ = i.Run(ctx)
+		_, _, _, _ = i.Run(ctx)
 	}(ctx)
 
 	go func(ctx context.Context, i insight.Insight, s chan os.Signal) {

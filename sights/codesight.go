@@ -9,12 +9,13 @@ import (
 	"github.com/devops-pipeflow/insight-plugin/gpt"
 	"github.com/devops-pipeflow/insight-plugin/repo"
 	"github.com/devops-pipeflow/insight-plugin/review"
+	pluginsInsight "github.com/devops-pipeflow/server/plugins/insight"
 )
 
 type CodeSight interface {
 	Init(context.Context) error
 	Deinit(context.Context) error
-	Run(context.Context) error
+	Run(context.Context) (pluginsInsight.CodeInfo, error)
 }
 
 type CodeSightConfig struct {
@@ -55,10 +56,10 @@ func (cs *codesight) Deinit(ctx context.Context) error {
 	return nil
 }
 
-func (cs *codesight) Run(ctx context.Context) error {
+func (cs *codesight) Run(ctx context.Context) (pluginsInsight.CodeInfo, error) {
 	cs.cfg.Logger.Debug("codesight: Run")
 
 	// TBD: FIXME
 
-	return nil
+	return pluginsInsight.CodeInfo{}, nil
 }

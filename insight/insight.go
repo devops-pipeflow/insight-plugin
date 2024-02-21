@@ -2,9 +2,6 @@ package insight
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
-
 	"github.com/hashicorp/go-hclog"
 	"github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"
@@ -21,7 +18,7 @@ const (
 type Insight interface {
 	Init(context.Context) error
 	Deinit(context.Context) error
-	Run(context.Context) error
+	Run(context.Context) (*pluginsInsight.BuildInfo, *pluginsInsight.CodeInfo, *pluginsInsight.NodeInfo, error)
 }
 
 type Config struct {
@@ -74,21 +71,23 @@ func (i *insight) Deinit(ctx context.Context) error {
 	return nil
 }
 
-func (i *insight) Run(ctx context.Context) error {
+func (i *insight) Run(ctx context.Context) (*pluginsInsight.BuildInfo, *pluginsInsight.CodeInfo, *pluginsInsight.NodeInfo, error) {
 	i.cfg.Logger.Debug("insight: Run")
 
+	var buildInfo pluginsInsight.BuildInfo
+	var codeInfo pluginsInsight.CodeInfo
 	var nodeInfo pluginsInsight.NodeInfo
 
 	g, ctx := errgroup.WithContext(ctx)
 	g.SetLimit(routineNum)
 
 	g.Go(func() error {
-		_ = i.cfg.BuildSight.Run(ctx)
+		buildInfo, _ = i.cfg.BuildSight.Run(ctx)
 		return nil
 	})
 
 	g.Go(func() error {
-		_ = i.cfg.CodeSight.Run(ctx)
+		codeInfo, _ = i.cfg.CodeSight.Run(ctx)
 		return nil
 	})
 
@@ -99,8 +98,5 @@ func (i *insight) Run(ctx context.Context) error {
 
 	_ = g.Wait()
 
-	buf, _ := json.Marshal(nodeInfo)
-	fmt.Println(string(buf))
-
-	return nil
+	return &buildInfo, &codeInfo, &nodeInfo, nil
 }
