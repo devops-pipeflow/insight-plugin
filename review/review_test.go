@@ -83,6 +83,15 @@ func TestFetch(t *testing.T) {
 }
 
 // nolint: dogsled
+func TestQuery(t *testing.T) {
+	ctx := context.Background()
+	r := initReview()
+
+	_, err := r.Query(ctx, "change:"+strconv.Itoa(changeGerrit))
+	assert.Equal(t, nil, err)
+}
+
+// nolint: dogsled
 func TestVote(t *testing.T) {
 	ctx := context.Background()
 	r := initReview()

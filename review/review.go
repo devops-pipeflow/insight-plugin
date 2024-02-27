@@ -66,6 +66,7 @@ type Review interface {
 	Deinit(context.Context) error
 	Clean(context.Context, string) error
 	Fetch(context.Context, string, string) (string, string, []string, error)
+	Query(context.Context, string) (map[string]interface{}, error)
 	Vote(context.Context, string, []Format) error
 }
 
@@ -204,6 +205,20 @@ func (r *review) Fetch(ctx context.Context, root, commit string) (dname, rname s
 	}
 
 	return path, queryRet["project"].(string), files, nil
+}
+
+func (r *review) Query(ctx context.Context, search string) (map[string]interface{}, error) {
+	buf, err := r.get(ctx, r.urlQuery(search, []string{"CURRENT_REVISION"}, 0))
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to query")
+	}
+
+	ret, err := r.unmarshalList(buf)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to unmarshalList")
+	}
+
+	return ret, nil
 }
 
 // nolint:funlen,gocyclo
