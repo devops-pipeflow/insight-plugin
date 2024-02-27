@@ -7,6 +7,8 @@ package review
 import (
 	"context"
 	"encoding/base64"
+	"encoding/json"
+	"fmt"
 	"io"
 	"net/url"
 	"os"
@@ -87,8 +89,11 @@ func TestQuery(t *testing.T) {
 	ctx := context.Background()
 	r := initReview()
 
-	_, err := r.Query(ctx, "change:"+strconv.Itoa(changeGerrit))
+	buf, err := r.Query(ctx, "change:"+strconv.Itoa(changeGerrit))
 	assert.Equal(t, nil, err)
+
+	ret, err := json.Marshal(buf)
+	fmt.Printf(string(ret))
 }
 
 // nolint: dogsled
