@@ -28,6 +28,7 @@ const (
 )
 
 const (
+	queryLimit   = 1000
 	urlChanges   = "/changes/"
 	urlContent   = "/content"
 	urlDetail    = "/detail"
@@ -39,6 +40,7 @@ const (
 	urlQuery     = "?q="
 	urlReview    = "/review"
 	urlRevisions = "/revisions/"
+	urlStart     = "&start="
 )
 
 const (
@@ -66,7 +68,7 @@ type Review interface {
 	Deinit(context.Context) error
 	Clean(context.Context, string) error
 	Fetch(context.Context, string, string) (string, string, []string, error)
-	Query(context.Context, string) (map[string]interface{}, error)
+	Query(context.Context, string, int) ([]interface{}, error)
 	Vote(context.Context, string, []Format) error
 }
 
@@ -153,13 +155,13 @@ func (r *review) Fetch(ctx context.Context, root, commit string) (dname, rname s
 		return "", "", nil, errors.Wrap(err, "failed to unmarshalList")
 	}
 
-	revisions := queryRet["revisions"].(map[string]interface{})
-	current := revisions[queryRet["current_revision"].(string)].(map[string]interface{})
+	revisions := queryRet[0].(map[string]interface{})["revisions"].(map[string]interface{})
+	current := revisions[queryRet[0].(map[string]interface{})["current_revision"].(string)].(map[string]interface{})
 
-	changeNum := int(queryRet["_number"].(float64))
+	changeNum := int(queryRet[0].(map[string]interface{})["_number"].(float64))
 	revisionNum := int(current["_number"].(float64))
 
-	path := filepath.Join(root, strconv.Itoa(changeNum), queryRet["current_revision"].(string))
+	path := filepath.Join(root, strconv.Itoa(changeNum), queryRet[0].(map[string]interface{})["current_revision"].(string))
 
 	// Get files
 	buf, err = r.get(ctx, r.urlFiles(changeNum, revisionNum))
@@ -204,21 +206,41 @@ func (r *review) Fetch(ctx context.Context, root, commit string) (dname, rname s
 		}
 	}
 
-	return path, queryRet["project"].(string), files, nil
+	return path, queryRet[0].(map[string]interface{})["project"].(string), files, nil
 }
 
-func (r *review) Query(ctx context.Context, search string) (map[string]interface{}, error) {
-	buf, err := r.get(ctx, r.urlQuery(search, []string{"CURRENT_REVISION"}, 0))
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to query")
+func (r *review) Query(ctx context.Context, search string, start int) ([]interface{}, error) {
+	helper := func(search string, start int) []interface{} {
+		buf, err := r.get(ctx, r.urlQuery(search, []string{"CURRENT_REVISION"}, start))
+		if err != nil {
+			return nil
+		}
+		ret, err := r.unmarshalList(buf)
+		if err != nil {
+			return nil
+		}
+		return ret
 	}
 
-	ret, err := r.unmarshalList(buf)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to unmarshalList")
+	buf := helper(search, start)
+	if buf == nil || len(buf) == 0 {
+		return []interface{}{}, nil
 	}
 
-	return ret, nil
+	more, ok := buf[len(buf)-1].(map[string]interface{})["_more_changes"].(bool)
+	if !ok {
+		more = false
+	}
+
+	if !more {
+		return buf, nil
+	}
+
+	if b, err := r.Query(ctx, search, start+len(buf)); err == nil {
+		buf = append(buf, b...)
+	}
+
+	return buf, nil
 }
 
 // nolint:funlen,gocyclo
@@ -280,11 +302,11 @@ func (r *review) Vote(ctx context.Context, commit string, data []Format) error {
 		return errors.Wrap(err, "failed to unmarshalList")
 	}
 
-	revisions := c["revisions"].(map[string]interface{})
-	current := revisions[c["current_revision"].(string)].(map[string]interface{})
+	revisions := c[0].(map[string]interface{})["revisions"].(map[string]interface{})
+	current := revisions[c[0].(map[string]interface{})["current_revision"].(string)].(map[string]interface{})
 
 	// Get patch
-	ret, err = r.get(ctx, r.urlPatch(int(c["_number"].(float64)), int(current["_number"].(float64))))
+	ret, err = r.get(ctx, r.urlPatch(int(c[0].(map[string]interface{})["_number"].(float64)), int(current["_number"].(float64))))
 	if err != nil {
 		return errors.Wrap(err, "failed to patch")
 	}
@@ -316,7 +338,8 @@ func (r *review) Vote(ctx context.Context, commit string, data []Format) error {
 	// Review commit
 	comments, labels, message := build(data, diffs)
 	buf := map[string]interface{}{"comments": comments, "labels": labels, "message": message}
-	if err := r.post(ctx, r.urlReview(int(c["_number"].(float64)), int(current["_number"].(float64))), buf); err != nil {
+	if err := r.post(ctx, r.urlReview(int(c[0].(map[string]interface{})["_number"].(float64)),
+		int(current["_number"].(float64))), buf); err != nil {
 		return errors.Wrap(err, "failed to review")
 	}
 
@@ -355,10 +378,10 @@ func (r *review) unmarshal(data []byte) (map[string]interface{}, error) {
 	return buf, nil
 }
 
-func (r *review) unmarshalList(data []byte) (map[string]interface{}, error) {
+func (r *review) unmarshalList(data []byte) ([]interface{}, error) {
 	r.cfg.Logger.Debug("review: unmarshalList")
 
-	var buf []map[string]interface{}
+	var buf []interface{}
 
 	if err := json.Unmarshal(data[4:], &buf); err != nil {
 		return nil, errors.Wrap(err, "failed to unmarshal")
@@ -368,7 +391,7 @@ func (r *review) unmarshalList(data []byte) (map[string]interface{}, error) {
 		return nil, errors.New("failed to match")
 	}
 
-	return buf[0], nil
+	return buf, nil
 }
 
 func (r *review) urlContent(change, revision int, name string) string {
@@ -428,7 +451,10 @@ func (r *review) urlPatch(change, revision int) string {
 func (r *review) urlQuery(search string, option []string, start int) string {
 	r.cfg.Logger.Debug("review: urlQuery")
 
-	query := urlQuery + search + urlOption + strings.Join(option, urlOption) + urlNumber + strconv.Itoa(start)
+	query := urlQuery + url.PathEscape(search) +
+		urlOption + strings.Join(option, urlOption) +
+		urlStart + strconv.Itoa(start) +
+		urlNumber + strconv.Itoa(queryLimit)
 
 	buf := r.url + urlChanges + query
 	if r.user != "" && r.pass != "" {
