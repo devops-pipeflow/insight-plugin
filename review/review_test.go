@@ -27,6 +27,8 @@ import (
 const (
 	changeGerrit   = 883543
 	commitGerrit   = "5907d4189ff8e798a9914186c91e4bf7b3166973"
+	queryAfter     = "after:2024-02-27"
+	queryBefore    = "before:2024-02-28"
 	revisionGerrit = 17
 )
 
@@ -86,14 +88,23 @@ func TestFetch(t *testing.T) {
 
 // nolint: dogsled
 func TestQuery(t *testing.T) {
+	var buf []interface{}
+	var err error
+	var ret []byte
+
 	ctx := context.Background()
 	r := initReview()
 
-	buf, err := r.Query(ctx, "change:"+strconv.Itoa(changeGerrit))
+	buf, err = r.Query(ctx, "change:"+strconv.Itoa(changeGerrit), 0)
 	assert.Equal(t, nil, err)
 
-	ret, err := json.Marshal(buf)
-	fmt.Printf(string(ret))
+	ret, _ = json.Marshal(buf)
+	fmt.Println(string(ret))
+
+	buf, err = r.Query(ctx, queryAfter+" "+queryBefore, 0)
+	assert.Equal(t, nil, err)
+
+	fmt.Println(len(buf))
 }
 
 // nolint: dogsled
@@ -147,8 +158,8 @@ func TestUnmarshalList(t *testing.T) {
 
 	buf, err := r.unmarshalList([]byte(data))
 	assert.Equal(t, nil, err)
-	assert.Equal(t, "demo1", buf["project"])
-	assert.Equal(t, "master1", buf["branch"])
+	assert.Equal(t, "demo1", buf[0].(map[string]interface{})["project"])
+	assert.Equal(t, "master1", buf[0].(map[string]interface{})["branch"])
 }
 
 func TestUrlContent(t *testing.T) {
@@ -204,7 +215,11 @@ func TestUrlQuery(t *testing.T) {
 	search := "is:open"
 	option := []string{"LABELS"}
 	start := 1
-	_url := r.url + urlPrefix + urlChanges + urlQuery + search + urlOption + strings.Join(option, urlOption) + urlNumber + strconv.Itoa(start)
+	_url := r.url + urlPrefix + urlChanges +
+		urlQuery + url.PathEscape(search) +
+		urlOption + strings.Join(option, urlOption) +
+		urlStart + strconv.Itoa(start) +
+		urlNumber + strconv.Itoa(queryLimit)
 
 	buf := r.urlQuery(search, option, start)
 	assert.Equal(t, _url, buf)
