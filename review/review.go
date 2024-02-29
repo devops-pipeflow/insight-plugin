@@ -223,7 +223,7 @@ func (r *review) Query(ctx context.Context, search string, start int) ([]interfa
 	}
 
 	buf := helper(search, start)
-	if buf == nil || len(buf) == 0 {
+	if len(buf) == 0 {
 		return []interface{}{}, nil
 	}
 
