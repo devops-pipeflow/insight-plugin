@@ -31,7 +31,9 @@ const (
 	queryLimit   = 1000
 	urlChanges   = "/changes/"
 	urlContent   = "/content"
+	urlCurrent   = "current"
 	urlDetail    = "/detail"
+	urlDiff      = "/diff"
 	urlFiles     = "/files/"
 	urlNumber    = "&n="
 	urlOption    = "&o="
@@ -67,6 +69,7 @@ type Review interface {
 	Init(context.Context) error
 	Deinit(context.Context) error
 	Clean(context.Context, string) error
+	Diff(context.Context, int, string) (map[string]interface{}, error)
 	Fetch(context.Context, string, string) (string, string, []string, error)
 	Query(context.Context, string, int) ([]interface{}, error)
 	Vote(context.Context, string, []Format) error
@@ -125,6 +128,22 @@ func (r *review) Clean(_ context.Context, name string) error {
 	}
 
 	return nil
+}
+
+func (r *review) Diff(ctx context.Context, change int, file string) (map[string]interface{}, error) {
+	r.cfg.Logger.Debug("review: Diff")
+
+	buf, err := r.get(ctx, r.urlDiff(change, file))
+	if err != nil {
+		return nil, nil
+	}
+
+	ret, err := r.unmarshal(buf)
+	if err != nil {
+		return nil, nil
+	}
+
+	return ret, nil
 }
 
 // nolint:funlen,gocyclo
@@ -415,6 +434,18 @@ func (r *review) urlDetail(change int) string {
 
 	if r.user != "" && r.pass != "" {
 		buf = r.url + urlPrefix + urlChanges + strconv.Itoa(change) + urlDetail
+	}
+
+	return buf
+}
+
+func (r *review) urlDiff(change int, file string) string {
+	r.cfg.Logger.Debug("review: urlDiff")
+
+	buf := r.url + urlChanges + strconv.Itoa(change) + urlRevisions + urlCurrent + urlFiles + url.PathEscape(file) + urlDiff
+
+	if r.user != "" && r.pass != "" {
+		buf = r.url + urlPrefix + urlChanges + strconv.Itoa(change) + urlRevisions + urlCurrent + urlFiles + url.PathEscape(file) + urlDiff
 	}
 
 	return buf

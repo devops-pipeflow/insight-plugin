@@ -27,6 +27,7 @@ import (
 const (
 	changeGerrit   = 883543
 	commitGerrit   = "5907d4189ff8e798a9914186c91e4bf7b3166973"
+	fileGerrit     = "cli/cli.cpp"
 	queryAfter     = "after:2024-02-27"
 	queryBefore    = "before:2024-02-28"
 	revisionGerrit = 17
@@ -69,6 +70,18 @@ func TestClean(t *testing.T) {
 	r := initReview()
 	err := r.Clean(context.Background(), root)
 	assert.Equal(t, nil, err)
+}
+
+// nolint: dogsled
+func TestDiff(t *testing.T) {
+	ctx := context.Background()
+	r := initReview()
+
+	buf, err := r.Diff(ctx, changeGerrit, fileGerrit)
+	assert.Equal(t, nil, err)
+
+	ret, _ := json.Marshal(buf)
+	fmt.Println(string(ret))
 }
 
 // nolint: dogsled
@@ -182,6 +195,18 @@ func TestUrlDetail(t *testing.T) {
 	_url := r.url + urlPrefix + urlChanges + strconv.Itoa(change) + urlDetail
 
 	buf := r.urlDetail(change)
+	assert.Equal(t, _url, buf)
+}
+
+func TestUrlDiff(t *testing.T) {
+	r := initReview()
+
+	change := changeGerrit
+	file := fileGerrit
+
+	_url := r.url + urlPrefix + urlChanges + strconv.Itoa(change) + urlRevisions + urlCurrent + urlFiles + url.PathEscape(file) + urlDiff
+
+	buf := r.urlDiff(changeGerrit, fileGerrit)
 	assert.Equal(t, _url, buf)
 }
 
