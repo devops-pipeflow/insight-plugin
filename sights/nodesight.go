@@ -20,11 +20,14 @@ const (
 	agentPath   = "/tmp/"
 	agentScript = agentExec + ".sh"
 
-	argDurationTime = "--duration-time"
-	argLogLevel     = "--log-level"
-	argSep          = "="
+	agentDurationTime = "--duration-time"
+	agentLogLevel     = "--log-level"
+	agentSep          = "="
 
 	artifactPath = "/devops-pipeflow/plugins/"
+
+	healthPath   = "/tmp/"
+	healthScript = "healthcheck.sh"
 
 	routineNum = -1
 )
@@ -80,12 +83,16 @@ func (ns *nodesight) Run(ctx context.Context) (pluginsInsight.NodeInfo, error) {
 		if err := ns.runDetect(ctx); err != nil {
 			return errors.Wrap(err, "failed to run detect")
 		}
+		health, err := ns.runHealth(ctx)
+		if err != nil {
+			return errors.Wrap(err, "failed to run health")
+		}
 		stat, err := ns.runStat(ctx)
 		if err != nil {
 			return errors.Wrap(err, "failed to run stat")
 		}
 		info.NodeStat = *stat
-		report, err := ns.runReport(ctx, stat)
+		report, err := ns.runReport(ctx, health, stat)
 		if err != nil {
 			return errors.Wrap(err, "failed to run report")
 		}
@@ -140,6 +147,40 @@ func (ns *nodesight) runDetect(ctx context.Context) error {
 	return nil
 }
 
+func (ns *nodesight) runHealth(ctx context.Context) (string, error) {
+	ns.cfg.Logger.Debug("nodesight: runHealth")
+
+	var err error
+	var out string
+
+	if err = ns.cfg.Ssh.Init(ctx); err != nil {
+		return "", errors.Wrap(err, "failed to init ssh")
+	}
+
+	defer func() {
+		_ = ns.cfg.Ssh.Deinit(ctx)
+	}()
+
+	cmds := []string{
+		fmt.Sprintf("curl -s -u%s:%s -L %s -o %s",
+			ns.cfg.Config.Spec.ArtifactConfig.User,
+			ns.cfg.Config.Spec.ArtifactConfig.Pass,
+			ns.cfg.Config.Spec.ArtifactConfig.Url+artifactPath+healthScript,
+			healthPath+healthScript),
+		fmt.Sprintf("cd %s; bash %s", healthPath, healthScript),
+		fmt.Sprintf("rm -f %s", healthPath+healthScript),
+	}
+
+	for i := range cmds {
+		out, err = ns.cfg.Ssh.Run(ctx, cmds[i])
+		if err != nil {
+			return "", errors.Wrap(err, "failed to run ssh")
+		}
+	}
+
+	return out, nil
+}
+
 func (ns *nodesight) runStat(ctx context.Context) (*pluginsInsight.NodeStat, error) {
 	ns.cfg.Logger.Debug("nodesight: runStat")
 
@@ -155,8 +196,8 @@ func (ns *nodesight) runStat(ctx context.Context) (*pluginsInsight.NodeStat, err
 
 	cmd := fmt.Sprintf("%s %s %s",
 		agentPath+agentExec,
-		argDurationTime+argSep+ns.cfg.Config.Spec.NodeConfig.Duration,
-		argLogLevel+argSep+"ERROR")
+		agentDurationTime+agentSep+ns.cfg.Config.Spec.NodeConfig.Duration,
+		agentLogLevel+agentSep+"ERROR")
 
 	out, err := ns.cfg.Ssh.Run(ctx, cmd)
 	if err != nil {
@@ -170,7 +211,7 @@ func (ns *nodesight) runStat(ctx context.Context) (*pluginsInsight.NodeStat, err
 	return &stat, nil
 }
 
-func (ns *nodesight) runReport(_ context.Context, stat *pluginsInsight.NodeStat) (*pluginsInsight.NodeReport, error) {
+func (ns *nodesight) runReport(_ context.Context, health string, stat *pluginsInsight.NodeStat) (*pluginsInsight.NodeReport, error) {
 	ns.cfg.Logger.Debug("nodesight: runReport")
 
 	var report pluginsInsight.NodeReport

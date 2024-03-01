@@ -2,6 +2,7 @@ package insight
 
 import (
 	"context"
+
 	"github.com/hashicorp/go-hclog"
 	"github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"

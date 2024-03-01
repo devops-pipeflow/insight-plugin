@@ -46,6 +46,10 @@ func TestNodeSightRunDetect(t *testing.T) {
 	t.Skip("Skipping TestNodeSightRunDetect.")
 }
 
+func TestNodeSightRunHealth(t *testing.T) {
+	t.Skip("Skipping TestNodeSightRunHealth.")
+}
+
 func TestNodeSightRunStat(t *testing.T) {
 	t.Skip("Skipping TestNodeSightRunStat.")
 }
