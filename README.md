@@ -138,7 +138,7 @@ message ConfigRequest {
   CodeConfig codeConfig = 4;  // codesight config
   NodeConfig nodeConfig = 5;  // nodesight config
   ArtifactConfig artifactConfig = 6;  // artifactory config
-  GptConfig gptConfig = 7;  // gptsight config
+  GptConfig gptConfig = 7;  // gpt config
   RepoConfig repoConfig = 8;  // repo config (Gitiles)
   ReviewConfig reviewConfig = 9;  // review config (Gerrit, pingview)
   SshConfig sshConfig = 10;  // ssh config
@@ -231,8 +231,8 @@ message BuildInfo {
 message CodeInfo {}
 
 message NodeInfo {
-  NodeStat nodeStat = 1;  // node statistic
-  NodeReport nodeReport = 2;  // node report
+  NodeStat nodeStat = 1;  // node statistic (shown on web)
+  NodeReport nodeReport = 2;  // node report (empty: pass, nonempty: fail)
 }
 
 message LoggingInfo {
@@ -277,11 +277,12 @@ message NodeReport {
   string cpuReport = 1; // cpu report
   string diskReport = 2; // disk report
   string dockerReport = 3; // docker report
-  string hostReport = 4; // host report
-  string loadReport = 5; // load report
-  string memReport = 6; // memory report
-  string netReport = 7; // net report
-  string processReport = 8; // process report
+  string healthReport = 4; // health report
+  string hostReport = 5; // host report
+  string loadReport = 6; // load report
+  string memReport = 7; // memory report
+  string netReport = 8; // net report
+  string processReport = 9; // process report
 }
 
 message CpuStat {
