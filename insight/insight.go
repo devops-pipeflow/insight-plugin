@@ -16,17 +16,11 @@ const (
 	routineNum = -1
 )
 
-var (
-	buildInfo proto.BuildInfo
-	codeInfo  proto.CodeInfo
-	nodeInfo  proto.NodeInfo
-)
-
 type Insight interface {
 	Init(context.Context) error
 	Deinit(context.Context) error
-	Run(context.Context, *proto.BuildTrigger, *proto.CodeTrigger,
-		*proto.NodeTrigger) (*proto.BuildInfo, *proto.CodeInfo, *proto.NodeInfo, error)
+	Run(context.Context, *proto.BuildTrigger, *proto.CodeTrigger, *proto.NodeTrigger) (
+		proto.BuildInfo, proto.CodeInfo, proto.NodeInfo, error)
 }
 
 type Config struct {
@@ -79,9 +73,16 @@ func (i *insight) Deinit(ctx context.Context) error {
 	return nil
 }
 
-func (i *insight) Run(ctx context.Context, buildTrigger *proto.BuildTrigger, codeTrigger *proto.CodeTrigger,
-	nodeTrigger *proto.NodeTrigger) (*proto.BuildInfo, *proto.CodeInfo, *proto.NodeInfo, error) {
+func (i *insight) Run(ctx context.Context,
+	buildTrigger *proto.BuildTrigger, codeTrigger *proto.CodeTrigger, nodeTrigger *proto.NodeTrigger) (
+	proto.BuildInfo, proto.CodeInfo, proto.NodeInfo, error) {
 	i.cfg.Logger.Debug("insight: Run")
+
+	var (
+		buildInfo proto.BuildInfo
+		codeInfo  proto.CodeInfo
+		nodeInfo  proto.NodeInfo
+	)
 
 	g, ctx := errgroup.WithContext(ctx)
 	g.SetLimit(routineNum)
@@ -103,5 +104,5 @@ func (i *insight) Run(ctx context.Context, buildTrigger *proto.BuildTrigger, cod
 
 	_ = g.Wait()
 
-	return &buildInfo, &codeInfo, &nodeInfo, nil
+	return buildInfo, codeInfo, nodeInfo, nil
 }
