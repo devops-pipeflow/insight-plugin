@@ -99,9 +99,18 @@ func initSights(ctx context.Context, logger hclog.Logger, cfg *config.Config) (s
 		c := sights.DefaultBuildSightConfig()
 		c.Config = *cfg
 		c.Logger = logger
-		c.Gpt = gpt.New(ctx, gpt.DefaultConfig())
-		c.Repo = repo.New(ctx, repo.DefaultConfig())
-		c.Review = review.New(ctx, review.DefaultConfig())
+		g := gpt.DefaultConfig()
+		g.Config = *cfg
+		g.Logger = logger
+		c.Gpt = gpt.New(ctx, g)
+		r := repo.DefaultConfig()
+		r.Config = *cfg
+		r.Logger = logger
+		c.Repo = repo.New(ctx, r)
+		v := review.DefaultConfig()
+		v.Config = *cfg
+		v.Logger = logger
+		c.Review = review.New(ctx, v)
 		return sights.BuildSightNew(ctx, c)
 	}
 
@@ -109,9 +118,18 @@ func initSights(ctx context.Context, logger hclog.Logger, cfg *config.Config) (s
 		c := sights.DefaultCodeSightConfig()
 		c.Config = *cfg
 		c.Logger = logger
-		c.Gpt = gpt.New(ctx, gpt.DefaultConfig())
-		c.Repo = repo.New(ctx, repo.DefaultConfig())
-		c.Review = review.New(ctx, review.DefaultConfig())
+		g := gpt.DefaultConfig()
+		g.Config = *cfg
+		g.Logger = logger
+		c.Gpt = gpt.New(ctx, g)
+		r := repo.DefaultConfig()
+		r.Config = *cfg
+		r.Logger = logger
+		c.Repo = repo.New(ctx, r)
+		v := review.DefaultConfig()
+		v.Config = *cfg
+		v.Logger = logger
+		c.Review = review.New(ctx, v)
 		return sights.CodeSightNew(ctx, c)
 	}
 
@@ -119,8 +137,14 @@ func initSights(ctx context.Context, logger hclog.Logger, cfg *config.Config) (s
 		c := sights.DefaultNodeSightConfig()
 		c.Config = *cfg
 		c.Logger = logger
-		c.Gpt = gpt.New(ctx, gpt.DefaultConfig())
-		c.Ssh = ssh.New(ctx, ssh.DefaultConfig())
+		g := gpt.DefaultConfig()
+		g.Config = *cfg
+		g.Logger = logger
+		c.Gpt = gpt.New(ctx, g)
+		s := ssh.DefaultConfig()
+		s.Config = *cfg
+		s.Logger = logger
+		c.Ssh = ssh.New(ctx, s)
 		return sights.NodeSightNew(ctx, c)
 	}
 
