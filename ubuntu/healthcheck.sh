@@ -444,7 +444,7 @@ parse_opts() {
     while true; do
         case "$1" in
             -h|--help) show_usage; return 1;;
-            -s|--silent) set_silent; return 1;;
+            -s|--silent) set_silent;;
             -v|--version) print_version; return 1;;
             --) shift; break;;
         esac
