@@ -8,8 +8,8 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"github.com/devops-pipeflow/insight-plugin/config"
+	"github.com/devops-pipeflow/insight-plugin/proto"
 	"github.com/devops-pipeflow/insight-plugin/sights"
-	pluginsInsight "github.com/devops-pipeflow/server/plugins/insight"
 )
 
 const (
@@ -17,16 +17,16 @@ const (
 )
 
 var (
-	buildInfo pluginsInsight.BuildInfo
-	codeInfo  pluginsInsight.CodeInfo
-	nodeInfo  pluginsInsight.NodeInfo
+	buildInfo proto.BuildInfo
+	codeInfo  proto.CodeInfo
+	nodeInfo  proto.NodeInfo
 )
 
 type Insight interface {
 	Init(context.Context) error
 	Deinit(context.Context) error
-	Run(context.Context, *pluginsInsight.BuildTrigger, *pluginsInsight.CodeTrigger,
-		*pluginsInsight.NodeTrigger) (*pluginsInsight.BuildInfo, *pluginsInsight.CodeInfo, *pluginsInsight.NodeInfo, error)
+	Run(context.Context, *proto.BuildTrigger, *proto.CodeTrigger,
+		*proto.NodeTrigger) (*proto.BuildInfo, *proto.CodeInfo, *proto.NodeInfo, error)
 }
 
 type Config struct {
@@ -79,8 +79,8 @@ func (i *insight) Deinit(ctx context.Context) error {
 	return nil
 }
 
-func (i *insight) Run(ctx context.Context, buildTrigger *pluginsInsight.BuildTrigger, codeTrigger *pluginsInsight.CodeTrigger,
-	nodeTrigger *pluginsInsight.NodeTrigger) (*pluginsInsight.BuildInfo, *pluginsInsight.CodeInfo, *pluginsInsight.NodeInfo, error) {
+func (i *insight) Run(ctx context.Context, buildTrigger *proto.BuildTrigger, codeTrigger *proto.CodeTrigger,
+	nodeTrigger *proto.NodeTrigger) (*proto.BuildInfo, *proto.CodeInfo, *proto.NodeInfo, error) {
 	i.cfg.Logger.Debug("insight: Run")
 
 	g, ctx := errgroup.WithContext(ctx)

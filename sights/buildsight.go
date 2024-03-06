@@ -7,15 +7,15 @@ import (
 
 	"github.com/devops-pipeflow/insight-plugin/config"
 	"github.com/devops-pipeflow/insight-plugin/gpt"
+	"github.com/devops-pipeflow/insight-plugin/proto"
 	"github.com/devops-pipeflow/insight-plugin/repo"
 	"github.com/devops-pipeflow/insight-plugin/review"
-	pluginsInsight "github.com/devops-pipeflow/server/plugins/insight"
 )
 
 type BuildSight interface {
 	Init(context.Context) error
 	Deinit(context.Context) error
-	Run(context.Context, *pluginsInsight.BuildTrigger) (pluginsInsight.BuildInfo, error)
+	Run(context.Context, *proto.BuildTrigger) (proto.BuildInfo, error)
 }
 
 type BuildSightConfig struct {
@@ -56,10 +56,10 @@ func (bs *buildsight) Deinit(ctx context.Context) error {
 	return nil
 }
 
-func (bs *buildsight) Run(ctx context.Context, trigger *pluginsInsight.BuildTrigger) (pluginsInsight.BuildInfo, error) {
+func (bs *buildsight) Run(ctx context.Context, trigger *proto.BuildTrigger) (proto.BuildInfo, error) {
 	bs.cfg.Logger.Debug("buildsight: Run")
 
 	// TBD: FIXME
 
-	return pluginsInsight.BuildInfo{}, nil
+	return proto.BuildInfo{}, nil
 }

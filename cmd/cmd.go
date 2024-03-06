@@ -15,6 +15,7 @@ import (
 	"github.com/devops-pipeflow/insight-plugin/config"
 	"github.com/devops-pipeflow/insight-plugin/gpt"
 	"github.com/devops-pipeflow/insight-plugin/insight"
+	"github.com/devops-pipeflow/insight-plugin/proto"
 	"github.com/devops-pipeflow/insight-plugin/repo"
 	"github.com/devops-pipeflow/insight-plugin/review"
 	"github.com/devops-pipeflow/insight-plugin/sights"
@@ -150,6 +151,10 @@ func initInsight(ctx context.Context, logger hclog.Logger, cfg *config.Config,
 func runInsight(ctx context.Context, logger hclog.Logger, i insight.Insight) error {
 	logger.Debug("cmd: runInsight")
 
+	var buildTrigger proto.BuildTrigger
+	var codeTrigger proto.CodeTrigger
+	var nodeTrigger proto.NodeTrigger
+
 	if err := i.Init(ctx); err != nil {
 		return errors.Wrap(err, "failed to init")
 	}
@@ -162,10 +167,10 @@ func runInsight(ctx context.Context, logger hclog.Logger, i insight.Insight) err
 	// kill -9 is syscall.SIGKILL but can"t be caught, so don't need add it
 	signal.Notify(s, syscall.SIGINT, syscall.SIGTERM)
 
-	go func(ctx context.Context) {
+	go func(ctx context.Context, buildTrigger *proto.BuildTrigger, codeTrigger *proto.CodeTrigger, nodeTrigger *proto.NodeTrigger) {
 		logger.Debug("cmd: runInsight: Run")
-		_, _, _, _ = i.Run(ctx)
-	}(ctx)
+		_, _, _, _ = i.Run(ctx, buildTrigger, codeTrigger, nodeTrigger)
+	}(ctx, &buildTrigger, &codeTrigger, &nodeTrigger)
 
 	go func(ctx context.Context, i insight.Insight, s chan os.Signal) {
 		logger.Debug("cmd: runInsight: Deinit")

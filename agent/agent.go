@@ -21,7 +21,7 @@ import (
 	"github.com/shirou/gopsutil/v3/net"
 	"github.com/shirou/gopsutil/v3/process"
 
-	pluginsInsight "github.com/devops-pipeflow/server/plugins/insight"
+	"github.com/devops-pipeflow/insight-plugin/proto"
 )
 
 const (
@@ -96,7 +96,7 @@ func runAgent(ctx context.Context, logger hclog.Logger, duration time.Duration) 
 	logger.Debug("agent: runAgent")
 
 	var err error
-	var nodeStat pluginsInsight.NodeStat
+	var nodeStat proto.NodeStat
 
 	nodeStat.CpuStat, err = fetchCpuStat(ctx, logger, duration)
 	if err != nil {
@@ -145,13 +145,13 @@ func runAgent(ctx context.Context, logger hclog.Logger, duration time.Duration) 
 	return nil
 }
 
-func fetchCpuStat(ctx context.Context, logger hclog.Logger, duration time.Duration) (pluginsInsight.CpuStat, error) {
+func fetchCpuStat(ctx context.Context, logger hclog.Logger, duration time.Duration) (proto.CpuStat, error) {
 	logger.Debug("agent: fetchCpuStat")
 
-	helper := func(times []cpu.TimesStat) []pluginsInsight.CpuTime {
-		var buf []pluginsInsight.CpuTime
+	helper := func(times []cpu.TimesStat) []proto.CpuTime {
+		var buf []proto.CpuTime
 		for i := range times {
-			buf = append(buf, pluginsInsight.CpuTime{
+			buf = append(buf, proto.CpuTime{
 				Cpu:       times[i].CPU,
 				User:      times[i].User,
 				System:    times[i].System,
@@ -170,25 +170,25 @@ func fetchCpuStat(ctx context.Context, logger hclog.Logger, duration time.Durati
 
 	physicalCount, err := cpu.CountsWithContext(ctx, false)
 	if err != nil {
-		return pluginsInsight.CpuStat{}, errors.Wrap(err, "failed to fetch physical count")
+		return proto.CpuStat{}, errors.Wrap(err, "failed to fetch physical count")
 	}
 
 	logicalCount, err := cpu.CountsWithContext(ctx, true)
 	if err != nil {
-		return pluginsInsight.CpuStat{}, errors.Wrap(err, "failed to fetch logical count")
+		return proto.CpuStat{}, errors.Wrap(err, "failed to fetch logical count")
 	}
 
 	cpuPercents, err := cpu.PercentWithContext(ctx, duration, true)
 	if err != nil {
-		return pluginsInsight.CpuStat{}, errors.Wrap(err, "failed to fetch cpu percent")
+		return proto.CpuStat{}, errors.Wrap(err, "failed to fetch cpu percent")
 	}
 
 	cpuTimes, err := cpu.TimesWithContext(ctx, true)
 	if err != nil {
-		return pluginsInsight.CpuStat{}, errors.Wrap(err, "failed to fetch cpu times")
+		return proto.CpuStat{}, errors.Wrap(err, "failed to fetch cpu times")
 	}
 
-	return pluginsInsight.CpuStat{
+	return proto.CpuStat{
 		PhysicalCount: int64(physicalCount),
 		LogicalCount:  int64(logicalCount),
 		CpuPercents:   cpuPercents,
@@ -196,13 +196,13 @@ func fetchCpuStat(ctx context.Context, logger hclog.Logger, duration time.Durati
 	}, nil
 }
 
-func fetchDiskStat(ctx context.Context, logger hclog.Logger, _ time.Duration) (pluginsInsight.DiskStat, error) {
+func fetchDiskStat(ctx context.Context, logger hclog.Logger, _ time.Duration) (proto.DiskStat, error) {
 	logger.Debug("agent: fetchDiskStat")
 
-	partitionsHelper := func(partitions []disk.PartitionStat) []pluginsInsight.DiskPartition {
-		var buf []pluginsInsight.DiskPartition
+	partitionsHelper := func(partitions []disk.PartitionStat) []proto.DiskPartition {
+		var buf []proto.DiskPartition
 		for i := range partitions {
-			buf = append(buf, pluginsInsight.DiskPartition{
+			buf = append(buf, proto.DiskPartition{
 				Device:     partitions[i].Device,
 				MountPoint: partitions[i].Mountpoint,
 				FsType:     partitions[i].Fstype,
@@ -212,8 +212,8 @@ func fetchDiskStat(ctx context.Context, logger hclog.Logger, _ time.Duration) (p
 		return buf
 	}
 
-	usageHelper := func(usage *disk.UsageStat) *pluginsInsight.DiskUsage {
-		return &pluginsInsight.DiskUsage{
+	usageHelper := func(usage *disk.UsageStat) *proto.DiskUsage {
+		return &proto.DiskUsage{
 			Path:        usage.Path,
 			FsType:      usage.Fstype,
 			Total:       usage.Total,
@@ -225,27 +225,27 @@ func fetchDiskStat(ctx context.Context, logger hclog.Logger, _ time.Duration) (p
 
 	partitions, err := disk.PartitionsWithContext(ctx, false)
 	if err != nil {
-		return pluginsInsight.DiskStat{}, errors.Wrap(err, "failed to fetch disk partitions")
+		return proto.DiskStat{}, errors.Wrap(err, "failed to fetch disk partitions")
 	}
 
 	usage, err := disk.UsageWithContext(ctx, "/")
 	if err != nil {
-		return pluginsInsight.DiskStat{}, errors.Wrap(err, "failed to fetch disk usage")
+		return proto.DiskStat{}, errors.Wrap(err, "failed to fetch disk usage")
 	}
 
-	return pluginsInsight.DiskStat{
+	return proto.DiskStat{
 		DiskPartitions: partitionsHelper(partitions),
 		DiskUsage:      *usageHelper(usage),
 	}, nil
 }
 
-func fetchDockerStat(ctx context.Context, logger hclog.Logger, _ time.Duration) (pluginsInsight.DockerStat, error) {
+func fetchDockerStat(ctx context.Context, logger hclog.Logger, _ time.Duration) (proto.DockerStat, error) {
 	logger.Debug("agent: fetchDockerStat")
 
-	dockerStatHelper := func(stats []docker.CgroupDockerStat) []pluginsInsight.CGroupDockerStat {
-		var buf []pluginsInsight.CGroupDockerStat
+	dockerStatHelper := func(stats []docker.CgroupDockerStat) []proto.CGroupDockerStat {
+		var buf []proto.CGroupDockerStat
 		for i := range stats {
-			buf = append(buf, pluginsInsight.CGroupDockerStat{
+			buf = append(buf, proto.CGroupDockerStat{
 				ContainerId: stats[i].ContainerID,
 				Name:        stats[i].Name,
 				Image:       stats[i].Image,
@@ -256,8 +256,8 @@ func fetchDockerStat(ctx context.Context, logger hclog.Logger, _ time.Duration) 
 		return buf
 	}
 
-	memDockerHelper := func(stat *docker.CgroupMemStat) pluginsInsight.CGroupMemDocker {
-		return pluginsInsight.CGroupMemDocker{
+	memDockerHelper := func(stat *docker.CgroupMemStat) proto.CGroupMemDocker {
+		return proto.CGroupMemDocker{
 			Cache:              stat.Cache,
 			Rss:                stat.RSS,
 			RssHuge:            stat.RSSHuge,
@@ -272,7 +272,7 @@ func fetchDockerStat(ctx context.Context, logger hclog.Logger, _ time.Duration) 
 		}
 	}
 
-	var dockerStat pluginsInsight.DockerStat
+	var dockerStat proto.DockerStat
 
 	stat, err := docker.GetDockerStatWithContext(ctx)
 	if err != nil {
@@ -291,22 +291,22 @@ func fetchDockerStat(ctx context.Context, logger hclog.Logger, _ time.Duration) 
 		}
 	}
 
-	return pluginsInsight.DockerStat{
+	return proto.DockerStat{
 		CGroupCpuDockerUsages: dockerStat.CGroupCpuDockerUsages,
 		CGroupDockerStats:     dockerStatHelper(stat),
 		CGroupMemDockers:      dockerStat.CGroupMemDockers,
 	}, nil
 }
 
-func fetchHostStat(ctx context.Context, logger hclog.Logger, _ time.Duration) (pluginsInsight.HostStat, error) {
+func fetchHostStat(ctx context.Context, logger hclog.Logger, _ time.Duration) (proto.HostStat, error) {
 	logger.Debug("agent: fetchHostStat")
 
 	info, err := host.InfoWithContext(ctx)
 	if err != nil {
-		return pluginsInsight.HostStat{}, errors.Wrap(err, "failed to fetch host info")
+		return proto.HostStat{}, errors.Wrap(err, "failed to fetch host info")
 	}
 
-	return pluginsInsight.HostStat{
+	return proto.HostStat{
 		Hostname:        info.Hostname,
 		Procs:           info.Procs,
 		OS:              info.OS,
@@ -319,26 +319,26 @@ func fetchHostStat(ctx context.Context, logger hclog.Logger, _ time.Duration) (p
 	}, nil
 }
 
-func fetchLoadStat(ctx context.Context, logger hclog.Logger, _ time.Duration) (pluginsInsight.LoadStat, error) {
+func fetchLoadStat(ctx context.Context, logger hclog.Logger, _ time.Duration) (proto.LoadStat, error) {
 	logger.Debug("agent: fetchLoadStat")
 
 	avg, err := load.AvgWithContext(ctx)
 	if err != nil {
-		return pluginsInsight.LoadStat{}, errors.Wrap(err, "failed to fetch load avg")
+		return proto.LoadStat{}, errors.Wrap(err, "failed to fetch load avg")
 	}
 
 	misc, err := load.MiscWithContext(ctx)
 	if err != nil {
-		return pluginsInsight.LoadStat{}, errors.Wrap(err, "failed to fetch load misc")
+		return proto.LoadStat{}, errors.Wrap(err, "failed to fetch load misc")
 	}
 
-	return pluginsInsight.LoadStat{
-		LoadAvg: pluginsInsight.LoadAvg{
+	return proto.LoadStat{
+		LoadAvg: proto.LoadAvg{
 			Load1:  avg.Load1,
 			Load5:  avg.Load5,
 			Load15: avg.Load15,
 		},
-		LoadMisc: pluginsInsight.LoadMisc{
+		LoadMisc: proto.LoadMisc{
 			ProcsTotal:   int64(misc.ProcsTotal),
 			ProcsCreated: int64(misc.ProcsCreated),
 			ProcsRunning: int64(misc.ProcsRunning),
@@ -348,13 +348,13 @@ func fetchLoadStat(ctx context.Context, logger hclog.Logger, _ time.Duration) (p
 	}, nil
 }
 
-func fetchMemStat(ctx context.Context, logger hclog.Logger, _ time.Duration) (pluginsInsight.MemStat, error) {
+func fetchMemStat(ctx context.Context, logger hclog.Logger, _ time.Duration) (proto.MemStat, error) {
 	logger.Debug("agent: fetchMemStat")
 
-	helper := func(devices []*mem.SwapDevice) []pluginsInsight.MemSwapDevice {
-		var buf []pluginsInsight.MemSwapDevice
+	helper := func(devices []*mem.SwapDevice) []proto.MemSwapDevice {
+		var buf []proto.MemSwapDevice
 		for i := range devices {
-			buf = append(buf, pluginsInsight.MemSwapDevice{
+			buf = append(buf, proto.MemSwapDevice{
 				Name:      devices[i].Name,
 				UsedBytes: devices[i].UsedBytes,
 				FreeBytes: devices[i].FreeBytes,
@@ -365,28 +365,28 @@ func fetchMemStat(ctx context.Context, logger hclog.Logger, _ time.Duration) (pl
 
 	swapDevices, err := mem.SwapDevicesWithContext(ctx)
 	if err != nil {
-		return pluginsInsight.MemStat{}, errors.Wrap(err, "failed to fetch swap devices")
+		return proto.MemStat{}, errors.Wrap(err, "failed to fetch swap devices")
 	}
 
 	swapMemory, err := mem.SwapMemoryWithContext(ctx)
 	if err != nil {
-		return pluginsInsight.MemStat{}, errors.Wrap(err, "failed to fetch swap memory")
+		return proto.MemStat{}, errors.Wrap(err, "failed to fetch swap memory")
 	}
 
 	virtualMemory, err := mem.VirtualMemoryWithContext(ctx)
 	if err != nil {
-		return pluginsInsight.MemStat{}, errors.Wrap(err, "failed to fetch virtual memory")
+		return proto.MemStat{}, errors.Wrap(err, "failed to fetch virtual memory")
 	}
 
-	return pluginsInsight.MemStat{
+	return proto.MemStat{
 		MemSwapDevices: helper(swapDevices),
-		MemSwapMemory: pluginsInsight.MemSwapMemory{
+		MemSwapMemory: proto.MemSwapMemory{
 			Total:       swapMemory.Total,
 			Used:        swapMemory.Used,
 			Free:        swapMemory.Free,
 			UsedPercent: swapMemory.UsedPercent,
 		},
-		MemVirtual: pluginsInsight.MemVirtual{
+		MemVirtual: proto.MemVirtual{
 			Total:          virtualMemory.Total,
 			Available:      virtualMemory.Available,
 			Used:           virtualMemory.Used,
@@ -411,13 +411,13 @@ func fetchMemStat(ctx context.Context, logger hclog.Logger, _ time.Duration) (pl
 	}, nil
 }
 
-func fetchNetStat(ctx context.Context, logger hclog.Logger, _ time.Duration) (pluginsInsight.NetStat, error) {
+func fetchNetStat(ctx context.Context, logger hclog.Logger, _ time.Duration) (proto.NetStat, error) {
 	logger.Debug("agent: fetchNetStat")
 
-	netIoHelper := func(stats []net.IOCountersStat) []pluginsInsight.NetIo {
-		var buf []pluginsInsight.NetIo
+	netIoHelper := func(stats []net.IOCountersStat) []proto.NetIo {
+		var buf []proto.NetIo
 		for i := range stats {
-			buf = append(buf, pluginsInsight.NetIo{
+			buf = append(buf, proto.NetIo{
 				Name:        stats[i].Name,
 				BytesSent:   stats[i].BytesSent,
 				BytesRecv:   stats[i].BytesRecv,
@@ -436,10 +436,10 @@ func fetchNetStat(ctx context.Context, logger hclog.Logger, _ time.Duration) (pl
 		return buf
 	}
 
-	netInterfaceHelper := func(stats []net.InterfaceStat) []pluginsInsight.NetInterface {
-		var buf []pluginsInsight.NetInterface
+	netInterfaceHelper := func(stats []net.InterfaceStat) []proto.NetInterface {
+		var buf []proto.NetInterface
 		for i := range stats {
-			buf = append(buf, pluginsInsight.NetInterface{
+			buf = append(buf, proto.NetInterface{
 				Index:        int64(stats[i].Index),
 				Mtu:          int64(stats[i].MTU),
 				Name:         stats[i].Name,
@@ -453,21 +453,21 @@ func fetchNetStat(ctx context.Context, logger hclog.Logger, _ time.Duration) (pl
 
 	ioCounters, err := net.IOCountersWithContext(ctx, true)
 	if err != nil {
-		return pluginsInsight.NetStat{}, errors.Wrap(err, "failed to fetch io counters")
+		return proto.NetStat{}, errors.Wrap(err, "failed to fetch io counters")
 	}
 
 	interfaces, err := net.InterfacesWithContext(ctx)
 	if err != nil {
-		return pluginsInsight.NetStat{}, errors.Wrap(err, "failed to fetch net interfaces")
+		return proto.NetStat{}, errors.Wrap(err, "failed to fetch net interfaces")
 	}
 
-	return pluginsInsight.NetStat{
+	return proto.NetStat{
 		NetIos:        netIoHelper(ioCounters),
 		NetInterfaces: netInterfaceHelper(interfaces),
 	}, nil
 }
 
-func fetchProcessStat(ctx context.Context, logger hclog.Logger, duration time.Duration) (pluginsInsight.ProcessStat, error) {
+func fetchProcessStat(ctx context.Context, logger hclog.Logger, duration time.Duration) (proto.ProcessStat, error) {
 	logger.Debug("agent: fetchProcessStat")
 
 	processChilderHelper := func(processes []*process.Process) []int32 {
@@ -478,8 +478,8 @@ func fetchProcessStat(ctx context.Context, logger hclog.Logger, duration time.Du
 		return buf
 	}
 
-	processMemoryInfoHelper := func(stat *process.MemoryInfoStat) pluginsInsight.ProcessMemoryInfo {
-		return pluginsInsight.ProcessMemoryInfo{
+	processMemoryInfoHelper := func(stat *process.MemoryInfoStat) proto.ProcessMemoryInfo {
+		return proto.ProcessMemoryInfo{
 			Rss:    stat.RSS,
 			Vms:    stat.VMS,
 			Hwm:    stat.HWM,
@@ -490,10 +490,10 @@ func fetchProcessStat(ctx context.Context, logger hclog.Logger, duration time.Du
 		}
 	}
 
-	processRlimitHelper := func(stats []process.RlimitStat) []pluginsInsight.ProcessRLimit {
-		var buf []pluginsInsight.ProcessRLimit
+	processRlimitHelper := func(stats []process.RlimitStat) []proto.ProcessRLimit {
+		var buf []proto.ProcessRLimit
 		for i := range stats {
-			buf = append(buf, pluginsInsight.ProcessRLimit{
+			buf = append(buf, proto.ProcessRLimit{
 				Resource: stats[i].Resource,
 				Soft:     stats[i].Soft,
 				Hard:     stats[i].Hard,
@@ -503,8 +503,8 @@ func fetchProcessStat(ctx context.Context, logger hclog.Logger, duration time.Du
 		return buf
 	}
 
-	processInfoHelper := func(ctx context.Context, processes []*process.Process) []pluginsInsight.ProcessInfo {
-		var buf []pluginsInsight.ProcessInfo
+	processInfoHelper := func(ctx context.Context, processes []*process.Process) []proto.ProcessInfo {
+		var buf []proto.ProcessInfo
 		for i := range processes {
 			background, _ := processes[i].BackgroundWithContext(ctx)
 			cpuPercent, _ := processes[i].CPUPercentWithContext(ctx)
@@ -524,7 +524,7 @@ func fetchProcessStat(ctx context.Context, logger hclog.Logger, duration time.Du
 			statuses, _ := processes[i].StatusWithContext(ctx)
 			uids, _ := processes[i].UidsWithContext(ctx)
 			username, _ := processes[i].UsernameWithContext(ctx)
-			buf = append(buf, pluginsInsight.ProcessInfo{
+			buf = append(buf, proto.ProcessInfo{
 				Background:        background,
 				CpuPercent:        cpuPercent,
 				Children:          processChilderHelper(procs),
@@ -550,10 +550,10 @@ func fetchProcessStat(ctx context.Context, logger hclog.Logger, duration time.Du
 
 	processes, err := process.ProcessesWithContext(ctx)
 	if err != nil {
-		return pluginsInsight.ProcessStat{}, errors.Wrap(err, "failed to fetch processes")
+		return proto.ProcessStat{}, errors.Wrap(err, "failed to fetch processes")
 	}
 
-	return pluginsInsight.ProcessStat{
+	return proto.ProcessStat{
 		ProcessInfos: processInfoHelper(ctx, processes),
 	}, nil
 }

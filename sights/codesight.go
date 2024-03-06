@@ -7,15 +7,15 @@ import (
 
 	"github.com/devops-pipeflow/insight-plugin/config"
 	"github.com/devops-pipeflow/insight-plugin/gpt"
+	"github.com/devops-pipeflow/insight-plugin/proto"
 	"github.com/devops-pipeflow/insight-plugin/repo"
 	"github.com/devops-pipeflow/insight-plugin/review"
-	pluginsInsight "github.com/devops-pipeflow/server/plugins/insight"
 )
 
 type CodeSight interface {
 	Init(context.Context) error
 	Deinit(context.Context) error
-	Run(context.Context, *pluginsInsight.CodeTrigger) (pluginsInsight.CodeInfo, error)
+	Run(context.Context, *proto.CodeTrigger) (proto.CodeInfo, error)
 }
 
 type CodeSightConfig struct {
@@ -56,10 +56,10 @@ func (cs *codesight) Deinit(ctx context.Context) error {
 	return nil
 }
 
-func (cs *codesight) Run(ctx context.Context, trigger *pluginsInsight.CodeTrigger) (pluginsInsight.CodeInfo, error) {
+func (cs *codesight) Run(ctx context.Context, trigger *proto.CodeTrigger) (proto.CodeInfo, error) {
 	cs.cfg.Logger.Debug("codesight: Run")
 
 	// TBD: FIXME
 
-	return pluginsInsight.CodeInfo{}, nil
+	return proto.CodeInfo{}, nil
 }

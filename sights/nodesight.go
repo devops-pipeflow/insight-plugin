@@ -11,8 +11,8 @@ import (
 
 	"github.com/devops-pipeflow/insight-plugin/config"
 	"github.com/devops-pipeflow/insight-plugin/gpt"
+	"github.com/devops-pipeflow/insight-plugin/proto"
 	"github.com/devops-pipeflow/insight-plugin/ssh"
-	pluginsInsight "github.com/devops-pipeflow/server/plugins/insight"
 )
 
 const (
@@ -35,7 +35,7 @@ const (
 type NodeSight interface {
 	Init(context.Context) error
 	Deinit(context.Context) error
-	Run(context.Context, *pluginsInsight.NodeTrigger) (pluginsInsight.NodeInfo, error)
+	Run(context.Context, *proto.NodeTrigger) (proto.NodeInfo, error)
 }
 
 type NodeSightConfig struct {
@@ -71,10 +71,10 @@ func (ns *nodesight) Deinit(_ context.Context) error {
 	return nil
 }
 
-func (ns *nodesight) Run(ctx context.Context, trigger *pluginsInsight.NodeTrigger) (pluginsInsight.NodeInfo, error) {
+func (ns *nodesight) Run(ctx context.Context, trigger *proto.NodeTrigger) (proto.NodeInfo, error) {
 	ns.cfg.Logger.Debug("nodesight: Run")
 
-	var info pluginsInsight.NodeInfo
+	var info proto.NodeInfo
 
 	g, ctx := errgroup.WithContext(ctx)
 	g.SetLimit(routineNum)
@@ -181,10 +181,10 @@ func (ns *nodesight) runHealth(ctx context.Context) (string, error) {
 	return out, nil
 }
 
-func (ns *nodesight) runStat(ctx context.Context) (*pluginsInsight.NodeStat, error) {
+func (ns *nodesight) runStat(ctx context.Context) (*proto.NodeStat, error) {
 	ns.cfg.Logger.Debug("nodesight: runStat")
 
-	var stat pluginsInsight.NodeStat
+	var stat proto.NodeStat
 
 	if err := ns.cfg.Ssh.Init(ctx); err != nil {
 		return &stat, errors.Wrap(err, "failed to init ssh")
@@ -211,10 +211,10 @@ func (ns *nodesight) runStat(ctx context.Context) (*pluginsInsight.NodeStat, err
 	return &stat, nil
 }
 
-func (ns *nodesight) runReport(_ context.Context, health string, stat *pluginsInsight.NodeStat) (*pluginsInsight.NodeReport, error) {
+func (ns *nodesight) runReport(_ context.Context, health string, stat *proto.NodeStat) (*proto.NodeReport, error) {
 	ns.cfg.Logger.Debug("nodesight: runReport")
 
-	var report pluginsInsight.NodeReport
+	var report proto.NodeReport
 
 	// TBD: FIXME
 
