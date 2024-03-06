@@ -140,7 +140,6 @@ message ConfigRequest {
   GptConfig gptConfig = 6;  // gpt config
   RepoConfig repoConfig = 7;  // repo config (Gitiles)
   ReviewConfig reviewConfig = 8;  // review config (Gerrit, pingview)
-  SshConfig sshConfig = 9;  // ssh config
 }
 
 message EnvVariable {
@@ -178,15 +177,6 @@ message ReviewConfig {
   string pass = 3;  // review pass (Gerrit, pingview)
 }
 
-message SshConfig {
-  string host = 1;  // ssh host
-  int64 port = 2;  // ssh port
-  string user = 3;  // ssh user
-  string pass = 4;  // ssh pass
-  string key = 5;  // ssh private key
-  string timeout = 6; // ssh timeout time in string (h:hour, m:minute, s:second)
-}
-
 message LoggingConfig {
   int64 start = 1;  // logging lines start (>=1)
   int64 len = 2;  // logging lines length
@@ -207,12 +197,23 @@ message BuildTrigger {
 
 message CodeTrigger {}
 
-message NodeTrigger {}
+message NodeTrigger {
+  SshConfig sshConfig = 1;  // ssh config
+}
 
 message LoggingTrigger {
   repeated string lines = 1;  // logging lines in list
   int64 start = 2;  // logging lines start (>=1)
   int64 len = 3;  // logging lines length
+}
+
+message SshConfig {
+  string host = 1;  // ssh host
+  int64 port = 2;  // ssh port
+  string user = 3;  // ssh user
+  string pass = 4;  // ssh pass
+  string key = 5;  // ssh private key
+  string timeout = 6; // ssh timeout time in string (h:hour, m:minute, s:second)
 }
 
 message TriggerResponse {
