@@ -15,7 +15,7 @@ import (
 type BuildSight interface {
 	Init(context.Context) error
 	Deinit(context.Context) error
-	Run(context.Context) (pluginsInsight.BuildInfo, error)
+	Run(context.Context, *pluginsInsight.BuildTrigger) (pluginsInsight.BuildInfo, error)
 }
 
 type BuildSightConfig struct {
@@ -56,7 +56,7 @@ func (bs *buildsight) Deinit(ctx context.Context) error {
 	return nil
 }
 
-func (bs *buildsight) Run(context.Context) (pluginsInsight.BuildInfo, error) {
+func (bs *buildsight) Run(ctx context.Context, trigger *pluginsInsight.BuildTrigger) (pluginsInsight.BuildInfo, error) {
 	bs.cfg.Logger.Debug("buildsight: Run")
 
 	// TBD: FIXME

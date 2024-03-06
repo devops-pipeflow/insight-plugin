@@ -15,7 +15,7 @@ import (
 type CodeSight interface {
 	Init(context.Context) error
 	Deinit(context.Context) error
-	Run(context.Context) (pluginsInsight.CodeInfo, error)
+	Run(context.Context, *pluginsInsight.CodeTrigger) (pluginsInsight.CodeInfo, error)
 }
 
 type CodeSightConfig struct {
@@ -56,7 +56,7 @@ func (cs *codesight) Deinit(ctx context.Context) error {
 	return nil
 }
 
-func (cs *codesight) Run(ctx context.Context) (pluginsInsight.CodeInfo, error) {
+func (cs *codesight) Run(ctx context.Context, trigger *pluginsInsight.CodeTrigger) (pluginsInsight.CodeInfo, error) {
 	cs.cfg.Logger.Debug("codesight: Run")
 
 	// TBD: FIXME

@@ -25,7 +25,8 @@ var (
 type Insight interface {
 	Init(context.Context) error
 	Deinit(context.Context) error
-	Run(context.Context) (*pluginsInsight.BuildInfo, *pluginsInsight.CodeInfo, *pluginsInsight.NodeInfo, error)
+	Run(context.Context, *pluginsInsight.BuildTrigger, *pluginsInsight.CodeTrigger,
+		*pluginsInsight.NodeTrigger) (*pluginsInsight.BuildInfo, *pluginsInsight.CodeInfo, *pluginsInsight.NodeInfo, error)
 }
 
 type Config struct {
@@ -78,24 +79,25 @@ func (i *insight) Deinit(ctx context.Context) error {
 	return nil
 }
 
-func (i *insight) Run(ctx context.Context) (*pluginsInsight.BuildInfo, *pluginsInsight.CodeInfo, *pluginsInsight.NodeInfo, error) {
+func (i *insight) Run(ctx context.Context, buildTrigger *pluginsInsight.BuildTrigger, codeTrigger *pluginsInsight.CodeTrigger,
+	nodeTrigger *pluginsInsight.NodeTrigger) (*pluginsInsight.BuildInfo, *pluginsInsight.CodeInfo, *pluginsInsight.NodeInfo, error) {
 	i.cfg.Logger.Debug("insight: Run")
 
 	g, ctx := errgroup.WithContext(ctx)
 	g.SetLimit(routineNum)
 
 	g.Go(func() error {
-		buildInfo, _ = i.cfg.BuildSight.Run(ctx)
+		buildInfo, _ = i.cfg.BuildSight.Run(ctx, buildTrigger)
 		return nil
 	})
 
 	g.Go(func() error {
-		codeInfo, _ = i.cfg.CodeSight.Run(ctx)
+		codeInfo, _ = i.cfg.CodeSight.Run(ctx, codeTrigger)
 		return nil
 	})
 
 	g.Go(func() error {
-		nodeInfo, _ = i.cfg.NodeSight.Run(ctx)
+		nodeInfo, _ = i.cfg.NodeSight.Run(ctx, nodeTrigger)
 		return nil
 	})
 

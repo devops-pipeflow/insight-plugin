@@ -35,7 +35,7 @@ const (
 type NodeSight interface {
 	Init(context.Context) error
 	Deinit(context.Context) error
-	Run(context.Context) (pluginsInsight.NodeInfo, error)
+	Run(context.Context, *pluginsInsight.NodeTrigger) (pluginsInsight.NodeInfo, error)
 }
 
 type NodeSightConfig struct {
@@ -59,7 +59,7 @@ func DefaultNodeSightConfig() *NodeSightConfig {
 	return &NodeSightConfig{}
 }
 
-func (ns *nodesight) Init(ctx context.Context) error {
+func (ns *nodesight) Init(_ context.Context) error {
 	ns.cfg.Logger.Debug("nodesight: Init")
 
 	return nil
@@ -71,7 +71,7 @@ func (ns *nodesight) Deinit(_ context.Context) error {
 	return nil
 }
 
-func (ns *nodesight) Run(ctx context.Context) (pluginsInsight.NodeInfo, error) {
+func (ns *nodesight) Run(ctx context.Context, trigger *pluginsInsight.NodeTrigger) (pluginsInsight.NodeInfo, error) {
 	ns.cfg.Logger.Debug("nodesight: Run")
 
 	var info pluginsInsight.NodeInfo
