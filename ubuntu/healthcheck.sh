@@ -7,14 +7,19 @@ VERSION_INFO="1.2.0"
 
 # Print pass message
 print_pass() {
+    if [ "$SILENT_MODE" = "false" ]; then
+        echo -e "$1"
+    fi
 }
 
 # Print fail message
 print_fail() {
+    echo -e "$1" 1>&2
 }
 
 # Print fix message
 print_fix() {
+    echo -e "$1" 1>&2
 }
 
 # Check /etc/hosts
@@ -27,14 +32,14 @@ check_hosts() {
     eval "$cmd 1> /dev/null"
     ret=$?
     if [ $ret -ne 0 ]; then
-        echo -e "\e[1mINFO\e[0m: check $name \e[92mPASS\e[0m"
+        print_pass "\e[1mINFO\e[0m: check $name \e[92mPASS\e[0m"
         return 0
     fi
 
-    echo -e "\e[1mERROR\e[0m: check $name \e[91mFAIL\e[0m ($pattern found)" 1>&2
+    print_fail "\e[1mERROR\e[0m: check $name \e[91mFAIL\e[0m ($pattern found)"
 
     if [ "$FIX_ME" = "true" ]; then
-        echo -e "\e[1mFIXME\e[0m: remove $pattern from $name" 1>&2
+        print_fix "\e[1mFIXME\e[0m: remove $pattern from $name"
     fi
 
     return 1
@@ -51,18 +56,18 @@ check_interfaces() {
     eval "$cmd 1> /dev/null"
     ret=$?
     if [ $ret -eq 0 ]; then
-        echo -e "\e[1mINFO\e[0m: check $name \e[92mPASS\e[0m"
+        print_pass "\e[1mINFO\e[0m: check $name \e[92mPASS\e[0m"
         return 0
     fi
 
-    echo -e "\e[1mERROR\e[0m: check $name \e[91mFAIL\e[0m ($server1, $server2 required)" 1>&2
+    print_fail "\e[1mERROR\e[0m: check $name \e[91mFAIL\e[0m ($server1, $server2 required)"
 
     if [ "$FIX_ME" = "true" ]; then
-        echo -e "\e[1mFIXME\e[0m: copy command below, then run it" 1>&2
-        echo -e "sudo bash -c \"cat >> $name\" << EOF" 1>&2
-        echo -e "dns-nameservers $server1" 1>&2
-        echo -e "dns-nameservers $server2" 1>&2
-        echo -e "EOF" 1>&2
+        print_fix "\e[1mFIXME\e[0m: copy command below, then run it"
+        print_fix "sudo bash -c \"cat >> $name\" << EOF"
+        print_fix "dns-nameservers $server1"
+        print_fix "dns-nameservers $server2"
+        print_fix "EOF"
     fi
 
     return 1
@@ -79,19 +84,19 @@ check_resolv() {
     eval "$cmd 1> /dev/null"
     ret=$?
     if [ $ret -eq 0 ]; then
-        echo -e "\e[1mINFO\e[0m: check $name \e[92mPASS\e[0m"
+        print_pass "\e[1mINFO\e[0m: check $name \e[92mPASS\e[0m"
         return 0
     fi
 
-    echo -e "\e[1mERROR\e[0m: check $name \e[91mFAIL\e[0m ($server1, $server2 required)" 1>&2
+    print_fail "\e[1mERROR\e[0m: check $name \e[91mFAIL\e[0m ($server1, $server2 required)"
 
     if [ "$FIX_ME" = "true" ]; then
-        echo -e "\e[1mFIXME\e[0m: copy command below, then run it" 1>&2
-        echo -e "sudo bash -c \"cat >> $name\" << EOF" 1>&2
-        echo -e "nameserver $server1" 1>&2
-        echo -e "nameserver $server2" 1>&2
-        echo -e "search localhost" 1>&2
-        echo -e "EOF" 1>&2
+        print_fix "\e[1mFIXME\e[0m: copy command below, then run it"
+        print_fix "sudo bash -c \"cat >> $name\" << EOF"
+        print_fix "nameserver $server1"
+        print_fix "nameserver $server2"
+        print_fix "search localhost"
+        print_fix "EOF"
     fi
 
     return 1
@@ -108,18 +113,18 @@ check_sysctl() {
     ret=$(eval "$cmd | sed '/#.*/d'")
     arr=(${ret//=/ })
     if [ "${arr[-2]}" = $config ] && [ "${arr[-1]}" -eq 1 ]; then
-        echo -e "\e[1mINFO\e[0m: check $name \e[92mPASS\e[0m"
+        print_pass "\e[1mINFO\e[0m: check $name \e[92mPASS\e[0m"
         return 0
     fi
 
-    echo -e "\e[1mERROR\e[0m: check $name \e[91mFAIL\e[0m ($config=1 required)" 1>&2
+    print_fail "\e[1mERROR\e[0m: check $name \e[91mFAIL\e[0m ($config=1 required)"
 
     if [ "$FIX_ME" = "true" ]; then
-        echo -e "\e[1mFIXME\e[0m: copy command below, then run it" 1>&2
-        echo -e "sudo bash -c \"cat >> /etc/sysctl.conf\" << EOF" 1>&2
-        echo -e "net.ipv4.ip_forward=1" 1>&2
-        echo -e "EOF" 1>&2
-        echo -e "sudo sysctl -p" 1>&2
+        print_fix "\e[1mFIXME\e[0m: copy command below, then run it"
+        print_fix "sudo bash -c \"cat >> /etc/sysctl.conf\" << EOF"
+        print_fix "net.ipv4.ip_forward=1"
+        print_fix "EOF"
+        print_fix "sudo sysctl -p"
     fi
 
     return 1
@@ -134,18 +139,18 @@ check_docker() {
     eval "$cmd 1> /dev/null"
     ret=$?
     if [ $ret -eq 0 ]; then
-        echo -e "\e[1mINFO\e[0m: check $name \e[92mPASS\e[0m"
+        print_pass "\e[1mINFO\e[0m: check $name \e[92mPASS\e[0m"
         return 0
     fi
 
-    echo -e "\e[1mERROR\e[0m: check $name \e[91mFAIL\e[0m ($name missing)" 1>&2
+    print_fail "\e[1mERROR\e[0m: check $name \e[91mFAIL\e[0m ($name missing)"
 
     if [ "$FIX_ME" = "true" ]; then
-        echo -e "\e[1mFIXME\e[0m: copy command below, then run it" 1>&2
-        echo -e "sudo apt autoremove docker docker.io" 1>&2
-        echo -e "sudo apt update && sudo apt install -y docker docker.io" 1>&2
-        echo -e "sudo service docker restart" 1>&2
-        echo -e "sudo chmod 666 /var/run/docker.sock" 1>&2
+        print_fix "\e[1mFIXME\e[0m: copy command below, then run it"
+        print_fix "sudo apt autoremove docker docker.io"
+        print_fix "sudo apt update && sudo apt install -y docker docker.io"
+        print_fix "sudo service docker restart"
+        print_fix "sudo chmod 666 /var/run/docker.sock"
     fi
 
     return 1
@@ -160,14 +165,14 @@ check_group() {
     eval "$cmd 1> /dev/null"
     ret=$?
     if [ $ret -eq 0 ]; then
-        echo -e "\e[1mINFO\e[0m: check user:$USER in group:$name \e[92mPASS\e[0m"
+        print_pass "\e[1mINFO\e[0m: check user:$USER in group:$name \e[92mPASS\e[0m"
         return 0
     fi
 
-    echo -e "\e[1mERROR\e[0m: check user:$USER in group:$name \e[91mFAIL\e[0m ($USER missing)" 1>&2
+    print_fail "\e[1mERROR\e[0m: check user:$USER in group:$name \e[91mFAIL\e[0m ($USER missing)"
 
     if [ "$FIX_ME" = "true" ]; then
-        echo -e "\e[1mFIXME\e[0m: sudo usermod -a -G docker $USER" 1>&2
+        print_fix "\e[1mFIXME\e[0m: sudo usermod -a -G docker $USER"
     fi
 
     return 1
@@ -185,16 +190,16 @@ check_default() {
     ret=$(eval "$cmd | sed '/#.*/d'")
     arr=(${ret//=/ })
     if [ "${arr[0]}" = "$config" ] && [ "${arr[1]} ${arr[2]}" = "$value" ]; then
-        echo -e "\e[1mINFO\e[0m: check $name \e[92mPASS\e[0m"
+        print_pass "\e[1mINFO\e[0m: check $name \e[92mPASS\e[0m"
         return 0
     fi
 
-    echo -e "\e[1mERROR\e[0m: check $name \e[91mFAIL\e[0m ($config=$value required)" 1>&2
+    print_fail "\e[1mERROR\e[0m: check $name \e[91mFAIL\e[0m ($config=$value required)"
 
     if [ "$FIX_ME" = "true" ]; then
-        echo -e "\e[1mFIXME\e[0m: copy command below, then run it" 1>&2
-        echo -e "echo \"DOCKER_OPTS=\\\"--insecure-registry 0.0.0.0/0\\\"\" | sudo tee --append /etc/default/docker" 1>&2
-        echo -e "sudo service docker restart" 1>&2
+        print_fix "\e[1mFIXME\e[0m: copy command below, then run it"
+        print_fix "echo \"DOCKER_OPTS=\\\"--insecure-registry 0.0.0.0/0\\\"\" | sudo tee --append /etc/default/docker"
+        print_fix "sudo service docker restart"
     fi
 
     return 1
@@ -220,19 +225,19 @@ check_daemon() {
     fi
 
     if [ "$err_registries" = "false" ]; then
-        echo -e "\e[1mINFO\e[0m: check $name \e[92mPASS\e[0m"
+        print_pass "\e[1mINFO\e[0m: check $name \e[92mPASS\e[0m"
         return 0
     fi
 
     if [ "$err_registries" = "true" ]; then
-        echo -e "\e[1mERROR\e[0m: check $name \e[91mFAIL\e[0m ({$config_registries:[$value_registries]} required)" 1>&2
+        print_fail "\e[1mERROR\e[0m: check $name \e[91mFAIL\e[0m ({$config_registries:[$value_registries]} required)"
     fi
 
     if [ "$FIX_ME" = "true" ]; then
-        echo -e "\e[1mFIXME\e[0m: copy command below, then run it" 1>&2
-        echo -e "sudo touch /etc/docker/daemon.json" 1>&2
-        echo -e "echo \"{\\\"insecure-registries\\\": [ \\\"0.0.0.0/0\\\" ]}\" | sudo tee /etc/docker/daemon.json" 1>&2
-        echo -e "sudo service docker restart" 1>&2
+        print_fix "\e[1mFIXME\e[0m: copy command below, then run it"
+        print_fix "sudo touch /etc/docker/daemon.json"
+        print_fix "echo \"{\\\"insecure-registries\\\": [ \\\"0.0.0.0/0\\\" ]}\" | sudo tee /etc/docker/daemon.json"
+        print_fix "sudo service docker restart"
     fi
 
     return 1
@@ -247,15 +252,15 @@ check_netstat() {
     _=$(eval "$cmd")
     ret=$?
     if [ "$ret" -ne 127 ]; then
-        echo -e "\e[1mINFO\e[0m: check $name \e[92mPASS\e[0m"
+        print_pass "\e[1mINFO\e[0m: check $name \e[92mPASS\e[0m"
         return 0
     fi
 
-    echo -e "\e[1mERROR\e[0m: check $name \e[91mFAIL\e[0m" 1>&2
+    print_fail "\e[1mERROR\e[0m: check $name \e[91mFAIL\e[0m"
 
     if [ "$FIX_ME" = "true" ]; then
-        echo -e "\e[1mFIXME\e[0m: copy command below, then run it" 1>&2
-        echo -e "sudo apt install net-tools" 1>&2
+        print_fix "\e[1mFIXME\e[0m: copy command below, then run it"
+        print_fix "sudo apt install net-tools"
     fi
 
     return 1
@@ -272,8 +277,8 @@ check_ssh() {
         host="127.0.0.1"
     fi
 
-    echo -e "\e[1mNOTE\e[0m: check ssh host \e[93m$USER@$host:22\e[0m"
-    echo -e "\e[1mNOTE\e[0m: check ssh-keygen \e[93mPress <ENTER> when 'Enter passphrase' asked\e[0m"
+    print_pass "\e[1mNOTE\e[0m: check ssh host \e[93m$USER@$host:22\e[0m"
+    print_pass "\e[1mNOTE\e[0m: check ssh-keygen \e[93mPress <ENTER> when 'Enter passphrase' asked\e[0m"
 
     return 0
 }
@@ -285,16 +290,16 @@ check_disk() {
 
     free=$(df -m --output=avail "/boot" | tail -n1)
     if [[ $free -gt $limit ]]; then
-        echo -e "\e[1mINFO\e[0m: check /boot \e[92mPASS\e[0m"
+        print_pass "\e[1mINFO\e[0m: check /boot \e[92mPASS\e[0m"
         return 0
     fi
 
-    echo -e "\e[1mERROR\e[0m: check /boot \e[91mFAIL\e[0m" 1>&2
+    print_fail "\e[1mERROR\e[0m: check /boot \e[91mFAIL\e[0m"
 
     if [ "$FIX_ME" = "true" ]; then
-        echo -e "\e[1mFIXME\e[0m: copy command below, then run it" 1>&2
-        echo -e "export RELEASE=$(uname -r)" 1>&2
-        echo "sudo find /boot -type f -name \"config-*\" -o -name \"initrd.img-*\" -o -name \"System.map-*\" -o -name \"vmlinuz-*\" | grep -vE \"\$RELEASE\$\" | xargs sudo rm -rf" 1>&2
+        print_fix "\e[1mFIXME\e[0m: copy command below, then run it"
+        print_fix "export RELEASE=$(uname -r)"
+        echo "sudo find /boot -type f -name \"config-*\" -o -name \"initrd.img-*\" -o -name \"System.map-*\" -o -name \"vmlinuz-*\" | grep -vE \"\$RELEASE\$\" | xargs sudo rm -rf"
     fi
 
     return 1
