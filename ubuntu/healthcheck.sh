@@ -18,10 +18,10 @@ check_hosts() {
         return 0
     fi
 
-    echo -e "\e[1mERROR\e[0m: check $name \e[91mFAIL\e[0m ($pattern found)"
+    echo -e "\e[1mERROR\e[0m: check $name \e[91mFAIL\e[0m ($pattern found)" 1>&2
 
     if [ "$FIX_ME" = "true" ]; then
-        echo -e "\e[1mFIXME\e[0m: remove $pattern from $name"
+        echo -e "\e[1mFIXME\e[0m: remove $pattern from $name" 1>&2
     fi
 
     return 1
@@ -30,8 +30,8 @@ check_hosts() {
 # Check /etc/network/interfaces
 check_interfaces() {
     local name="/etc/network/interfaces"
-    local server1="127.0.0.1"
-    local server2="127.0.0.2"
+    local server1="8.8.8.8"
+    local server2="8.8.4.4"
     local cmd="grep -E '$server1|$server2' $name"
     local ret
 
@@ -42,14 +42,14 @@ check_interfaces() {
         return 0
     fi
 
-    echo -e "\e[1mERROR\e[0m: check $name \e[91mFAIL\e[0m ($server1, $server2 required)"
+    echo -e "\e[1mERROR\e[0m: check $name \e[91mFAIL\e[0m ($server1, $server2 required)" 1>&2
 
     if [ "$FIX_ME" = "true" ]; then
-        echo -e "\e[1mFIXME\e[0m: copy command below, then run it"
-        echo -e "sudo bash -c \"cat >> $name\" << EOF"
-        echo -e "dns-nameservers $server1"
-        echo -e "dns-nameservers $server2"
-        echo -e "EOF"
+        echo -e "\e[1mFIXME\e[0m: copy command below, then run it" 1>&2
+        echo -e "sudo bash -c \"cat >> $name\" << EOF" 1>&2
+        echo -e "dns-nameservers $server1" 1>&2
+        echo -e "dns-nameservers $server2" 1>&2
+        echo -e "EOF" 1>&2
     fi
 
     return 1
@@ -58,8 +58,8 @@ check_interfaces() {
 # Check /etc/resolv.conf
 check_resolv() {
     local name="/etc/resolv.conf"
-    local server1="127.0.0.1"
-    local server2="127.0.0.2"
+    local server1="8.8.8.8"
+    local server2="8.8.4.4"
     local cmd="grep -E '$server1|$server2' $name"
     local ret
 
@@ -70,15 +70,15 @@ check_resolv() {
         return 0
     fi
 
-    echo -e "\e[1mERROR\e[0m: check $name \e[91mFAIL\e[0m ($server1, $server2 required)"
+    echo -e "\e[1mERROR\e[0m: check $name \e[91mFAIL\e[0m ($server1, $server2 required)" 1>&2
 
     if [ "$FIX_ME" = "true" ]; then
-        echo -e "\e[1mFIXME\e[0m: copy command below, then run it"
-        echo -e "sudo bash -c \"cat >> $name\" << EOF"
-        echo -e "nameserver $server1"
-        echo -e "nameserver $server2"
-        echo -e "search localhost.intra"
-        echo -e "EOF"
+        echo -e "\e[1mFIXME\e[0m: copy command below, then run it" 1>&2
+        echo -e "sudo bash -c \"cat >> $name\" << EOF" 1>&2
+        echo -e "nameserver $server1" 1>&2
+        echo -e "nameserver $server2" 1>&2
+        echo -e "search localhost" 1>&2
+        echo -e "EOF" 1>&2
     fi
 
     return 1
@@ -99,14 +99,14 @@ check_sysctl() {
         return 0
     fi
 
-    echo -e "\e[1mERROR\e[0m: check $name \e[91mFAIL\e[0m ($config=1 required)"
+    echo -e "\e[1mERROR\e[0m: check $name \e[91mFAIL\e[0m ($config=1 required)" 1>&2
 
     if [ "$FIX_ME" = "true" ]; then
-        echo -e "\e[1mFIXME\e[0m: copy command below, then run it"
-        echo -e "sudo bash -c \"cat >> /etc/sysctl.conf\" << EOF"
-        echo -e "net.ipv4.ip_forward=1"
-        echo -e "EOF"
-        echo -e "sudo sysctl -p"
+        echo -e "\e[1mFIXME\e[0m: copy command below, then run it" 1>&2
+        echo -e "sudo bash -c \"cat >> /etc/sysctl.conf\" << EOF" 1>&2
+        echo -e "net.ipv4.ip_forward=1" 1>&2
+        echo -e "EOF" 1>&2
+        echo -e "sudo sysctl -p" 1>&2
     fi
 
     return 1
@@ -125,14 +125,14 @@ check_docker() {
         return 0
     fi
 
-    echo -e "\e[1mERROR\e[0m: check $name \e[91mFAIL\e[0m ($name missing)"
+    echo -e "\e[1mERROR\e[0m: check $name \e[91mFAIL\e[0m ($name missing)" 1>&2
 
     if [ "$FIX_ME" = "true" ]; then
-        echo -e "\e[1mFIXME\e[0m: copy command below, then run it"
-        echo -e "sudo apt autoremove docker docker.io"
-        echo -e "sudo apt update && sudo apt install -y docker docker.io"
-        echo -e "sudo service docker restart"
-        echo -e "sudo chmod 666 /var/run/docker.sock"
+        echo -e "\e[1mFIXME\e[0m: copy command below, then run it" 1>&2
+        echo -e "sudo apt autoremove docker docker.io" 1>&2
+        echo -e "sudo apt update && sudo apt install -y docker docker.io" 1>&2
+        echo -e "sudo service docker restart" 1>&2
+        echo -e "sudo chmod 666 /var/run/docker.sock" 1>&2
     fi
 
     return 1
@@ -151,10 +151,10 @@ check_group() {
         return 0
     fi
 
-    echo -e "\e[1mERROR\e[0m: check user:$USER in group:$name \e[91mFAIL\e[0m ($USER missing)"
+    echo -e "\e[1mERROR\e[0m: check user:$USER in group:$name \e[91mFAIL\e[0m ($USER missing)" 1>&2
 
     if [ "$FIX_ME" = "true" ]; then
-        echo -e "\e[1mFIXME\e[0m: sudo usermod -a -G docker $USER"
+        echo -e "\e[1mFIXME\e[0m: sudo usermod -a -G docker $USER" 1>&2
     fi
 
     return 1
@@ -176,12 +176,12 @@ check_default() {
         return 0
     fi
 
-    echo -e "\e[1mERROR\e[0m: check $name \e[91mFAIL\e[0m ($config=$value required)"
+    echo -e "\e[1mERROR\e[0m: check $name \e[91mFAIL\e[0m ($config=$value required)" 1>&2
 
     if [ "$FIX_ME" = "true" ]; then
-        echo -e "\e[1mFIXME\e[0m: copy command below, then run it"
-        echo -e "echo \"DOCKER_OPTS=\\\"--insecure-registry 0.0.0.0/0\\\"\" | sudo tee --append /etc/default/docker"
-        echo -e "sudo service docker restart"
+        echo -e "\e[1mFIXME\e[0m: copy command below, then run it" 1>&2
+        echo -e "echo \"DOCKER_OPTS=\\\"--insecure-registry 0.0.0.0/0\\\"\" | sudo tee --append /etc/default/docker" 1>&2
+        echo -e "sudo service docker restart" 1>&2
     fi
 
     return 1
@@ -212,14 +212,14 @@ check_daemon() {
     fi
 
     if [ "$err_registries" = "true" ]; then
-        echo -e "\e[1mERROR\e[0m: check $name \e[91mFAIL\e[0m ({$config_registries:[$value_registries]} required)"
+        echo -e "\e[1mERROR\e[0m: check $name \e[91mFAIL\e[0m ({$config_registries:[$value_registries]} required)" 1>&2
     fi
 
     if [ "$FIX_ME" = "true" ]; then
-        echo -e "\e[1mFIXME\e[0m: copy command below, then run it"
-        echo -e "sudo touch /etc/docker/daemon.json"
-        echo -e "echo \"{\\\"insecure-registries\\\": [ \\\"0.0.0.0/0\\\" ]}\" | sudo tee /etc/docker/daemon.json"
-        echo -e "sudo service docker restart"
+        echo -e "\e[1mFIXME\e[0m: copy command below, then run it" 1>&2
+        echo -e "sudo touch /etc/docker/daemon.json" 1>&2
+        echo -e "echo \"{\\\"insecure-registries\\\": [ \\\"0.0.0.0/0\\\" ]}\" | sudo tee /etc/docker/daemon.json" 1>&2
+        echo -e "sudo service docker restart" 1>&2
     fi
 
     return 1
@@ -238,11 +238,11 @@ check_netstat() {
         return 0
     fi
 
-    echo -e "\e[1mERROR\e[0m: check $name \e[91mFAIL\e[0m"
+    echo -e "\e[1mERROR\e[0m: check $name \e[91mFAIL\e[0m" 1>&2
 
     if [ "$FIX_ME" = "true" ]; then
-        echo -e "\e[1mFIXME\e[0m: copy command below, then run it"
-        echo -e "sudo apt install net-tools"
+        echo -e "\e[1mFIXME\e[0m: copy command below, then run it" 1>&2
+        echo -e "sudo apt install net-tools" 1>&2
     fi
 
     return 1
@@ -276,12 +276,12 @@ check_disk() {
         return 0
     fi
 
-    echo -e "\e[1mERROR\e[0m: check /boot \e[91mFAIL\e[0m"
+    echo -e "\e[1mERROR\e[0m: check /boot \e[91mFAIL\e[0m" 1>&2
 
     if [ "$FIX_ME" = "true" ]; then
-        echo -e "\e[1mFIXME\e[0m: copy command below, then run it"
-        echo -e "export RELEASE=$(uname -r)"
-        echo "sudo find /boot -type f -name \"config-*\" -o -name \"initrd.img-*\" -o -name \"System.map-*\" -o -name \"vmlinuz-*\" | grep -vE \"\$RELEASE\$\" | xargs sudo rm -rf"
+        echo -e "\e[1mFIXME\e[0m: copy command below, then run it" 1>&2
+        echo -e "export RELEASE=$(uname -r)" 1>&2
+        echo "sudo find /boot -type f -name \"config-*\" -o -name \"initrd.img-*\" -o -name \"System.map-*\" -o -name \"vmlinuz-*\" | grep -vE \"\$RELEASE\$\" | xargs sudo rm -rf" 1>&2
     fi
 
     return 1
