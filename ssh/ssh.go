@@ -11,6 +11,7 @@ import (
 	crypto_ssh "golang.org/x/crypto/ssh"
 
 	"github.com/devops-pipeflow/insight-plugin/config"
+	"github.com/devops-pipeflow/insight-plugin/proto"
 )
 
 const (
@@ -49,7 +50,7 @@ var (
 )
 
 type Ssh interface {
-	Init(context.Context) error
+	Init(context.Context, *proto.SshConfig) error
 	Deinit(context.Context) error
 	Run(context.Context, string) (string, error)
 }
@@ -75,12 +76,16 @@ func DefaultConfig() *SshConfig {
 	return &SshConfig{}
 }
 
-func (s *ssh) Init(ctx context.Context) error {
+func (s *ssh) Init(ctx context.Context, cfg *proto.SshConfig) error {
 	s.cfg.Logger.Debug("ssh: Init")
 
-	return s.initSession(ctx, s.cfg.Config.Spec.SshConfig.Host, s.cfg.Config.Spec.SshConfig.Port,
-		s.cfg.Config.Spec.SshConfig.User, s.cfg.Config.Spec.SshConfig.Pass, s.cfg.Config.Spec.SshConfig.Key,
-		s.cfg.Config.Spec.SshConfig.Timeout)
+	c := s.cfg.Config.Spec.SshConfig
+
+	if cfg.Host != "" {
+		c = config.SshConfig(*cfg)
+	}
+
+	return s.initSession(ctx, c.Host, c.Port, c.User, c.Pass, c.Key, c.Timeout)
 }
 
 func (s *ssh) Deinit(ctx context.Context) error {

@@ -80,14 +80,14 @@ func (ns *nodesight) Run(ctx context.Context, trigger *proto.NodeTrigger) (proto
 	g.SetLimit(routineNum)
 
 	g.Go(func() error {
-		if err := ns.runDetect(ctx); err != nil {
+		if err := ns.runDetect(ctx, &trigger.SshConfig); err != nil {
 			return errors.Wrap(err, "failed to run detect")
 		}
-		health, err := ns.runHealth(ctx)
+		health, err := ns.runHealth(ctx, &trigger.SshConfig)
 		if err != nil {
 			return errors.Wrap(err, "failed to run health")
 		}
-		stat, err := ns.runStat(ctx)
+		stat, err := ns.runStat(ctx, &trigger.SshConfig)
 		if err != nil {
 			return errors.Wrap(err, "failed to run stat")
 		}
@@ -107,10 +107,10 @@ func (ns *nodesight) Run(ctx context.Context, trigger *proto.NodeTrigger) (proto
 	return info, nil
 }
 
-func (ns *nodesight) runDetect(ctx context.Context) error {
+func (ns *nodesight) runDetect(ctx context.Context, cfg *proto.SshConfig) error {
 	ns.cfg.Logger.Debug("nodesight: runDetect")
 
-	if err := ns.cfg.Ssh.Init(ctx); err != nil {
+	if err := ns.cfg.Ssh.Init(ctx, cfg); err != nil {
 		return errors.Wrap(err, "failed to init ssh")
 	}
 
@@ -147,13 +147,13 @@ func (ns *nodesight) runDetect(ctx context.Context) error {
 	return nil
 }
 
-func (ns *nodesight) runHealth(ctx context.Context) (string, error) {
+func (ns *nodesight) runHealth(ctx context.Context, cfg *proto.SshConfig) (string, error) {
 	ns.cfg.Logger.Debug("nodesight: runHealth")
 
 	var err error
 	var out string
 
-	if err = ns.cfg.Ssh.Init(ctx); err != nil {
+	if err = ns.cfg.Ssh.Init(ctx, cfg); err != nil {
 		return "", errors.Wrap(err, "failed to init ssh")
 	}
 
@@ -181,12 +181,12 @@ func (ns *nodesight) runHealth(ctx context.Context) (string, error) {
 	return out, nil
 }
 
-func (ns *nodesight) runStat(ctx context.Context) (*proto.NodeStat, error) {
+func (ns *nodesight) runStat(ctx context.Context, cfg *proto.SshConfig) (*proto.NodeStat, error) {
 	ns.cfg.Logger.Debug("nodesight: runStat")
 
 	var stat proto.NodeStat
 
-	if err := ns.cfg.Ssh.Init(ctx); err != nil {
+	if err := ns.cfg.Ssh.Init(ctx, cfg); err != nil {
 		return &stat, errors.Wrap(err, "failed to init ssh")
 	}
 
