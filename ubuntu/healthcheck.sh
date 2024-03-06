@@ -2,7 +2,20 @@
 
 # Set defaults
 FIX_ME="true"
-VERSION_INFO="1.1.0"
+SILENT_MODE="false"
+VERSION_INFO="1.2.0"
+
+# Print pass message
+print_pass() {
+}
+
+# Print fail message
+print_fail() {
+}
+
+# Print fix message
+print_fix() {
+}
 
 # Check /etc/hosts
 check_hosts() {
@@ -381,12 +394,6 @@ run_check() {
     return 0
 }
 
-print_version() {
-cat <<VERSION
-$VERSION_INFO
-VERSION
-}
-
 show_usage() {
 cat <<USAGE
 
@@ -400,14 +407,27 @@ OPTIONS:
     -h, --help
         Display this help message
 
+    -s, --silent
+        Show error message only
+
     -v, --version
         Display version information
 USAGE
 }
 
+set_silent() {
+    SILENT_MODE="true"
+}
+
+print_version() {
+cat <<VERSION
+$VERSION_INFO
+VERSION
+}
+
 parse_opts() {
-    local long_opts="fix,help,version,"
-    local short_opts="fhv"
+    local long_opts="help,silent,version,"
+    local short_opts="hsv"
     local getopt_cmd
 
     getopt_cmd=$(getopt -o $short_opts --long "$long_opts" \
@@ -419,6 +439,7 @@ parse_opts() {
     while true; do
         case "$1" in
             -h|--help) show_usage; return 1;;
+            -s|--silent) set_silent; return 1;;
             -v|--version) print_version; return 1;;
             --) shift; break;;
         esac
