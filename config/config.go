@@ -32,8 +32,7 @@ type BuildConfig struct {
 	LoggingConfig LoggingConfig `yaml:"loggingConfig"`
 }
 
-type CodeConfig struct {
-}
+type CodeConfig struct{}
 
 type NodeConfig struct {
 	Duration string `yaml:"duration"`
