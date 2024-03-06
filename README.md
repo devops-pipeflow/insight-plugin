@@ -132,16 +132,15 @@ service Insight {
 }
 
 message ConfigRequest {
-  string pluginName = 1;  // plugin name
-  repeated EnvVariable envVariables = 2;  // environment variables in list
-  BuildConfig buildConfig = 3;  // buildsight config
-  CodeConfig codeConfig = 4;  // codesight config
-  NodeConfig nodeConfig = 5;  // nodesight config
-  ArtifactConfig artifactConfig = 6;  // artifactory config
-  GptConfig gptConfig = 7;  // gpt config
-  RepoConfig repoConfig = 8;  // repo config (Gitiles)
-  ReviewConfig reviewConfig = 9;  // review config (Gerrit, pingview)
-  SshConfig sshConfig = 10;  // ssh config
+  repeated EnvVariable envVariables = 1;  // environment variables in list
+  BuildConfig buildConfig = 2;  // buildsight config
+  CodeConfig codeConfig = 3;  // codesight config
+  NodeConfig nodeConfig = 4;  // nodesight config
+  ArtifactConfig artifactConfig = 5;  // artifactory config
+  GptConfig gptConfig = 6;  // gpt config
+  RepoConfig repoConfig = 7;  // repo config (Gitiles)
+  ReviewConfig reviewConfig = 8;  // review config (Gerrit, pingview)
+  SshConfig sshConfig = 9;  // ssh config
 }
 
 message EnvVariable {
