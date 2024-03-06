@@ -16,6 +16,12 @@ const (
 	routineNum = -1
 )
 
+var (
+	buildInfo pluginsInsight.BuildInfo
+	codeInfo  pluginsInsight.CodeInfo
+	nodeInfo  pluginsInsight.NodeInfo
+)
+
 type Insight interface {
 	Init(context.Context) error
 	Deinit(context.Context) error
@@ -74,10 +80,6 @@ func (i *insight) Deinit(ctx context.Context) error {
 
 func (i *insight) Run(ctx context.Context) (*pluginsInsight.BuildInfo, *pluginsInsight.CodeInfo, *pluginsInsight.NodeInfo, error) {
 	i.cfg.Logger.Debug("insight: Run")
-
-	var buildInfo pluginsInsight.BuildInfo
-	var codeInfo pluginsInsight.CodeInfo
-	var nodeInfo pluginsInsight.NodeInfo
 
 	g, ctx := errgroup.WithContext(ctx)
 	g.SetLimit(routineNum)
