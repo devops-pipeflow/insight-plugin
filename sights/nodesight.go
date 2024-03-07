@@ -101,6 +101,7 @@ func (ns *nodesight) Run(ctx context.Context, trigger *proto.NodeTrigger) (proto
 	})
 
 	if err := g.Wait(); err != nil {
+		info.Error = err.Error()
 		return info, errors.Wrap(err, "failed to wait routine")
 	}
 

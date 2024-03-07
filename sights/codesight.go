@@ -59,7 +59,10 @@ func (cs *codesight) Deinit(ctx context.Context) error {
 func (cs *codesight) Run(ctx context.Context, trigger *proto.CodeTrigger) (proto.CodeInfo, error) {
 	cs.cfg.Logger.Debug("codesight: Run")
 
-	// TBD: FIXME
+	var info proto.CodeInfo
 
-	return proto.CodeInfo{}, nil
+	// TBD: FIXME
+	info.Error = "failed to run codesight"
+
+	return info, nil
 }

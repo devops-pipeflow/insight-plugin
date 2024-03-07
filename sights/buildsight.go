@@ -59,7 +59,10 @@ func (bs *buildsight) Deinit(ctx context.Context) error {
 func (bs *buildsight) Run(ctx context.Context, trigger *proto.BuildTrigger) (proto.BuildInfo, error) {
 	bs.cfg.Logger.Debug("buildsight: Run")
 
-	// TBD: FIXME
+	var info proto.BuildInfo
 
-	return proto.BuildInfo{}, nil
+	// TBD: FIXME
+	info.Error = "failed to run buildsight"
+
+	return info, nil
 }
