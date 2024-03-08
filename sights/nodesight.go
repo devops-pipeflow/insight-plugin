@@ -16,18 +16,18 @@ import (
 )
 
 const (
-	agentExec   = "agent"
-	agentPath   = "/tmp/"
-	agentScript = agentExec + ".sh"
-
 	agentDurationTime = "--duration-time"
+	agentExec         = "agent"
 	agentLogLevel     = "--log-level"
+	agentPath         = "/tmp/"
+	agentScript       = agentExec + ".sh"
 	agentSep          = "="
 
 	artifactPath = "/devops-pipeflow/plugins/"
 
 	healthPath   = "/tmp/"
 	healthScript = "healthcheck.sh"
+	healthSilent = "--silent"
 
 	routineNum = -1
 )
@@ -151,10 +151,7 @@ func (ns *nodesight) runDetect(ctx context.Context, cfg *proto.SshConfig) error 
 func (ns *nodesight) runHealth(ctx context.Context, cfg *proto.SshConfig) (string, error) {
 	ns.cfg.Logger.Debug("nodesight: runHealth")
 
-	var err error
-	var out string
-
-	if err = ns.cfg.Ssh.Init(ctx, cfg); err != nil {
+	if err := ns.cfg.Ssh.Init(ctx, cfg); err != nil {
 		return "", errors.Wrap(err, "failed to init ssh")
 	}
 
@@ -162,22 +159,23 @@ func (ns *nodesight) runHealth(ctx context.Context, cfg *proto.SshConfig) (strin
 		_ = ns.cfg.Ssh.Deinit(ctx)
 	}()
 
-	cmds := []string{
-		fmt.Sprintf("curl -s -u%s:%s -L %s -o %s",
-			ns.cfg.Config.Spec.ArtifactConfig.User,
-			ns.cfg.Config.Spec.ArtifactConfig.Pass,
-			ns.cfg.Config.Spec.ArtifactConfig.Url+artifactPath+healthScript,
-			healthPath+healthScript),
-		fmt.Sprintf("cd %s; bash %s", healthPath, healthScript),
-		fmt.Sprintf("rm -f %s", healthPath+healthScript),
+	cmd := fmt.Sprintf("curl -s -u%s:%s -L %s -o %s",
+		ns.cfg.Config.Spec.ArtifactConfig.User,
+		ns.cfg.Config.Spec.ArtifactConfig.Pass,
+		ns.cfg.Config.Spec.ArtifactConfig.Url+artifactPath+healthScript,
+		healthPath+healthScript)
+	if _, err := ns.cfg.Ssh.Run(ctx, cmd); err != nil {
+		return "", errors.Wrap(err, "failed to deploy health script")
 	}
 
-	for i := range cmds {
-		out, err = ns.cfg.Ssh.Run(ctx, cmds[i])
-		if err != nil {
-			return "", errors.Wrap(err, "failed to run ssh")
-		}
+	cmd = fmt.Sprintf("cd %s; bash %s %s", healthPath, healthScript, healthSilent)
+	out, err := ns.cfg.Ssh.Run(ctx, cmd)
+	if err != nil {
+		return "", errors.Wrap(err, "failed to run health script")
 	}
+
+	cmd = fmt.Sprintf("rm -f %s", healthPath+healthScript)
+	_, _ = ns.cfg.Ssh.Run(ctx, cmd)
 
 	return out, nil
 }
