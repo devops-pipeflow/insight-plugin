@@ -80,6 +80,9 @@ func (ns *nodesight) Run(ctx context.Context, trigger *proto.NodeTrigger) (proto
 	g.SetLimit(routineNum)
 
 	g.Go(func() error {
+		defer func(ns *nodesight, ctx context.Context, cfg *proto.SshConfig) {
+			_ = ns.runClean(ctx, cfg)
+		}(ns, ctx, &trigger.SshConfig)
 		if err := ns.runDetect(ctx, &trigger.SshConfig); err != nil {
 			return errors.Wrap(err, "failed to run detect")
 		}
@@ -132,17 +135,14 @@ func (ns *nodesight) runDetect(ctx context.Context, cfg *proto.SshConfig) error 
 			ns.cfg.Config.Spec.ArtifactConfig.Pass,
 			ns.cfg.Config.Spec.ArtifactConfig.Url+artifactPath+agentExec,
 			agentPath+agentExec),
-		fmt.Sprintf("rm -f %s", agentPath+agentScript),
 	}
 
-	for i := range cmds {
-		out, err := ns.cfg.Ssh.Run(ctx, cmds[i])
-		if err != nil {
-			return errors.Wrap(err, "failed to run ssh")
-		}
-		if out != "" {
-			return errors.Wrap(errors.New(out), "failed to deploy agent")
-		}
+	out, err := ns.cfg.Ssh.Run(ctx, cmds)
+	if err != nil {
+		return errors.Wrap(err, "failed to run ssh")
+	}
+	if out != "" {
+		return errors.Wrap(errors.New(out), "failed to run detect")
 	}
 
 	return nil
@@ -159,23 +159,19 @@ func (ns *nodesight) runHealth(ctx context.Context, cfg *proto.SshConfig) (strin
 		_ = ns.cfg.Ssh.Deinit(ctx)
 	}()
 
-	cmd := fmt.Sprintf("curl -s -u%s:%s -L %s -o %s",
-		ns.cfg.Config.Spec.ArtifactConfig.User,
-		ns.cfg.Config.Spec.ArtifactConfig.Pass,
-		ns.cfg.Config.Spec.ArtifactConfig.Url+artifactPath+healthScript,
-		healthPath+healthScript)
-	if _, err := ns.cfg.Ssh.Run(ctx, cmd); err != nil {
-		return "", errors.Wrap(err, "failed to deploy health script")
+	cmds := []string{
+		fmt.Sprintf("curl -s -u%s:%s -L %s -o %s",
+			ns.cfg.Config.Spec.ArtifactConfig.User,
+			ns.cfg.Config.Spec.ArtifactConfig.Pass,
+			ns.cfg.Config.Spec.ArtifactConfig.Url+artifactPath+healthScript,
+			healthPath+healthScript),
+		fmt.Sprintf("cd %s; bash %s %s", healthPath, healthScript, healthSilent),
 	}
 
-	cmd = fmt.Sprintf("cd %s; bash %s %s", healthPath, healthScript, healthSilent)
-	out, err := ns.cfg.Ssh.Run(ctx, cmd)
+	out, err := ns.cfg.Ssh.Run(ctx, cmds)
 	if err != nil {
-		return "", errors.Wrap(err, "failed to run health script")
+		return "", errors.Wrap(err, "failed to run ssh")
 	}
-
-	cmd = fmt.Sprintf("rm -f %s", healthPath+healthScript)
-	_, _ = ns.cfg.Ssh.Run(ctx, cmd)
 
 	return out, nil
 }
@@ -193,12 +189,14 @@ func (ns *nodesight) runStat(ctx context.Context, cfg *proto.SshConfig) (*proto.
 		_ = ns.cfg.Ssh.Deinit(ctx)
 	}()
 
-	cmd := fmt.Sprintf("%s %s %s",
-		agentPath+agentExec,
-		agentDurationTime+agentSep+ns.cfg.Config.Spec.NodeConfig.Duration,
-		agentLogLevel+agentSep+"ERROR")
+	cmds := []string{
+		fmt.Sprintf("%s %s %s",
+			agentPath+agentExec,
+			agentDurationTime+agentSep+ns.cfg.Config.Spec.NodeConfig.Duration,
+			agentLogLevel+agentSep+"ERROR"),
+	}
 
-	out, err := ns.cfg.Ssh.Run(ctx, cmd)
+	out, err := ns.cfg.Ssh.Run(ctx, cmds)
 	if err != nil {
 		return &stat, errors.Wrap(err, "failed to run ssh")
 	}
@@ -208,6 +206,30 @@ func (ns *nodesight) runStat(ctx context.Context, cfg *proto.SshConfig) (*proto.
 	}
 
 	return &stat, nil
+}
+
+func (ns *nodesight) runClean(ctx context.Context, cfg *proto.SshConfig) error {
+	ns.cfg.Logger.Debug("nodesight: runClean")
+
+	if err := ns.cfg.Ssh.Init(ctx, cfg); err != nil {
+		return errors.Wrap(err, "failed to init ssh")
+	}
+
+	defer func() {
+		_ = ns.cfg.Ssh.Deinit(ctx)
+	}()
+
+	cmds := []string{
+		fmt.Sprintf("rm -f %s", agentPath+agentScript),
+		fmt.Sprintf("rm -f %s", healthPath+healthScript),
+	}
+
+	_, err := ns.cfg.Ssh.Run(ctx, cmds)
+	if err != nil {
+		return errors.Wrap(err, "failed to run ssh")
+	}
+
+	return nil
 }
 
 func (ns *nodesight) runReport(_ context.Context, health string, stat *proto.NodeStat) (*proto.NodeReport, error) {

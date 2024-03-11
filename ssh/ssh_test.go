@@ -78,7 +78,12 @@ func TestSshRunSession(t *testing.T) {
 
 	_ = s.initSession(ctx, sshHost, sshPort, sshUser, sshPass, sshKey, sshTimeout)
 
-	out, err := s.runSession(ctx, "echo \"Hello World!\"")
+	cmds := []string{
+		"echo \"Hello\"",
+		"echo \"World!\"",
+	}
+
+	out, err := s.runSession(ctx, cmds)
 	assert.Equal(t, nil, err)
 
 	fmt.Println(out)

@@ -4,6 +4,7 @@ import (
 	"context"
 	"net"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/go-hclog"
@@ -16,6 +17,7 @@ import (
 
 const (
 	connTimeout = 10 * time.Second
+	operatorAnd = "&&"
 )
 
 const (
@@ -52,7 +54,7 @@ var (
 type Ssh interface {
 	Init(context.Context, *proto.SshConfig) error
 	Deinit(context.Context) error
-	Run(context.Context, string) (string, error)
+	Run(context.Context, []string) (string, error)
 }
 
 type SshConfig struct {
@@ -94,10 +96,10 @@ func (s *ssh) Deinit(ctx context.Context) error {
 	return s.deinitSession(ctx)
 }
 
-func (s *ssh) Run(ctx context.Context, cmd string) (string, error) {
+func (s *ssh) Run(ctx context.Context, cmds []string) (string, error) {
 	s.cfg.Logger.Debug("ssh: Run")
 
-	return s.runSession(ctx, cmd)
+	return s.runSession(ctx, cmds)
 }
 
 func (s *ssh) initSession(ctx context.Context, host string, port int64, user, pass, key, timeout string) error {
@@ -159,14 +161,14 @@ func (s *ssh) deinitSession(_ context.Context) error {
 	return nil
 }
 
-func (s *ssh) runSession(_ context.Context, cmd string) (string, error) {
+func (s *ssh) runSession(_ context.Context, cmds []string) (string, error) {
 	s.cfg.Logger.Debug("ssh: runSession")
 
 	if s.session == nil {
 		return "", errors.New("invalid session")
 	}
 
-	out, err := s.session.CombinedOutput(cmd)
+	out, err := s.session.CombinedOutput(strings.Join(cmds, operatorAnd))
 	if err != nil {
 		return string(out), errors.Wrap(err, "failed to run cmd")
 	}
