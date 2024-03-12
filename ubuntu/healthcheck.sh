@@ -70,7 +70,7 @@ check_interfaces() {
         print_fix "EOF"
     fi
 
-    return 1
+    return 2
 }
 
 # Check /etc/resolv.conf
@@ -99,7 +99,7 @@ check_resolv() {
         print_fix "EOF"
     fi
 
-    return 1
+    return 3
 }
 
 # Check /etc/sysctl.conf
@@ -127,7 +127,7 @@ check_sysctl() {
         print_fix "sudo sysctl -p"
     fi
 
-    return 1
+    return 4
 }
 
 # Check Docker
@@ -153,7 +153,7 @@ check_docker() {
         print_fix "sudo chmod 666 /var/run/docker.sock"
     fi
 
-    return 1
+    return 5
 }
 
 # Check /var/run/docker.sock
@@ -175,7 +175,7 @@ check_group() {
         print_fix "\e[1mFIXME\e[0m: sudo usermod -a -G docker $USER"
     fi
 
-    return 1
+    return 6
 }
 
 # Check /etc/default/docker
@@ -202,7 +202,7 @@ check_default() {
         print_fix "sudo service docker restart"
     fi
 
-    return 1
+    return 7
 }
 
 # Check /etc/docker/daemon.json
@@ -240,7 +240,7 @@ check_daemon() {
         print_fix "sudo service docker restart"
     fi
 
-    return 1
+    return 8
 }
 
 # Check netstat
@@ -263,7 +263,7 @@ check_netstat() {
         print_fix "sudo apt install net-tools"
     fi
 
-    return 1
+    return 9
 }
 
 # Check $HOME/.ssh/
@@ -280,7 +280,7 @@ check_ssh() {
     print_pass "\e[1mNOTE\e[0m: check ssh host \e[93m$USER@$host:22\e[0m"
     print_pass "\e[1mNOTE\e[0m: check ssh-keygen \e[93mPress <ENTER> when 'Enter passphrase' asked\e[0m"
 
-    return 0
+    return 10
 }
 
 # Check disk
@@ -302,7 +302,7 @@ check_disk() {
         echo "sudo find /boot -type f -name \"config-*\" -o -name \"initrd.img-*\" -o -name \"System.map-*\" -o -name \"vmlinuz-*\" | grep -vE \"\$RELEASE\$\" | xargs sudo rm -rf"
     fi
 
-    return 1
+    return 11
 }
 
 run_check() {
