@@ -104,7 +104,6 @@ func (ns *nodesight) Run(ctx context.Context, trigger *proto.NodeTrigger) (proto
 	})
 
 	if err := g.Wait(); err != nil {
-		info.Error = err.Error()
 		return info, errors.Wrap(err, "failed to wait routine")
 	}
 
@@ -139,10 +138,7 @@ func (ns *nodesight) runDetect(ctx context.Context, cfg *proto.SshConfig) error 
 
 	out, err := ns.cfg.Ssh.Run(ctx, cmds)
 	if err != nil {
-		return errors.Wrap(err, "failed to run ssh")
-	}
-	if out != "" {
-		return errors.Wrap(errors.New(out), "failed to run detect")
+		return errors.Wrap(errors.New(out), err.Error())
 	}
 
 	return nil
@@ -167,16 +163,19 @@ func (ns *nodesight) runHealth(ctx context.Context, cfg *proto.SshConfig) (strin
 			healthPath+healthScript),
 	}
 
-	_, err := ns.cfg.Ssh.Run(ctx, cmds)
+	out, err := ns.cfg.Ssh.Run(ctx, cmds)
 	if err != nil {
-		return "", errors.Wrap(err, "failed to run ssh")
+		return "", errors.Wrap(errors.New(out), err.Error())
 	}
 
 	cmds = []string{
 		fmt.Sprintf("cd %s; bash %s %s", healthPath, healthScript, healthSilent),
 	}
 
-	out, _ := ns.cfg.Ssh.Run(ctx, cmds)
+	out, err = ns.cfg.Ssh.Run(ctx, cmds)
+	if err != nil {
+		return "", errors.Wrap(errors.New(out), err.Error())
+	}
 
 	return out, nil
 }
@@ -203,7 +202,7 @@ func (ns *nodesight) runStat(ctx context.Context, cfg *proto.SshConfig) (*proto.
 
 	out, err := ns.cfg.Ssh.Run(ctx, cmds)
 	if err != nil {
-		return &stat, errors.Wrap(err, "failed to run ssh")
+		return &stat, errors.Wrap(errors.New(out), err.Error())
 	}
 
 	if err := json.Unmarshal([]byte(out), &stat); err != nil {
@@ -229,9 +228,9 @@ func (ns *nodesight) runClean(ctx context.Context, cfg *proto.SshConfig) error {
 		fmt.Sprintf("rm -f %s", healthPath+healthScript),
 	}
 
-	_, err := ns.cfg.Ssh.Run(ctx, cmds)
+	out, err := ns.cfg.Ssh.Run(ctx, cmds)
 	if err != nil {
-		return errors.Wrap(err, "failed to run ssh")
+		return errors.Wrap(errors.New(out), err.Error())
 	}
 
 	return nil

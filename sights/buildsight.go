@@ -62,7 +62,6 @@ func (bs *buildsight) Run(ctx context.Context, trigger *proto.BuildTrigger) (pro
 	var info proto.BuildInfo
 
 	// TBD: FIXME
-	info.Error = "failed to run buildsight"
 
 	return info, nil
 }

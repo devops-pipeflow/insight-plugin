@@ -82,27 +82,39 @@ func (i *insight) Run(ctx context.Context,
 		buildInfo proto.BuildInfo
 		codeInfo  proto.CodeInfo
 		nodeInfo  proto.NodeInfo
+		err       error
 	)
 
 	g, ctx := errgroup.WithContext(ctx)
 	g.SetLimit(routineNum)
 
 	g.Go(func() error {
-		buildInfo, _ = i.cfg.BuildSight.Run(ctx, buildTrigger)
+		buildInfo, err = i.cfg.BuildSight.Run(ctx, buildTrigger)
+		if err != nil {
+			return errors.Wrap(err, "failed to run buildsight")
+		}
 		return nil
 	})
 
 	g.Go(func() error {
-		codeInfo, _ = i.cfg.CodeSight.Run(ctx, codeTrigger)
+		codeInfo, err = i.cfg.CodeSight.Run(ctx, codeTrigger)
+		if err != nil {
+			return errors.Wrap(err, "failed to run codesight")
+		}
 		return nil
 	})
 
 	g.Go(func() error {
-		nodeInfo, _ = i.cfg.NodeSight.Run(ctx, nodeTrigger)
+		nodeInfo, err = i.cfg.NodeSight.Run(ctx, nodeTrigger)
+		if err != nil {
+			return errors.Wrap(err, "failed to run nodesight")
+		}
 		return nil
 	})
 
-	_ = g.Wait()
+	if err = g.Wait(); err != nil {
+		return buildInfo, codeInfo, nodeInfo, errors.Wrap(err, "failed to wait routine")
+	}
 
 	return buildInfo, codeInfo, nodeInfo, nil
 }

@@ -62,7 +62,6 @@ func (cs *codesight) Run(ctx context.Context, trigger *proto.CodeTrigger) (proto
 	var info proto.CodeInfo
 
 	// TBD: FIXME
-	info.Error = "failed to run codesight"
 
 	return info, nil
 }

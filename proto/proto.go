@@ -97,7 +97,7 @@ type BuildInfo struct {
 	ReviewInfo  ReviewInfo  `json:"reviewInfo"`
 }
 
-type CodeInfo struct {}
+type CodeInfo struct{}
 
 type NodeInfo struct {
 	NodeStat   NodeStat   `json:"nodeStat"`
