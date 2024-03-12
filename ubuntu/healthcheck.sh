@@ -280,7 +280,7 @@ check_ssh() {
     print_pass "\e[1mNOTE\e[0m: check ssh host \e[93m$USER@$host:22\e[0m"
     print_pass "\e[1mNOTE\e[0m: check ssh-keygen \e[93mPress <ENTER> when 'Enter passphrase' asked\e[0m"
 
-    return 10
+    return 0
 }
 
 # Check disk
