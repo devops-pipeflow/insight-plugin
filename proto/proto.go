@@ -95,17 +95,13 @@ type BuildInfo struct {
 	LoggingInfo LoggingInfo `json:"loggingInfo"`
 	RepoInfo    RepoInfo    `json:"repoInfo"`
 	ReviewInfo  ReviewInfo  `json:"reviewInfo"`
-	Error       string      `json:"error"`
 }
 
-type CodeInfo struct {
-	Error string `json:"error"`
-}
+type CodeInfo struct {}
 
 type NodeInfo struct {
 	NodeStat   NodeStat   `json:"nodeStat"`
 	NodeReport NodeReport `json:"nodeReport"`
-	Error      string     `json:"error"`
 }
 
 type LoggingInfo struct {
