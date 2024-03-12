@@ -165,13 +165,18 @@ func (ns *nodesight) runHealth(ctx context.Context, cfg *proto.SshConfig) (strin
 			ns.cfg.Config.Spec.ArtifactConfig.Pass,
 			ns.cfg.Config.Spec.ArtifactConfig.Url+artifactPath+healthScript,
 			healthPath+healthScript),
-		fmt.Sprintf("cd %s; bash %s %s", healthPath, healthScript, healthSilent),
 	}
 
-	out, err := ns.cfg.Ssh.Run(ctx, cmds)
+	_, err := ns.cfg.Ssh.Run(ctx, cmds)
 	if err != nil {
 		return "", errors.Wrap(err, "failed to run ssh")
 	}
+
+	cmds = []string{
+		fmt.Sprintf("cd %s; bash %s %s", healthPath, healthScript, healthSilent),
+	}
+
+	out, _ := ns.cfg.Ssh.Run(ctx, cmds)
 
 	return out, nil
 }
