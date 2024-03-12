@@ -12,8 +12,8 @@ CHECKSUM=
 
 # Verify checksum
 # TBD: FIXME
-echo "$CHECKSUM" | shasum -a 256 -c -s
-ret=$?
+#echo "$CHECKSUM" | shasum -a 256 -c -s
+#ret=$?
 #if [ $ret != 0 ]; then
 #  echo 'Invalid checksum'
 #  exit 1
