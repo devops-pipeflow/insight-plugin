@@ -213,6 +213,9 @@ func fetchDiskStat(ctx context.Context, logger hclog.Logger, _ time.Duration) (p
 	}
 
 	usageHelper := func(usage *disk.UsageStat) *proto.DiskUsage {
+		if usage == nil {
+			return &proto.DiskUsage{}
+		}
 		return &proto.DiskUsage{
 			Path:        usage.Path,
 			FsType:      usage.Fstype,
@@ -257,6 +260,9 @@ func fetchDockerStat(ctx context.Context, logger hclog.Logger, _ time.Duration) 
 	}
 
 	memDockerHelper := func(stat *docker.CgroupMemStat) proto.CGroupMemDocker {
+		if stat == nil {
+			return proto.CGroupMemDocker{}
+		}
 		return proto.CGroupMemDocker{
 			Cache:              stat.Cache,
 			Rss:                stat.RSS,
@@ -479,6 +485,9 @@ func fetchProcessStat(ctx context.Context, logger hclog.Logger, duration time.Du
 	}
 
 	processMemoryInfoHelper := func(stat *process.MemoryInfoStat) proto.ProcessMemoryInfo {
+		if stat == nil {
+			return proto.ProcessMemoryInfo{}
+		}
 		return proto.ProcessMemoryInfo{
 			Rss:    stat.RSS,
 			Vms:    stat.VMS,
