@@ -226,17 +226,13 @@ message BuildInfo {
   LoggingInfo loggingInfo = 1;  // logging info
   RepoInfo repoInfo = 2;  // repo info (Gitiles)
   ReviewInfo reviewInfo = 3;  // review info (Gerrit, pingview)
-  string error = 4;  // error info
 }
 
-message CodeInfo {
-  string error = 1;  // error info
-}
+message CodeInfo {}
 
 message NodeInfo {
   NodeStat nodeStat = 1;  // node statistic (shown on web)
   NodeReport nodeReport = 2;  // node report (empty: pass, nonempty: fail)
-  string error = 3;  // error info
 }
 
 message LoggingInfo {
