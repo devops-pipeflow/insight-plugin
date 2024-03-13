@@ -12,6 +12,15 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func timeDuration() func() {
+	start := time.Now()
+
+	return func() {
+		d := time.Since(start)
+		fmt.Printf("time duration = %v\n", d)
+	}
+}
+
 func TestInitLogger(t *testing.T) {
 	ctx := context.Background()
 
@@ -50,93 +59,109 @@ func TestFetchCpuStat(t *testing.T) {
 	ctx := context.Background()
 	logger, _ := initLogger(ctx, agentLevel)
 
+	defer timeDuration()()
+
 	d, _ := time.ParseDuration(agentDuration)
 	stat, err := fetchCpuStat(ctx, logger, d)
 	assert.Equal(t, nil, err)
 
-	buf, _ := json.Marshal(stat)
-	fmt.Println(string(buf))
+	_, err = json.Marshal(stat)
+	assert.Equal(t, nil, err)
 }
 
 func TestFetchDiskStat(t *testing.T) {
 	ctx := context.Background()
 	logger, _ := initLogger(ctx, agentLevel)
 
+	defer timeDuration()()
+
 	d, _ := time.ParseDuration(agentDuration)
 	stat, err := fetchDiskStat(ctx, logger, d)
 	assert.Equal(t, nil, err)
 
-	buf, _ := json.Marshal(stat)
-	fmt.Println(string(buf))
+	_, err = json.Marshal(stat)
+	assert.Equal(t, nil, err)
 }
 
 func TestFetchDockerStat(t *testing.T) {
 	ctx := context.Background()
 	logger, _ := initLogger(ctx, agentLevel)
 
+	defer timeDuration()()
+
 	d, _ := time.ParseDuration(agentDuration)
 	stat, _ := fetchDockerStat(ctx, logger, d)
 
-	buf, _ := json.Marshal(stat)
-	fmt.Println(string(buf))
+	_, err := json.Marshal(stat)
+	assert.Equal(t, nil, err)
 }
 
 func TestFetchHostStat(t *testing.T) {
 	ctx := context.Background()
 	logger, _ := initLogger(ctx, agentLevel)
 
+	defer timeDuration()()
+
 	d, _ := time.ParseDuration(agentDuration)
 	stat, err := fetchHostStat(ctx, logger, d)
 	assert.Equal(t, nil, err)
 
-	buf, _ := json.Marshal(stat)
-	fmt.Println(string(buf))
+	_, err = json.Marshal(stat)
+	assert.Equal(t, nil, err)
 }
 
 func TestFetchLoadStat(t *testing.T) {
 	ctx := context.Background()
 	logger, _ := initLogger(ctx, agentLevel)
 
+	defer timeDuration()()
+
 	d, _ := time.ParseDuration(agentDuration)
 	stat, err := fetchLoadStat(ctx, logger, d)
 	assert.Equal(t, nil, err)
 
-	buf, _ := json.Marshal(stat)
-	fmt.Println(string(buf))
+	_, err = json.Marshal(stat)
+	assert.Equal(t, nil, err)
 }
 
 func TestFetchMemStat(t *testing.T) {
 	ctx := context.Background()
 	logger, _ := initLogger(ctx, agentLevel)
 
+	defer timeDuration()()
+
 	d, _ := time.ParseDuration(agentDuration)
 	stat, err := fetchMemStat(ctx, logger, d)
 	assert.Equal(t, nil, err)
 
-	buf, _ := json.Marshal(stat)
-	fmt.Println(string(buf))
+	_, err = json.Marshal(stat)
+	assert.Equal(t, nil, err)
 }
 
 func TestFetchNetStat(t *testing.T) {
 	ctx := context.Background()
 	logger, _ := initLogger(ctx, agentLevel)
 
+	defer timeDuration()()
+
 	d, _ := time.ParseDuration(agentDuration)
 	stat, err := fetchNetStat(ctx, logger, d)
 	assert.Equal(t, nil, err)
 
-	buf, _ := json.Marshal(stat)
-	fmt.Println(string(buf))
+	_, err = json.Marshal(stat)
+	assert.Equal(t, nil, err)
 }
 
 func TestFetchProcessStat(t *testing.T) {
 	ctx := context.Background()
 	logger, _ := initLogger(ctx, agentLevel)
 
+	defer timeDuration()()
+
 	d, _ := time.ParseDuration(agentDuration)
 	stat, err := fetchProcessStat(ctx, logger, d)
 	assert.Equal(t, nil, err)
 
-	buf, _ := json.Marshal(stat)
-	fmt.Println(string(buf))
+	_, err = json.Marshal(stat)
+	assert.Equal(t, nil, err)
 }

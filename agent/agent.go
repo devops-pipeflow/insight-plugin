@@ -360,6 +360,9 @@ func fetchMemStat(ctx context.Context, logger hclog.Logger, _ time.Duration) (pr
 	helper := func(devices []*mem.SwapDevice) []proto.MemSwapDevice {
 		var buf []proto.MemSwapDevice
 		for i := range devices {
+			if devices[i] == nil {
+				continue
+			}
 			buf = append(buf, proto.MemSwapDevice{
 				Name:      devices[i].Name,
 				UsedBytes: devices[i].UsedBytes,
@@ -479,6 +482,9 @@ func fetchProcessStat(ctx context.Context, logger hclog.Logger, duration time.Du
 	processChilderHelper := func(processes []*process.Process) []int32 {
 		var buf []int32
 		for i := range processes {
+			if processes[i] == nil {
+				continue
+			}
 			buf = append(buf, processes[i].Pid)
 		}
 		return buf
@@ -515,6 +521,9 @@ func fetchProcessStat(ctx context.Context, logger hclog.Logger, duration time.Du
 	processInfoHelper := func(ctx context.Context, processes []*process.Process) []proto.ProcessInfo {
 		var buf []proto.ProcessInfo
 		for i := range processes {
+			if processes[i] == nil {
+				continue
+			}
 			background, _ := processes[i].BackgroundWithContext(ctx)
 			cpuPercent, _ := processes[i].CPUPercentWithContext(ctx)
 			procs, _ := processes[i].ChildrenWithContext(ctx)
