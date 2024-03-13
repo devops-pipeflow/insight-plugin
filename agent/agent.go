@@ -25,14 +25,14 @@ import (
 )
 
 const (
-	agentDuration = 10 * time.Second
+	agentDuration = "10s"
 	agentLevel    = "INFO"
 	agentName     = "name"
 )
 
 var (
 	app          = kingpin.New(agentName, "insight agent")
-	durationTime = app.Flag("duration-time", "Duration time ((h:hour, m:minute, s:second)").Required().String()
+	durationTime = app.Flag("duration-time", "Duration time ((h:hour, m:minute, s:second)").Default(agentDuration).String()
 	logLevel     = app.Flag("log-level", "Log level (DEBUG|INFO|WARN|ERROR)").Default(agentLevel).String()
 )
 
@@ -86,7 +86,7 @@ func initDuration(_ context.Context, logger hclog.Logger, duration string) (time
 			return 0, errors.Wrap(err, "failed to parse duration")
 		}
 	} else {
-		d = agentDuration
+		d, _ = time.ParseDuration(agentDuration)
 	}
 
 	return d, nil

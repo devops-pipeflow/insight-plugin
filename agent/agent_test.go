@@ -25,8 +25,9 @@ func TestInitDuration(t *testing.T) {
 	logger, _ := initLogger(ctx, agentLevel)
 
 	duration, err := initDuration(ctx, logger, "")
+	d, _ := time.ParseDuration(agentDuration)
 	assert.Equal(t, nil, err)
-	assert.Equal(t, agentDuration, duration)
+	assert.Equal(t, d, duration)
 
 	duration, err = initDuration(ctx, logger, "1s")
 	assert.Equal(t, nil, err)
@@ -49,7 +50,8 @@ func TestFetchCpuStat(t *testing.T) {
 	ctx := context.Background()
 	logger, _ := initLogger(ctx, agentLevel)
 
-	stat, err := fetchCpuStat(ctx, logger, agentDuration)
+	d, _ := time.ParseDuration(agentDuration)
+	stat, err := fetchCpuStat(ctx, logger, d)
 	assert.Equal(t, nil, err)
 
 	buf, _ := json.Marshal(stat)
@@ -60,7 +62,8 @@ func TestFetchDiskStat(t *testing.T) {
 	ctx := context.Background()
 	logger, _ := initLogger(ctx, agentLevel)
 
-	stat, err := fetchDiskStat(ctx, logger, agentDuration)
+	d, _ := time.ParseDuration(agentDuration)
+	stat, err := fetchDiskStat(ctx, logger, d)
 	assert.Equal(t, nil, err)
 
 	buf, _ := json.Marshal(stat)
@@ -71,7 +74,8 @@ func TestFetchDockerStat(t *testing.T) {
 	ctx := context.Background()
 	logger, _ := initLogger(ctx, agentLevel)
 
-	stat, _ := fetchDockerStat(ctx, logger, agentDuration)
+	d, _ := time.ParseDuration(agentDuration)
+	stat, _ := fetchDockerStat(ctx, logger, d)
 
 	buf, _ := json.Marshal(stat)
 	fmt.Println(string(buf))
@@ -81,7 +85,8 @@ func TestFetchHostStat(t *testing.T) {
 	ctx := context.Background()
 	logger, _ := initLogger(ctx, agentLevel)
 
-	stat, err := fetchHostStat(ctx, logger, agentDuration)
+	d, _ := time.ParseDuration(agentDuration)
+	stat, err := fetchHostStat(ctx, logger, d)
 	assert.Equal(t, nil, err)
 
 	buf, _ := json.Marshal(stat)
@@ -92,7 +97,8 @@ func TestFetchLoadStat(t *testing.T) {
 	ctx := context.Background()
 	logger, _ := initLogger(ctx, agentLevel)
 
-	stat, err := fetchLoadStat(ctx, logger, agentDuration)
+	d, _ := time.ParseDuration(agentDuration)
+	stat, err := fetchLoadStat(ctx, logger, d)
 	assert.Equal(t, nil, err)
 
 	buf, _ := json.Marshal(stat)
@@ -103,7 +109,8 @@ func TestFetchMemStat(t *testing.T) {
 	ctx := context.Background()
 	logger, _ := initLogger(ctx, agentLevel)
 
-	stat, err := fetchMemStat(ctx, logger, agentDuration)
+	d, _ := time.ParseDuration(agentDuration)
+	stat, err := fetchMemStat(ctx, logger, d)
 	assert.Equal(t, nil, err)
 
 	buf, _ := json.Marshal(stat)
@@ -114,7 +121,8 @@ func TestFetchNetStat(t *testing.T) {
 	ctx := context.Background()
 	logger, _ := initLogger(ctx, agentLevel)
 
-	stat, err := fetchNetStat(ctx, logger, agentDuration)
+	d, _ := time.ParseDuration(agentDuration)
+	stat, err := fetchNetStat(ctx, logger, d)
 	assert.Equal(t, nil, err)
 
 	buf, _ := json.Marshal(stat)
@@ -125,7 +133,8 @@ func TestFetchProcessStat(t *testing.T) {
 	ctx := context.Background()
 	logger, _ := initLogger(ctx, agentLevel)
 
-	stat, err := fetchProcessStat(ctx, logger, agentDuration)
+	d, _ := time.ParseDuration(agentDuration)
+	stat, err := fetchProcessStat(ctx, logger, d)
 	assert.Equal(t, nil, err)
 
 	buf, _ := json.Marshal(stat)
