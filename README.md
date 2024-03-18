@@ -193,6 +193,33 @@ message TriggerRequest {
 
 message BuildTrigger {
   LoggingTrigger loggingTrigger = 1;
+  GerritTrigger  gerritTrigger = 2;
+}
+
+message GerritTrigger {
+  string host = 1;
+  string port = 2;
+  string project = 3;
+  string topic = 4;
+  string branch = 5;
+  string eventType = 6;
+  string scheme = 7;
+  string refspec = 8;
+  string changeID = 9;
+  string changeUrl = 10;
+  string changeNumber = 11;
+  string changeSubject = 12;
+  string changeOwner = 13;
+  string changeOwnerName = 14;
+  string changeOwnerEmail = 15;
+  string changeWIPState = 16;
+  string changePrivateState = 17;
+  string changeCommitMessage = 18;
+  string patchsetNumber = 19;
+  string patchsetRevision = 20;
+  string patchsetUploader = 21;
+  string patchsetUploaderName = 22;
+  string patchsetUploaderEmail = 23;
 }
 
 message CodeTrigger {}
