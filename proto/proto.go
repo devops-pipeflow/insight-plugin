@@ -62,6 +62,33 @@ type TriggerRequest struct {
 
 type BuildTrigger struct {
 	LoggingTrigger LoggingTrigger `json:"loggingTrigger"`
+	GerritTrigger  GerritTrigger  `json:"gerritTrigger"`
+}
+
+type GerritTrigger struct {
+	Host                  string `json:"host"`
+	Port                  string `json:"port"`
+	Project               string `json:"project"`
+	Topic                 string `json:"topic"`
+	Branch                string `json:"branch"`
+	EventType             string `json:"eventType"`
+	Scheme                string `json:"scheme"`
+	Refspec               string `json:"refspec"`
+	ChangeID              string `json:"changeID"`
+	ChangeUrl             string `json:"changeUrl"`
+	ChangeNumber          string `json:"changeNumber"`
+	ChangeSubject         string `json:"changeSubject"`
+	ChangeOwner           string `json:"changeOwner"`
+	ChangeOwnerName       string `json:"changeOwnerName"`
+	ChangeOwnerEmail      string `json:"changeOwnerEmail"`
+	ChangeWIPState        string `json:"changeWIPState"`
+	ChangePrivateState    string `json:"changePrivateState"`
+	ChangeCommitMessage   string `json:"changeCommitMessage"`
+	PatchsetNumber        string `json:"patchsetNumber"`
+	PatchsetRevision      string `json:"patchsetRevision"`
+	PatchsetUploader      string `json:"patchsetUploader"`
+	PatchsetUploaderName  string `json:"patchsetUploaderName"`
+	PatchsetUploaderEmail string `json:"patchsetUploaderEmail"`
 }
 
 type CodeTrigger struct{}
