@@ -276,7 +276,7 @@ message RepoInfo {
   string committer = 4;  // committer name in repo
   string author = 5;  // author name in repo
   string message = 6;  // commit message in repo
-  string date = 7;  // commit date in repo
+  string date = 7;  // commit updated date in repo
 }
 
 message ReviewInfo {
@@ -286,7 +286,7 @@ message ReviewInfo {
   string owner = 4;  // owner name in review
   string author = 5;  // author name in review
   string message = 6;  // commit message in review
-  string date = 7;  // commit date in review
+  string date = 7;  // commit updated date in review
 }
 
 message NodeStat {
