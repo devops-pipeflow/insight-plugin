@@ -153,7 +153,7 @@ message BuildConfig {
 
 message CodeConfig {
   string duration = 1;  // duration time in string (h:hour, m:minute, s:second)
-  repeated LintConfig lintConfig = 2;  // lint config
+  repeated LintConfig lintConfigs = 2;  // lint configs
   LintVote lintVote = 3;  // vote config (Gerrit, pingview)
 }
 
@@ -193,9 +193,9 @@ message LoggingConfig {
 
 message LintConfig {
   string name = 1;  // lint name
-  repeated string extension = 2;  // extension name
-  repeated string file = 3;  // file name
-  repeated string repo = 4;  // repository name
+  repeated string extensions = 2;  // extension names
+  repeated string files = 3;  // file names
+  repeated string projects = 4;  // project names
 }
 
 message LintVote {
