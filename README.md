@@ -199,10 +199,10 @@ message LintConfig {
 }
 
 message LintVote {
-  approval = 1;  // approval vote
-  disapproval = 2;  // disapproval vote
-  label = 3;  //  vote label
-  message = 4;  // vote message
+  string approval = 1;  // approval vote
+  string disapproval = 2;  // disapproval vote
+  string label = 3;  //  vote label
+  string message = 4;  // vote message
 }
 
 message ConfigResponse {}
