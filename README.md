@@ -148,13 +148,17 @@ message EnvVariable {
 }
 
 message BuildConfig {
-  LoggingConfig loggingConfig = 1;
+  LoggingConfig loggingConfig = 1;  // logging config
 }
 
-message CodeConfig {}
+message CodeConfig {
+  string duration = 1;  // duration time in string (h:hour, m:minute, s:second)
+  repeated LintConfig lintConfig = 2;  // lint config
+  LintVote lintVote = 3;  // vote config (Gerrit, pingview)
+}
 
 message NodeConfig {
-  string duration = 1;  // node duration time in string (h:hour, m:minute, s:second)
+  string duration = 1;  // duration time in string (h:hour, m:minute, s:second)
 }
 
 message ArtifactConfig {
@@ -163,7 +167,11 @@ message ArtifactConfig {
   string pass = 3;  // artifactory pass
 }
 
-message GptConfig {}
+message GptConfig {
+  string url = 1;  // gpt url (codegpt)
+  string user = 2;  // gpt user (codegpt)
+  string pass = 3;  // gpt pass (codegpt)
+}
 
 message RepoConfig {
   string url = 1;  // repo url (Gitiles)
@@ -183,6 +191,20 @@ message LoggingConfig {
   int64 count = 3;  // logging lines count (total size: len*count)
 }
 
+message LintConfig {
+  string name = 1;  // lint name
+  repeated string extension = 2;  // extension name
+  repeated string file = 3;  // file name
+  repeated string repo = 4;  // repository name
+}
+
+message LintVote {
+  approval = 1;  // approval vote
+  disapproval = 2;  // disapproval vote
+  label = 3;  //  vote label
+  message = 4;  // vote message
+}
+
 message ConfigResponse {}
 
 message TriggerRequest {
@@ -192,11 +214,15 @@ message TriggerRequest {
 }
 
 message BuildTrigger {
-  LoggingTrigger loggingTrigger = 1;
-  GerritTrigger  gerritTrigger = 2;
+  LoggingTrigger loggingTrigger = 1;  // logging trigger
+  ReviewTrigger  reviewTrigger = 2;  // review trigger
 }
 
-message GerritTrigger {
+message CodeTrigger {
+  ReviewTrigger  reviewTrigger = 1;  // review trigger
+}
+
+message ReviewTrigger {
   string host = 1;
   string port = 2;
   string project = 3;
@@ -221,8 +247,6 @@ message GerritTrigger {
   string patchsetUploaderName = 22;
   string patchsetUploaderEmail = 23;
 }
-
-message CodeTrigger {}
 
 message NodeTrigger {
   SshConfig sshConfig = 1;  // ssh config
