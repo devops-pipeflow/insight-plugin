@@ -60,3 +60,7 @@ func TestNodeSightRunReport(t *testing.T) {
 	// TBD: FIXME
 	assert.Equal(t, nil, nil)
 }
+
+func TestNodeSightRunClean(t *testing.T) {
+	t.Skip("Skipping TestNodeSightRunClean.")
+}
