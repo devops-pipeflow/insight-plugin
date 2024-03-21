@@ -81,23 +81,31 @@ func DefaultConfig() *SshConfig {
 func (s *ssh) Init(ctx context.Context, cfg *proto.SshConfig) error {
 	s.cfg.Logger.Debug("ssh: Init")
 
-	c := s.cfg.Config.Spec.SshConfig
-
 	if cfg.Host != "" {
-		c = config.SshConfig(*cfg)
+		s.cfg.Config.Spec.SshConfig = config.SshConfig(*cfg)
 	}
 
-	return s.initSession(ctx, c.Host, c.Port, c.User, c.Pass, c.Key, c.Timeout)
+	return nil
 }
 
 func (s *ssh) Deinit(ctx context.Context) error {
 	s.cfg.Logger.Debug("ssh: Deinit")
 
-	return s.deinitSession(ctx)
+	return nil
 }
 
 func (s *ssh) Run(ctx context.Context, cmds []string) (string, error) {
 	s.cfg.Logger.Debug("ssh: Run")
+
+	c := s.cfg.Config.Spec.SshConfig
+
+	if err := s.initSession(ctx, c.Host, c.Port, c.User, c.Pass, c.Key, c.Timeout); err != nil {
+		return "", errors.Wrap(err, "failed to init session")
+	}
+
+	defer func(s *ssh, ctx context.Context) {
+		_ = s.deinitSession(ctx)
+	}(s, ctx)
 
 	return s.runSession(ctx, cmds)
 }
