@@ -65,6 +65,14 @@ const (
 	voteMessage     = "Voting Code-Review by pipeflow insight"
 )
 
+var (
+	queryOptions = []string{
+		"CURRENT_FILES",
+		"CURRENT_REVISION",
+		"DETAILED_ACCOUNTS",
+	}
+)
+
 type Review interface {
 	Init(context.Context) error
 	Deinit(context.Context) error
@@ -230,7 +238,7 @@ func (r *review) Fetch(ctx context.Context, root, commit string) (dname, rname s
 
 func (r *review) Query(ctx context.Context, search string, start int) ([]interface{}, error) {
 	helper := func(search string, start int) []interface{} {
-		buf, err := r.get(ctx, r.urlQuery(search, []string{"CURRENT_REVISION"}, start))
+		buf, err := r.get(ctx, r.urlQuery(search, queryOptions, start))
 		if err != nil {
 			return nil
 		}
