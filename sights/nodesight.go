@@ -76,21 +76,29 @@ func (ns *nodesight) Run(ctx context.Context, trigger *proto.NodeTrigger) (proto
 
 	var info proto.NodeInfo
 
+	if err := ns.cfg.Ssh.Init(ctx, &trigger.SshConfig); err != nil {
+		return info, errors.Wrap(err, "failed to init ssh")
+	}
+
+	defer func() {
+		_ = ns.cfg.Ssh.Deinit(ctx)
+	}()
+
 	g, ctx := errgroup.WithContext(ctx)
 	g.SetLimit(routineNum)
 
 	g.Go(func() error {
-		defer func(ns *nodesight, ctx context.Context, cfg *proto.SshConfig) {
-			_ = ns.runClean(ctx, cfg)
-		}(ns, ctx, &trigger.SshConfig)
-		if err := ns.runDetect(ctx, &trigger.SshConfig); err != nil {
+		defer func(ns *nodesight, ctx context.Context) {
+			_ = ns.runClean(ctx)
+		}(ns, ctx)
+		if err := ns.runDetect(ctx); err != nil {
 			return errors.Wrap(err, "failed to run detect")
 		}
-		health, err := ns.runHealth(ctx, &trigger.SshConfig)
+		health, err := ns.runHealth(ctx)
 		if err != nil {
 			return errors.Wrap(err, "failed to run health")
 		}
-		stat, err := ns.runStat(ctx, &trigger.SshConfig)
+		stat, err := ns.runStat(ctx)
 		if err != nil {
 			return errors.Wrap(err, "failed to run stat")
 		}
@@ -110,16 +118,8 @@ func (ns *nodesight) Run(ctx context.Context, trigger *proto.NodeTrigger) (proto
 	return info, nil
 }
 
-func (ns *nodesight) runDetect(ctx context.Context, cfg *proto.SshConfig) error {
+func (ns *nodesight) runDetect(ctx context.Context) error {
 	ns.cfg.Logger.Debug("nodesight: runDetect")
-
-	if err := ns.cfg.Ssh.Init(ctx, cfg); err != nil {
-		return errors.Wrap(err, "failed to init ssh")
-	}
-
-	defer func() {
-		_ = ns.cfg.Ssh.Deinit(ctx)
-	}()
 
 	cmds := []string{
 		fmt.Sprintf("curl -s -u%s:%s -L %s -o %s",
@@ -144,16 +144,8 @@ func (ns *nodesight) runDetect(ctx context.Context, cfg *proto.SshConfig) error 
 	return nil
 }
 
-func (ns *nodesight) runHealth(ctx context.Context, cfg *proto.SshConfig) (string, error) {
+func (ns *nodesight) runHealth(ctx context.Context) (string, error) {
 	ns.cfg.Logger.Debug("nodesight: runHealth")
-
-	if err := ns.cfg.Ssh.Init(ctx, cfg); err != nil {
-		return "", errors.Wrap(err, "failed to init ssh")
-	}
-
-	defer func() {
-		_ = ns.cfg.Ssh.Deinit(ctx)
-	}()
 
 	cmds := []string{
 		fmt.Sprintf("curl -s -u%s:%s -L %s -o %s",
@@ -180,18 +172,10 @@ func (ns *nodesight) runHealth(ctx context.Context, cfg *proto.SshConfig) (strin
 	return out, nil
 }
 
-func (ns *nodesight) runStat(ctx context.Context, cfg *proto.SshConfig) (*proto.NodeStat, error) {
+func (ns *nodesight) runStat(ctx context.Context) (*proto.NodeStat, error) {
 	ns.cfg.Logger.Debug("nodesight: runStat")
 
 	var stat proto.NodeStat
-
-	if err := ns.cfg.Ssh.Init(ctx, cfg); err != nil {
-		return &stat, errors.Wrap(err, "failed to init ssh")
-	}
-
-	defer func() {
-		_ = ns.cfg.Ssh.Deinit(ctx)
-	}()
 
 	cmds := []string{
 		fmt.Sprintf("%s %s %s",
@@ -212,16 +196,18 @@ func (ns *nodesight) runStat(ctx context.Context, cfg *proto.SshConfig) (*proto.
 	return &stat, nil
 }
 
-func (ns *nodesight) runClean(ctx context.Context, cfg *proto.SshConfig) error {
+func (ns *nodesight) runReport(_ context.Context, health string, stat *proto.NodeStat) (*proto.NodeReport, error) {
+	ns.cfg.Logger.Debug("nodesight: runReport")
+
+	var report proto.NodeReport
+
+	// TBD: FIXME
+
+	return &report, nil
+}
+
+func (ns *nodesight) runClean(ctx context.Context) error {
 	ns.cfg.Logger.Debug("nodesight: runClean")
-
-	if err := ns.cfg.Ssh.Init(ctx, cfg); err != nil {
-		return errors.Wrap(err, "failed to init ssh")
-	}
-
-	defer func() {
-		_ = ns.cfg.Ssh.Deinit(ctx)
-	}()
 
 	cmds := []string{
 		fmt.Sprintf("rm -f %s", agentPath+agentScript),
@@ -234,14 +220,4 @@ func (ns *nodesight) runClean(ctx context.Context, cfg *proto.SshConfig) error {
 	}
 
 	return nil
-}
-
-func (ns *nodesight) runReport(_ context.Context, health string, stat *proto.NodeStat) (*proto.NodeReport, error) {
-	ns.cfg.Logger.Debug("nodesight: runReport")
-
-	var report proto.NodeReport
-
-	// TBD: FIXME
-
-	return &report, nil
 }
