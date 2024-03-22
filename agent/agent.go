@@ -21,7 +21,7 @@ import (
 	"github.com/shirou/gopsutil/v3/net"
 	"github.com/shirou/gopsutil/v3/process"
 
-	proto "github.com/devops-pipeflow/server/plugins/insight"
+	"github.com/devops-pipeflow/insight-plugin/proto"
 )
 
 const (
