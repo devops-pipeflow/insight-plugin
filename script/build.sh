@@ -12,7 +12,6 @@ else
   CGO_ENABLED=0 GOARCH=$(go env GOARCH) GOOS=linux go build -ldflags "$ldflags" -o bin/insight .
   pushd bin || exit
   upx agent
-  checksum=$(shasum -a 256 agent); sed "s:^CHECKSUM=$:CHECKSUM=\"$checksum\":g" ../agent/agent.sh > agent.sh
-  chmod +x agent.sh
+  cp ../agent/agent.sh .
   popd || exit
 fi

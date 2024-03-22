@@ -23,7 +23,7 @@ const (
 	agentScript       = agentExec + ".sh"
 	agentSep          = "="
 
-	artifactPath = "/devops-pipeflow/plugins/"
+	artifactPath = "zd-devops-nj-release-generic/devops-pipeflow/plugins"
 
 	healthPath   = "/tmp/"
 	healthScript = "healthcheck.sh"
@@ -125,14 +125,16 @@ func (ns *nodesight) runDetect(ctx context.Context) error {
 		fmt.Sprintf("curl -s -u%s:%s -L %s -o %s",
 			ns.cfg.Config.Spec.ArtifactConfig.User,
 			ns.cfg.Config.Spec.ArtifactConfig.Pass,
-			ns.cfg.Config.Spec.ArtifactConfig.Url+artifactPath+agentScript,
+			ns.cfg.Config.Spec.ArtifactConfig.Url+"/"+artifactPath+"/"+agentScript,
 			agentPath+agentScript),
-		fmt.Sprintf("cd %s; bash %s %s %s %s %s",
+		fmt.Sprintf("cd %s; bash %s %s %s %s %s %s %s",
 			agentPath,
 			agentScript,
 			ns.cfg.Config.Spec.ArtifactConfig.User,
 			ns.cfg.Config.Spec.ArtifactConfig.Pass,
-			ns.cfg.Config.Spec.ArtifactConfig.Url+artifactPath+agentExec,
+			ns.cfg.Config.Spec.ArtifactConfig.Url,
+			artifactPath,
+			agentExec,
 			agentPath+agentExec),
 	}
 
@@ -151,7 +153,7 @@ func (ns *nodesight) runHealth(ctx context.Context) (string, error) {
 		fmt.Sprintf("curl -s -u%s:%s -L %s -o %s",
 			ns.cfg.Config.Spec.ArtifactConfig.User,
 			ns.cfg.Config.Spec.ArtifactConfig.Pass,
-			ns.cfg.Config.Spec.ArtifactConfig.Url+artifactPath+healthScript,
+			ns.cfg.Config.Spec.ArtifactConfig.Url+"/"+artifactPath+"/"+healthScript,
 			healthPath+healthScript),
 	}
 

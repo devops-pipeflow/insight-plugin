@@ -1,32 +1,39 @@
 #!/bin/bash
 
 # Usage: Generate checksum
-# checksum=$(shasum -a 256 /path/to/bin/agent); sed "s:^CHECKSUM=$:CHECKSUM=\"$checksum\":g" agent.sh > /path/to/bin/agent.sh
-# chmod +x /path/to/bin/agent.sh
+# shasum -a 256 agent
 
 # Usage: Deploy agent
-# bash /path/to/bin/agent.sh "$ARTIFACT_USER" "$ARTIFACT_PASS" "$ARTIFACT_URL" "$AGENT_PATH"
+# ./agent.sh "$ARTIFACT_USER" "$ARTIFACT_PASS" "$ARTIFACT_URL" "$ARTIFACT_PATH", "$AGENT_EXEC", "$AGENT_PATH_AGENT_EXEC"
 
-# Generate checksum
-CHECKSUM=
+# Install jq
+jq --version > /dev/null
+ret=$?
+if [ "$ret" -ne 0 ]; then
+  sudo apt install -y jq > /dev/null
+fi
+
+# Fetch checksum
+CHECKSUM=$(curl -f -s -u "$1":"$2" "$3/api/storage/$4/$5" | jq '.checksums.sha256' | tr -d '"')
 
 # Verify checksum
-# TBD: FIXME
-#echo "$CHECKSUM" | shasum -a 256 -c -s
-#ret=$?
-#if [ $ret != 0 ]; then
-#  echo 'Invalid checksum'
-#  exit 1
-#fi
+echo "$CHECKSUM $5" > "$5".checksum
+sha256sum --ignore-missing --status -c "$5".checksum
+ret=$?
+rm -rf "$5".checksum
+if [ $ret -eq 0 ]; then
+  echo 'Checksum pass'
+  exit 0
+fi
 
 # Deploy agent
-curl -f -s -u"$1":"$2" -L "$3" -o "$4"
+curl -f -s -u"$1":"$2" -L "$3/$4/$5" -o "$6"
 ret=$?
 if [ $ret != 0 ]; then
   echo 'Missing agent'
-  exit 2
+  exit 1
 fi
 
-chmod +x "$4"
+chmod +x "$6"
 
 exit 0
