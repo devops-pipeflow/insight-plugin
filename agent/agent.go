@@ -40,7 +40,7 @@ func main() {
 	ctx := context.Background()
 
 	if err := Run(ctx); err != nil {
-		fmt.Println(err.Error())
+		fmt.Printf("%+v\n", err)
 		os.Exit(1)
 	}
 
