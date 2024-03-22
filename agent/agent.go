@@ -21,7 +21,7 @@ import (
 	"github.com/shirou/gopsutil/v3/net"
 	"github.com/shirou/gopsutil/v3/process"
 
-	"github.com/devops-pipeflow/insight-plugin/proto"
+	proto "github.com/devops-pipeflow/server/plugins/insight"
 )
 
 const (
@@ -536,7 +536,6 @@ func fetchProcessStat(ctx context.Context, logger hclog.Logger, duration time.Du
 			name, _ := processes[i].NameWithContext(ctx)
 			numFd, _ := processes[i].NumFDsWithContext(ctx)
 			numThread, _ := processes[i].NumThreadsWithContext(ctx)
-			parent, _ := processes[i].ParentWithContext(ctx)
 			ppid, _ := processes[i].PpidWithContext(ctx)
 			rlimits, _ := processes[i].RlimitWithContext(ctx)
 			statuses, _ := processes[i].StatusWithContext(ctx)
@@ -555,7 +554,7 @@ func fetchProcessStat(ctx context.Context, logger hclog.Logger, duration time.Du
 				Name:              name,
 				NumFd:             numFd,
 				NumThread:         numThread,
-				Parent:            parent.Pid,
+				Parent:            ppid,
 				Ppid:              ppid,
 				ProcessRLimits:    processRlimitHelper(rlimits),
 				Statuses:          statuses,
