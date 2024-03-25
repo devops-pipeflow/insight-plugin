@@ -138,8 +138,8 @@ message ConfigRequest {
   NodeConfig nodeConfig = 4;  // nodesight config
   ArtifactConfig artifactConfig = 5;  // artifactory config
   GptConfig gptConfig = 6;  // gpt config
-  RepoConfig repoConfig = 7;  // repo config (Gitiles)
-  ReviewConfig reviewConfig = 8;  // review config (Gerrit, pingview)
+  RepoConfig repoConfig = 7;  // repo config
+  ReviewConfig reviewConfig = 8;  // review config
 }
 
 message EnvVariable {
@@ -268,7 +268,7 @@ message SshConfig {
 }
 
 message TriggerResponse {
-  BuildInfo buildInfo = 1;  // buildsight info
+  repeated BuildInfo buildInfos = 1;  // buildsight infos
   CodeInfo codeInfo = 2;  // codesight info
   NodeInfo nodeInfo = 3;  // nodesight info
 }
