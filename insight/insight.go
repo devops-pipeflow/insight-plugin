@@ -89,25 +89,31 @@ func (i *insight) Run(ctx context.Context,
 	g.SetLimit(routineNum)
 
 	g.Go(func() error {
-		buildInfo, err = i.cfg.BuildSight.Run(ctx, buildTrigger)
-		if err != nil {
-			return errors.Wrap(err, "failed to run buildsight")
+		if buildTrigger != nil {
+			buildInfo, err = i.cfg.BuildSight.Run(ctx, buildTrigger)
+			if err != nil {
+				return errors.Wrap(err, "failed to run buildsight")
+			}
 		}
 		return nil
 	})
 
 	g.Go(func() error {
-		codeInfo, err = i.cfg.CodeSight.Run(ctx, codeTrigger)
-		if err != nil {
-			return errors.Wrap(err, "failed to run codesight")
+		if codeTrigger != nil {
+			codeInfo, err = i.cfg.CodeSight.Run(ctx, codeTrigger)
+			if err != nil {
+				return errors.Wrap(err, "failed to run codesight")
+			}
 		}
 		return nil
 	})
 
 	g.Go(func() error {
-		nodeInfo, err = i.cfg.NodeSight.Run(ctx, nodeTrigger)
-		if err != nil {
-			return errors.Wrap(err, "failed to run nodesight")
+		if nodeTrigger != nil {
+			nodeInfo, err = i.cfg.NodeSight.Run(ctx, nodeTrigger)
+			if err != nil {
+				return errors.Wrap(err, "failed to run nodesight")
+			}
 		}
 		return nil
 	})
