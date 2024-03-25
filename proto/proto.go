@@ -55,9 +55,9 @@ type LoggingConfig struct {
 type ConfigResponse struct{}
 
 type TriggerRequest struct {
-	BuildTrigger BuildTrigger `json:"buildTrigger"`
-	CodeTrigger  CodeTrigger  `json:"codeTrigger"`
-	NodeTrigger  NodeTrigger  `json:"nodeTrigger"`
+	BuildTrigger *BuildTrigger `json:"buildTrigger"`
+	CodeTrigger  *CodeTrigger  `json:"codeTrigger"`
+	NodeTrigger  *NodeTrigger  `json:"nodeTrigger"`
 }
 
 type BuildTrigger struct {
