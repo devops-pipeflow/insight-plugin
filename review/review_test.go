@@ -25,12 +25,12 @@ import (
 )
 
 const (
-	changeGerrit   = 883543
-	commitGerrit   = "5907d4189ff8e798a9914186c91e4bf7b3166973"
-	fileGerrit     = "cli/cli.cpp"
-	queryAfter     = "after:2024-02-27"
-	queryBefore    = "before:2024-02-28"
-	revisionGerrit = 17
+	changeReview   = 883543
+	commitReview   = "5907d4189ff8e798a9914186c91e4bf7b3166973"
+	fileReview     = "cli/cli.cpp"
+	queryAfter     = "after:2024-03-27"
+	queryBefore    = "before:2024-03-28"
+	revisionReview = 17
 )
 
 func initReview() review {
@@ -63,7 +63,7 @@ func initReview() review {
 
 func TestClean(t *testing.T) {
 	d, _ := os.Getwd()
-	root := filepath.Join(d, "gerrit-test-clean")
+	root := filepath.Join(d, "review-test-clean")
 
 	_ = os.Mkdir(root, os.ModePerm)
 
@@ -77,7 +77,7 @@ func TestDiff(t *testing.T) {
 	ctx := context.Background()
 	r := initReview()
 
-	buf, err := r.Diff(ctx, changeGerrit, fileGerrit)
+	buf, err := r.Diff(ctx, changeReview, fileReview)
 	assert.Equal(t, nil, err)
 
 	ret, _ := json.Marshal(buf)
@@ -87,12 +87,12 @@ func TestDiff(t *testing.T) {
 // nolint: dogsled
 func TestFetch(t *testing.T) {
 	d, _ := os.Getwd()
-	root := filepath.Join(d, "gerrit-test-fetch")
+	root := filepath.Join(d, "review-test-fetch")
 
 	ctx := context.Background()
 	r := initReview()
 
-	_, _, _, err := r.Fetch(ctx, root, commitGerrit)
+	_, _, _, err := r.Fetch(ctx, root, commitReview)
 	assert.Equal(t, nil, err)
 
 	err = r.Clean(ctx, root)
@@ -108,7 +108,7 @@ func TestQuery(t *testing.T) {
 	ctx := context.Background()
 	r := initReview()
 
-	buf, err = r.Query(ctx, "change:"+strconv.Itoa(changeGerrit), 0)
+	buf, err = r.Query(ctx, "change:"+strconv.Itoa(changeReview), 0)
 	assert.Equal(t, nil, err)
 
 	ret, _ = json.Marshal(buf)
@@ -130,7 +130,7 @@ func TestVote(t *testing.T) {
 	err := r.Vote(ctx, "", buf)
 	assert.NotEqual(t, nil, err)
 
-	err = r.Vote(ctx, commitGerrit, buf)
+	err = r.Vote(ctx, commitReview, buf)
 	assert.Equal(t, nil, err)
 
 	buf = make([]Format, 1)
@@ -141,7 +141,7 @@ func TestVote(t *testing.T) {
 		Type:    TypeError,
 	}
 
-	err = r.Vote(ctx, commitGerrit, buf)
+	err = r.Vote(ctx, commitReview, buf)
 	assert.Equal(t, nil, err)
 }
 
@@ -149,10 +149,10 @@ func TestWrite(t *testing.T) {
 	r := initReview()
 
 	d, _ := os.Getwd()
-	err := r.write(d, "gerrit-test-write", "Hello World!")
+	err := r.write(d, "review-test-write", "Hello World!")
 	assert.Equal(t, nil, err)
 
-	_ = os.RemoveAll(filepath.Join(d, "gerrit-test-write"))
+	_ = os.RemoveAll(filepath.Join(d, "review-test-write"))
 }
 
 func TestUnmarshal(t *testing.T) {
@@ -201,12 +201,12 @@ func TestUrlDetail(t *testing.T) {
 func TestUrlDiff(t *testing.T) {
 	r := initReview()
 
-	change := changeGerrit
-	file := fileGerrit
+	change := changeReview
+	file := fileReview
 
 	_url := r.url + urlPrefix + urlChanges + strconv.Itoa(change) + urlRevisions + urlCurrent + urlFiles + url.PathEscape(file) + urlDiff
 
-	buf := r.urlDiff(changeGerrit, fileGerrit)
+	buf := r.urlDiff(changeReview, fileReview)
 	assert.Equal(t, _url, buf)
 }
 
@@ -269,7 +269,7 @@ func TestGetContent(t *testing.T) {
 	_, err := r.get(ctx, r.urlContent(-1, -1, ""))
 	assert.NotEqual(t, nil, err)
 
-	buf, err := r.get(ctx, r.urlContent(changeGerrit, revisionGerrit, url.PathEscape("Android.mk")))
+	buf, err := r.get(ctx, r.urlContent(changeReview, revisionReview, url.PathEscape("Android.mk")))
 	assert.Equal(t, nil, err)
 
 	dst := make([]byte, len(buf))
@@ -284,7 +284,7 @@ func TestGetDetail(t *testing.T) {
 	_, err := r.get(ctx, r.urlDetail(-1))
 	assert.NotEqual(t, nil, err)
 
-	buf, err := r.get(ctx, r.urlDetail(changeGerrit))
+	buf, err := r.get(ctx, r.urlDetail(changeReview))
 	assert.Equal(t, nil, err)
 
 	_, err = r.unmarshal(buf)
@@ -298,7 +298,7 @@ func TestGetFiles(t *testing.T) {
 	_, err := r.get(ctx, r.urlFiles(-1, -1))
 	assert.NotEqual(t, nil, err)
 
-	buf, err := r.get(ctx, r.urlFiles(changeGerrit, revisionGerrit))
+	buf, err := r.get(ctx, r.urlFiles(changeReview, revisionReview))
 	assert.Equal(t, nil, err)
 
 	_, err = r.unmarshal(buf)
@@ -312,7 +312,7 @@ func TestGetPatch(t *testing.T) {
 	_, err := r.get(ctx, r.urlPatch(-1, -1))
 	assert.NotEqual(t, nil, err)
 
-	buf, err := r.get(ctx, r.urlPatch(changeGerrit, revisionGerrit))
+	buf, err := r.get(ctx, r.urlPatch(changeReview, revisionReview))
 	assert.Equal(t, nil, err)
 
 	dst := make([]byte, len(buf))
@@ -327,7 +327,7 @@ func TestGetQuery(t *testing.T) {
 	_, err := r.get(ctx, r.urlQuery("commit:-1", []string{"CURRENT_REVISION"}, 0))
 	assert.NotEqual(t, nil, err)
 
-	buf, err := r.get(ctx, r.urlQuery("commit:"+commitGerrit, []string{"CURRENT_REVISION"}, 0))
+	buf, err := r.get(ctx, r.urlQuery("commit:"+commitReview, []string{"CURRENT_REVISION"}, 0))
 	assert.Equal(t, nil, err)
 
 	_, err = r.unmarshalList(buf)
@@ -356,6 +356,6 @@ func TestPostReview(t *testing.T) {
 		"message": "Voting Code-Review by pipeflow insight",
 	}
 
-	err = r.post(ctx, r.urlReview(changeGerrit, revisionGerrit), buf)
+	err = r.post(ctx, r.urlReview(changeReview, revisionReview), buf)
 	assert.Equal(t, nil, err)
 }

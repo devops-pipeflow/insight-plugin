@@ -155,7 +155,7 @@ func (r *review) Diff(ctx context.Context, change int, file string) (map[string]
 }
 
 // nolint:funlen,gocyclo
-func (r *review) Fetch(ctx context.Context, root, commit string) (dname, rname string, flist []string, emsg error) {
+func (r *review) Fetch(ctx context.Context, root, commit string) (path, name string, files []string, err error) {
 	r.cfg.Logger.Debug("review: Fetch")
 
 	filterFiles := func(data map[string]interface{}) map[string]interface{} {
@@ -188,7 +188,7 @@ func (r *review) Fetch(ctx context.Context, root, commit string) (dname, rname s
 	changeNum := int(queryRet[0].(map[string]interface{})["_number"].(float64))
 	revisionNum := int(current["_number"].(float64))
 
-	path := filepath.Join(root, strconv.Itoa(changeNum), queryRet[0].(map[string]interface{})["current_revision"].(string))
+	path = filepath.Join(root, strconv.Itoa(changeNum), queryRet[0].(map[string]interface{})["current_revision"].(string))
 
 	// Get files
 	buf, err = r.get(ctx, r.urlFiles(changeNum, revisionNum))
@@ -223,8 +223,6 @@ func (r *review) Fetch(ctx context.Context, root, commit string) (dname, rname s
 	}
 
 	// Return files
-	var files []string
-
 	for key := range fs {
 		if key == commitMsg {
 			files = append(files, base64Message)
