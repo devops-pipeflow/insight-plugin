@@ -20,7 +20,7 @@ type Insight interface {
 	Init(context.Context) error
 	Deinit(context.Context) error
 	Run(context.Context, *proto.BuildTrigger, *proto.CodeTrigger, *proto.NodeTrigger) (
-		proto.BuildInfo, proto.CodeInfo, proto.NodeInfo, error)
+		[]proto.BuildInfo, proto.CodeInfo, proto.NodeInfo, error)
 }
 
 type Config struct {
@@ -75,11 +75,11 @@ func (i *insight) Deinit(ctx context.Context) error {
 
 func (i *insight) Run(ctx context.Context,
 	buildTrigger *proto.BuildTrigger, codeTrigger *proto.CodeTrigger, nodeTrigger *proto.NodeTrigger) (
-	proto.BuildInfo, proto.CodeInfo, proto.NodeInfo, error) {
+	[]proto.BuildInfo, proto.CodeInfo, proto.NodeInfo, error) {
 	i.cfg.Logger.Debug("insight: Run")
 
 	var (
-		buildInfo proto.BuildInfo
+		buildInfo []proto.BuildInfo
 		codeInfo  proto.CodeInfo
 		nodeInfo  proto.NodeInfo
 		err       error
