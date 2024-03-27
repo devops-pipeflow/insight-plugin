@@ -5,6 +5,7 @@
 package repo
 
 import (
+	"context"
 	"io"
 	"os"
 	"testing"
@@ -44,32 +45,44 @@ func initRepo() repo {
 	}
 }
 
-func TestGet(t *testing.T) {
+func TestFetch(t *testing.T) {
+	ctx := context.Background()
 	r := initRepo()
 
-	_, err := r.Get("platform/build/soong", "branch:master")
+	_, err := r.Fetch(ctx, "platform/build/soong", "README.md", "branch:master")
 	assert.Equal(t, nil, err)
 
-	_, err = r.Get("platform/build/soong", "commit:42ada5cff3fca011b5a0d017955f14dc63898807")
+	_, err = r.Fetch(ctx, "platform/build/soong", "README.md", "commit:9387734632ba3bf381bd57a638ac1216108c59f4")
+	assert.Equal(t, nil, err)
+
+	_, err = r.Fetch(ctx, "platform/build/soong", "README.md", "tag:android14-release")
+	assert.Equal(t, nil, err)
+}
+
+func TestGet(t *testing.T) {
+	ctx := context.Background()
+	r := initRepo()
+
+	_, err := r.Get(ctx, "platform/build/soong", "branch:master")
+	assert.Equal(t, nil, err)
+
+	_, err = r.Get(ctx, "platform/build/soong", "commit:42ada5cff3fca011b5a0d017955f14dc63898807")
 	assert.Equal(t, nil, err)
 }
 
 func TestQuery(t *testing.T) {
+	ctx := context.Background()
 	r := initRepo()
 
-	_, err := r.Query("platform/build/soong", "branch:master")
+	_, err := r.Query(ctx, "platform/build/soong", "branch:master")
 	assert.Equal(t, nil, err)
 
-	_, err = r.Query("platform/build/soong", "branch:main commit:42ada5cff3fca011b5a0d017955f14dc63898807")
+	_, err = r.Query(ctx, "platform/build/soong", "branch:main commit:42ada5cff3fca011b5a0d017955f14dc63898807")
 	assert.Equal(t, nil, err)
 
-	_, err = r.Query("platform/build/soong", "tag:android-vts-10.0_r4")
+	_, err = r.Query(ctx, "platform/build/soong", "tag:android-vts-10.0_r4")
 	assert.Equal(t, nil, err)
 
-	_, err = r.Query("platform/build/soong", "tag:android-vts-10.0_r4 commit:42ada5cff3fca011b5a0d017955f14dc63898807")
+	_, err = r.Query(ctx, "platform/build/soong", "tag:android-vts-10.0_r4 commit:42ada5cff3fca011b5a0d017955f14dc63898807")
 	assert.Equal(t, nil, err)
-}
-
-func TestRequest(t *testing.T) {
-	t.Skip("Skipping TestRequest.")
 }

@@ -33,8 +33,9 @@ const (
 type Repo interface {
 	Init(context.Context) error
 	Deinit(context.Context) error
-	Get(string, string) (map[string]interface{}, error)
-	Query(string, string) (map[string]interface{}, error)
+	Fetch(context.Context, string, string, string) ([]byte, error)
+	Get(context.Context, string, string) (map[string]interface{}, error)
+	Query(context.Context, string, string) (map[string]interface{}, error)
 }
 
 type Config struct {
@@ -75,6 +76,45 @@ func (r *repo) Deinit(ctx context.Context) error {
 	return nil
 }
 
+// Fetch
+//
+// Example:
+//
+// branch:BRANCH: https://android.googlesource.com/platform/build/soong/+/refs/heads/main/README.md
+//
+// commit:COMMIT: https://android.googlesource.com/platform/build/soong/+/25900543331a1508110da4926ca45557b4c236da/README.md
+//
+// tag:TAG: https://android.googlesource.com/platform/build/soong/+/refs/heads/android14-release/README.md
+func (r *repo) Fetch(_ context.Context, project, file, operator string) ([]byte, error) {
+	r.cfg.Logger.Debug("repo: Fetch")
+
+	var buf []byte
+	var err error
+
+	if project == "" || file == "" || operator == "" || len(strings.Split(operator, opDelimiter)) >= opGroups {
+		return nil, errors.New("parameter invalid")
+	}
+
+	if strings.HasPrefix(operator, opBranch) {
+		branch := strings.TrimPrefix(operator, opBranch)
+		buf, err = r.get(r.url+"/"+project+urlConcat+urlHeads+branch+"/"+file, r.user, r.pass)
+	} else if strings.HasPrefix(operator, opCommit) {
+		commit := strings.TrimPrefix(operator, opCommit)
+		buf, err = r.get(r.url+"/"+project+urlConcat+commit+"/"+file, r.user, r.pass)
+	} else if strings.HasPrefix(operator, opTag) {
+		tag := strings.TrimPrefix(operator, opTag)
+		buf, err = r.get(r.url+"/"+project+urlConcat+urlHeads+tag+"/"+file, r.user, r.pass)
+	} else {
+		err = errors.New("operator invalid")
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return buf, nil
+}
+
 // Get
 //
 // Example:
@@ -86,9 +126,10 @@ func (r *repo) Deinit(ctx context.Context) error {
 // tag:TAG: https://android.googlesource.com/platform/build/soong/+/refs/tags/android-vts-10.0_r4?format=JSON
 //
 // nolint: lll
-func (r *repo) Get(project, operator string) (map[string]interface{}, error) {
+func (r *repo) Get(_ context.Context, project, operator string) (map[string]interface{}, error) {
 	r.cfg.Logger.Debug("repo: Get")
 
+	var body []byte
 	var buf map[string]interface{}
 	var err error
 
@@ -98,19 +139,25 @@ func (r *repo) Get(project, operator string) (map[string]interface{}, error) {
 
 	if strings.HasPrefix(operator, opBranch) {
 		branch := strings.TrimPrefix(operator, opBranch)
-		buf, err = r.request(r.url+"/"+project+urlConcat+urlHeads+branch+"?"+urlFormat, r.user, r.pass)
+		body, err = r.get(r.url+"/"+project+urlConcat+urlHeads+branch+"?"+urlFormat, r.user, r.pass)
 	} else if strings.HasPrefix(operator, opCommit) {
 		commit := strings.TrimPrefix(operator, opCommit)
-		buf, err = r.request(r.url+"/"+project+urlConcat+commit+"?"+urlFormat, r.user, r.pass)
+		body, err = r.get(r.url+"/"+project+urlConcat+commit+"?"+urlFormat, r.user, r.pass)
 	} else if strings.HasPrefix(operator, opTag) {
 		tag := strings.TrimPrefix(operator, opTag)
-		buf, err = r.request(r.url+"/"+project+urlConcat+urlTags+tag+"?"+urlFormat, r.user, r.pass)
+		body, err = r.get(r.url+"/"+project+urlConcat+urlTags+tag+"?"+urlFormat, r.user, r.pass)
 	} else {
 		err = errors.New("operator invalid")
 	}
 
 	if err != nil {
 		return nil, err
+	}
+
+	body = []byte(strings.ReplaceAll(string(body), ")]}'", ""))
+
+	if err := json.Unmarshal(body, &buf); err != nil {
+		return nil, errors.Wrap(err, "unmarshal failed")
 	}
 
 	return buf, nil
@@ -129,7 +176,7 @@ func (r *repo) Get(project, operator string) (map[string]interface{}, error) {
 // tag:TAG commit:COMMIT: https://android.googlesource.com/platform/build/soong/+log/refs/tags/android-vts-10.0_r4/?s=9863d53618714a36c3f254d949497a7eb2d11863&format=JSON
 //
 // nolint: gocyclo,lll
-func (r *repo) Query(project, operator string) (map[string]interface{}, error) {
+func (r *repo) Query(_ context.Context, project, operator string) (map[string]interface{}, error) {
 	r.cfg.Logger.Debug("repo: Query")
 
 	parser := func(op string) (string, string, string, error) {
@@ -163,6 +210,7 @@ func (r *repo) Query(project, operator string) (map[string]interface{}, error) {
 		return branch, commit, tag, nil
 	}
 
+	var body []byte
 	var buf map[string]interface{}
 	var err error
 
@@ -177,15 +225,15 @@ func (r *repo) Query(project, operator string) (map[string]interface{}, error) {
 
 	if branch != "" {
 		if commit != "" {
-			buf, err = r.request(r.url+"/"+project+urlLog+urlHeads+branch+urlSearch+commit+"&"+urlFormat, r.user, r.pass)
+			body, err = r.get(r.url+"/"+project+urlLog+urlHeads+branch+urlSearch+commit+"&"+urlFormat, r.user, r.pass)
 		} else {
-			buf, err = r.request(r.url+"/"+project+urlLog+urlHeads+branch+"?"+urlFormat, r.user, r.pass)
+			body, err = r.get(r.url+"/"+project+urlLog+urlHeads+branch+"?"+urlFormat, r.user, r.pass)
 		}
 	} else if tag != "" {
 		if commit != "" {
-			buf, err = r.request(r.url+"/"+project+urlLog+urlTags+tag+urlSearch+commit+"&"+urlFormat, r.user, r.pass)
+			body, err = r.get(r.url+"/"+project+urlLog+urlTags+tag+urlSearch+commit+"&"+urlFormat, r.user, r.pass)
 		} else {
-			buf, err = r.request(r.url+"/"+project+urlLog+urlTags+tag+"?"+urlFormat, r.user, r.pass)
+			body, err = r.get(r.url+"/"+project+urlLog+urlTags+tag+"?"+urlFormat, r.user, r.pass)
 		}
 	} else {
 		err = errors.New("operator invalid")
@@ -195,13 +243,17 @@ func (r *repo) Query(project, operator string) (map[string]interface{}, error) {
 		return nil, err
 	}
 
+	body = []byte(strings.ReplaceAll(string(body), ")]}'", ""))
+
+	if err := json.Unmarshal(body, &buf); err != nil {
+		return nil, errors.Wrap(err, "unmarshal failed")
+	}
+
 	return buf, nil
 }
 
-func (r *repo) request(url, user, pass string) (map[string]interface{}, error) {
-	r.cfg.Logger.Debug("repo: request")
-
-	var buf map[string]interface{}
+func (r *repo) get(url, user, pass string) ([]byte, error) {
+	r.cfg.Logger.Debug("repo: get")
 
 	req, err := http.NewRequest(http.MethodGet, url, http.NoBody)
 	if err != nil {
@@ -225,16 +277,10 @@ func (r *repo) request(url, user, pass string) (map[string]interface{}, error) {
 		return nil, errors.New("client failed")
 	}
 
-	body, err := io.ReadAll(resp.Body)
+	data, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, errors.New("read failed")
 	}
 
-	body = []byte(strings.ReplaceAll(string(body), ")]}'", ""))
-
-	if err := json.Unmarshal(body, &buf); err != nil {
-		return nil, errors.New("unmarshal failed")
-	}
-
-	return buf, nil
+	return data, nil
 }
