@@ -31,7 +31,7 @@ linters-settings:
       mnd:
         checks: argument,case,condition,return
   govet:
-    check-shadowing: true
+    shadow: true
     settings:
       printf:
         funcs:
@@ -87,7 +87,7 @@ linters:
   # - unused
   # - varcheck
 
-run:
-  skip-dirs:
+issues:
+  exclude-dirs:
     - external
     - script
