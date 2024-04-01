@@ -9,10 +9,10 @@ import (
 
 	"github.com/hashicorp/go-hclog"
 	"github.com/pkg/errors"
-	crypto_ssh "golang.org/x/crypto/ssh"
+	cryptossh "golang.org/x/crypto/ssh"
 
 	"github.com/devops-pipeflow/insight-plugin/config"
-	"github.com/devops-pipeflow/insight-plugin/proto"
+	proto "github.com/devops-pipeflow/server/plugins/insight"
 )
 
 const (
@@ -64,8 +64,8 @@ type SshConfig struct {
 
 type ssh struct {
 	cfg     *SshConfig
-	client  *crypto_ssh.Client
-	session *crypto_ssh.Session
+	client  *cryptossh.Client
+	session *cryptossh.Session
 }
 
 func New(_ context.Context, cfg *SshConfig) Ssh {
@@ -113,7 +113,7 @@ func (s *ssh) Run(ctx context.Context, cmds []string) (string, error) {
 func (s *ssh) initSession(ctx context.Context, host string, port int64, user, pass, key, timeout string) error {
 	s.cfg.Logger.Debug("ssh: initSession")
 
-	var cfg crypto_ssh.Config
+	var cfg cryptossh.Config
 	var err error
 
 	auth, err := s.setAuth(ctx, pass, key)
@@ -129,19 +129,19 @@ func (s *ssh) initSession(ctx context.Context, host string, port int64, user, pa
 		return errors.Wrap(err, "failed to set timeout")
 	}
 
-	_config := &crypto_ssh.ClientConfig{
+	_config := &cryptossh.ClientConfig{
 		User:    user,
 		Auth:    auth,
 		Timeout: t,
 		Config:  cfg,
-		HostKeyCallback: func(hostname string, remote net.Addr, key crypto_ssh.PublicKey) error {
+		HostKeyCallback: func(hostname string, remote net.Addr, key cryptossh.PublicKey) error {
 			return nil
 		},
 	}
 
 	addr := host + ":" + strconv.FormatInt(port, 10)
 
-	s.client, err = crypto_ssh.Dial("tcp", addr, _config)
+	s.client, err = cryptossh.Dial("tcp", addr, _config)
 	if err != nil {
 		return errors.Wrap(err, "failed to create ssh client")
 	}
@@ -184,26 +184,26 @@ func (s *ssh) runSession(_ context.Context, cmds []string) (string, error) {
 	return string(out), nil
 }
 
-func (s *ssh) setAuth(_ context.Context, pass, key string) ([]crypto_ssh.AuthMethod, error) {
+func (s *ssh) setAuth(_ context.Context, pass, key string) ([]cryptossh.AuthMethod, error) {
 	s.cfg.Logger.Debug("ssh: setAuth")
 
 	var err error
-	var signer crypto_ssh.Signer
+	var signer cryptossh.Signer
 
-	auth := make([]crypto_ssh.AuthMethod, 0)
+	auth := make([]cryptossh.AuthMethod, 0)
 
 	if key != "" {
 		if pass != "" {
-			signer, err = crypto_ssh.ParsePrivateKeyWithPassphrase([]byte(key), []byte(pass))
+			signer, err = cryptossh.ParsePrivateKeyWithPassphrase([]byte(key), []byte(pass))
 		} else {
-			signer, err = crypto_ssh.ParsePrivateKey([]byte(key))
+			signer, err = cryptossh.ParsePrivateKey([]byte(key))
 		}
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to parse private key")
 		}
-		auth = append(auth, crypto_ssh.PublicKeys(signer))
+		auth = append(auth, cryptossh.PublicKeys(signer))
 	} else {
-		auth = append(auth, crypto_ssh.Password(pass))
+		auth = append(auth, cryptossh.Password(pass))
 	}
 
 	return auth, nil
