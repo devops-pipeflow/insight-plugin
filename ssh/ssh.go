@@ -12,7 +12,7 @@ import (
 	cryptossh "golang.org/x/crypto/ssh"
 
 	"github.com/devops-pipeflow/insight-plugin/config"
-	proto "github.com/devops-pipeflow/server/plugins/insight"
+	"github.com/devops-pipeflow/insight-plugin/proto"
 )
 
 const (
