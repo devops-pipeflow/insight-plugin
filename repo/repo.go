@@ -63,9 +63,9 @@ func DefaultConfig() *Config {
 func (r *repo) Init(ctx context.Context) error {
 	r.cfg.Logger.Debug("repo: Init")
 
-	r.user = r.cfg.Config.Spec.ReviewConfig.User
-	r.pass = r.cfg.Config.Spec.ReviewConfig.Pass
-	r.url = r.cfg.Config.Spec.ReviewConfig.Url
+	r.user = r.cfg.Config.Spec.RepoConfig.User
+	r.pass = r.cfg.Config.Spec.RepoConfig.Pass
+	r.url = r.cfg.Config.Spec.RepoConfig.Url
 
 	return nil
 }
