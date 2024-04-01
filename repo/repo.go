@@ -15,11 +15,12 @@ import (
 
 const (
 	urlConcat = "/+/"
-	urlFormat = "format=JSON"
+	urlJSON   = "format=JSON"
 	urlHeads  = "refs/heads/"
 	urlLog    = "/+log/"
 	urlSearch = "/?s="
 	urlTags   = "refs/tags/"
+	urlText   = "format=TEXT"
 )
 
 const (
@@ -97,13 +98,13 @@ func (r *repo) Fetch(_ context.Context, project, file, operator string) ([]byte,
 
 	if strings.HasPrefix(operator, opBranch) {
 		branch := strings.TrimPrefix(operator, opBranch)
-		buf, err = r.get(r.url+"/"+project+urlConcat+urlHeads+branch+"/"+file, r.user, r.pass)
+		buf, err = r.get(r.url+"/"+project+urlConcat+urlHeads+branch+"/"+file+"?"+urlText, r.user, r.pass)
 	} else if strings.HasPrefix(operator, opCommit) {
 		commit := strings.TrimPrefix(operator, opCommit)
-		buf, err = r.get(r.url+"/"+project+urlConcat+commit+"/"+file, r.user, r.pass)
+		buf, err = r.get(r.url+"/"+project+urlConcat+commit+"/"+file+"?"+urlText, r.user, r.pass)
 	} else if strings.HasPrefix(operator, opTag) {
 		tag := strings.TrimPrefix(operator, opTag)
-		buf, err = r.get(r.url+"/"+project+urlConcat+urlHeads+tag+"/"+file, r.user, r.pass)
+		buf, err = r.get(r.url+"/"+project+urlConcat+urlHeads+tag+"/"+file+"?"+urlText, r.user, r.pass)
 	} else {
 		err = errors.New("operator invalid")
 	}
@@ -139,13 +140,13 @@ func (r *repo) Get(_ context.Context, project, operator string) (map[string]inte
 
 	if strings.HasPrefix(operator, opBranch) {
 		branch := strings.TrimPrefix(operator, opBranch)
-		body, err = r.get(r.url+"/"+project+urlConcat+urlHeads+branch+"?"+urlFormat, r.user, r.pass)
+		body, err = r.get(r.url+"/"+project+urlConcat+urlHeads+branch+"?"+urlJSON, r.user, r.pass)
 	} else if strings.HasPrefix(operator, opCommit) {
 		commit := strings.TrimPrefix(operator, opCommit)
-		body, err = r.get(r.url+"/"+project+urlConcat+commit+"?"+urlFormat, r.user, r.pass)
+		body, err = r.get(r.url+"/"+project+urlConcat+commit+"?"+urlJSON, r.user, r.pass)
 	} else if strings.HasPrefix(operator, opTag) {
 		tag := strings.TrimPrefix(operator, opTag)
-		body, err = r.get(r.url+"/"+project+urlConcat+urlTags+tag+"?"+urlFormat, r.user, r.pass)
+		body, err = r.get(r.url+"/"+project+urlConcat+urlTags+tag+"?"+urlJSON, r.user, r.pass)
 	} else {
 		err = errors.New("operator invalid")
 	}
@@ -225,15 +226,15 @@ func (r *repo) Query(_ context.Context, project, operator string) (map[string]in
 
 	if branch != "" {
 		if commit != "" {
-			body, err = r.get(r.url+"/"+project+urlLog+urlHeads+branch+urlSearch+commit+"&"+urlFormat, r.user, r.pass)
+			body, err = r.get(r.url+"/"+project+urlLog+urlHeads+branch+urlSearch+commit+"&"+urlJSON, r.user, r.pass)
 		} else {
-			body, err = r.get(r.url+"/"+project+urlLog+urlHeads+branch+"?"+urlFormat, r.user, r.pass)
+			body, err = r.get(r.url+"/"+project+urlLog+urlHeads+branch+"?"+urlJSON, r.user, r.pass)
 		}
 	} else if tag != "" {
 		if commit != "" {
-			body, err = r.get(r.url+"/"+project+urlLog+urlTags+tag+urlSearch+commit+"&"+urlFormat, r.user, r.pass)
+			body, err = r.get(r.url+"/"+project+urlLog+urlTags+tag+urlSearch+commit+"&"+urlJSON, r.user, r.pass)
 		} else {
-			body, err = r.get(r.url+"/"+project+urlLog+urlTags+tag+"?"+urlFormat, r.user, r.pass)
+			body, err = r.get(r.url+"/"+project+urlLog+urlTags+tag+"?"+urlJSON, r.user, r.pass)
 		}
 	} else {
 		err = errors.New("operator invalid")

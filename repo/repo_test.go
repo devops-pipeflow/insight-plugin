@@ -49,13 +49,13 @@ func TestFetch(t *testing.T) {
 	ctx := context.Background()
 	r := initRepo()
 
-	_, err := r.Fetch(ctx, "platform/build/soong", "README.md", "branch:master")
+	_, err := r.Fetch(ctx, "platform/build/soong", "Android.bp", "branch:master")
 	assert.Equal(t, nil, err)
 
-	_, err = r.Fetch(ctx, "platform/build/soong", "README.md", "commit:9387734632ba3bf381bd57a638ac1216108c59f4")
+	_, err = r.Fetch(ctx, "platform/build/soong", "Android.bp", "commit:9387734632ba3bf381bd57a638ac1216108c59f4")
 	assert.Equal(t, nil, err)
 
-	_, err = r.Fetch(ctx, "platform/build/soong", "README.md", "tag:android14-release")
+	_, err = r.Fetch(ctx, "platform/build/soong", "Android.bp", "tag:android14-release")
 	assert.Equal(t, nil, err)
 }
 
