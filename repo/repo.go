@@ -2,6 +2,7 @@ package repo
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -114,7 +115,13 @@ func (r *repo) Fetch(_ context.Context, project, file, operator string) ([]byte,
 		return nil, err
 	}
 
-	return buf, nil
+	ret := make([]byte, base64.StdEncoding.DecodedLen(len(buf)))
+
+	if _, err = base64.StdEncoding.Decode(ret, buf); err != nil {
+		return nil, errors.Wrap(err, "decoding failed")
+	}
+
+	return ret, nil
 }
 
 // Get
