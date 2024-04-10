@@ -27,9 +27,7 @@ linters-settings:
   golint:
     min-confidence: 0
   gomnd:
-    settings:
-      mnd:
-        checks: argument,case,condition,return
+    checks: argument,case,condition,return
   govet:
     shadow: true
     settings:
