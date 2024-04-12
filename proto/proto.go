@@ -20,7 +20,11 @@ type BuildConfig struct {
 	LoggingConfig LoggingConfig `json:"loggingConfig"`
 }
 
-type CodeConfig struct{}
+type CodeConfig struct {
+	Duration    string       `json:"duration"`
+	LintConfigs []LintConfig `json:"lintConfigs"`
+	LintVote    LintVote     `json:"lintVote"`
+}
 
 type NodeConfig struct {
 	Duration string `json:"duration"`
@@ -32,7 +36,11 @@ type ArtifactConfig struct {
 	Pass string `json:"pass"`
 }
 
-type GptConfig struct{}
+type GptConfig struct {
+	Url  string `json:"url"`
+	User string `json:"user"`
+	Pass string `json:"pass"`
+}
 
 type RepoConfig struct {
 	Url  string `json:"url"`
@@ -52,20 +60,41 @@ type LoggingConfig struct {
 	Count int64 `json:"count"`
 }
 
+type LintConfig struct {
+	Name       string   `json:"name"`
+	Extensions []string `json:"extensions"`
+	Files      []string `json:"files"`
+	Projects   []string `json:"projects"`
+}
+
+type LintVote struct {
+	Approval    string `json:"approval"`
+	Disapproval string `json:"disapproval"`
+	Label       string `json:"label"`
+	Message     string `json:"message"`
+}
+
 type ConfigResponse struct{}
 
 type TriggerRequest struct {
-	BuildTrigger *BuildTrigger `json:"buildTrigger"`
-	CodeTrigger  *CodeTrigger  `json:"codeTrigger"`
-	NodeTrigger  *NodeTrigger  `json:"nodeTrigger"`
+	ArtifactTrigger *ArtifactTrigger `json:"artifactTrigger"`
+	BuildTrigger    *BuildTrigger    `json:"buildTrigger"`
+	CodeTrigger     *CodeTrigger     `json:"codeTrigger"`
+	NodeTrigger     *NodeTrigger     `json:"nodeTrigger"`
 }
+
+type ArtifactTrigger struct{}
 
 type BuildTrigger struct {
 	LoggingTrigger LoggingTrigger `json:"loggingTrigger"`
-	GerritTrigger  GerritTrigger  `json:"gerritTrigger"`
+	ReviewTrigger  ReviewTrigger  `json:"reviewTrigger"`
 }
 
-type GerritTrigger struct {
+type CodeTrigger struct {
+	ReviewTrigger ReviewTrigger `json:"reviewTrigger"`
+}
+
+type ReviewTrigger struct {
 	Host                  string `json:"host"`
 	Port                  string `json:"port"`
 	Project               string `json:"project"`
@@ -91,8 +120,6 @@ type GerritTrigger struct {
 	PatchsetUploaderEmail string `json:"patchsetUploaderEmail"`
 }
 
-type CodeTrigger struct{}
-
 type NodeTrigger struct {
 	SshConfig SshConfig `json:"sshConfig"`
 }
@@ -113,10 +140,13 @@ type SshConfig struct {
 }
 
 type TriggerResponse struct {
-	BuildInfo BuildInfo `json:"buildInfo"`
-	CodeInfo  CodeInfo  `json:"codeInfo"`
-	NodeInfo  NodeInfo  `json:"nodeInfo"`
+	ArtifactInfo ArtifactInfo `json:"artifactInfo"`
+	BuildInfos   []BuildInfo  `json:"buildInfos"`
+	CodeInfo     CodeInfo     `json:"codeInfo"`
+	NodeInfo     NodeInfo     `json:"nodeInfo"`
 }
+
+type ArtifactInfo struct{}
 
 type BuildInfo struct {
 	LoggingInfo LoggingInfo `json:"loggingInfo"`
