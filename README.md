@@ -85,19 +85,41 @@ spec:
       len: 2
       count: 3
   codeConfig:
+    duration: 10s
+    lintConfigs:
+      - name: lintcpp
+        extensions:
+          - .c
+          - .cc
+          - .cpp
+          - .h
+          - .hpp
+        files:
+          - name
+        projects:
+          - name
+    lintVote:
+      approval: +1
+      disapproval: -1
+      label: Code-Review
+      message: Voting Code-Review by codesight
   nodeConfig:
     duration: 10s
+  toolchainConfig:
   artifactConfig:
     url: 127.0.0.1:8080
     user: user
     pass: pass
   gptConfig:
-  repoConfig:
     url: 127.0.0.1:8081
     user: user
     pass: pass
-  reviewConfig:
+  repoConfig:
     url: 127.0.0.1:8082
+    user: user
+    pass: pass
+  reviewConfig:
+    url: 127.0.0.1:8083
     user: user
     pass: pass
   sshConfig:
