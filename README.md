@@ -208,10 +208,13 @@ message LintVote {
 message ConfigResponse {}
 
 message TriggerRequest {
-  BuildTrigger buildTrigger = 1;  // buildsight trigger
-  CodeTrigger codeTrigger = 2;  // codesight trigger
-  NodeTrigger nodeTrigger = 3;  // nodesight trigger
+  ArtifactTrigger artifactTrigger = 1;  // artifactsight trigger
+  BuildTrigger buildTrigger = 2;  // buildsight trigger
+  CodeTrigger codeTrigger = 3;  // codesight trigger
+  NodeTrigger nodeTrigger = 4;  // nodesight trigger
 }
+
+message ArtifactTrigger {}
 
 message BuildTrigger {
   LoggingTrigger loggingTrigger = 1;  // logging trigger
@@ -268,10 +271,13 @@ message SshConfig {
 }
 
 message TriggerResponse {
-  repeated BuildInfo buildInfos = 1;  // buildsight infos
-  CodeInfo codeInfo = 2;  // codesight info
-  NodeInfo nodeInfo = 3;  // nodesight info
+  ArtifactInfo artifactInfo = 1;  // artifactsight info
+  repeated BuildInfo buildInfos = 2;  // buildsight infos
+  CodeInfo codeInfo = 3;  // codesight info
+  NodeInfo nodeInfo = 4;  // nodesight info
 }
+
+message ArtifactInfo {}
 
 message BuildInfo {
   LoggingInfo loggingInfo = 1;  // logging info
