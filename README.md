@@ -136,10 +136,11 @@ message ConfigRequest {
   BuildConfig buildConfig = 2;  // buildsight config
   CodeConfig codeConfig = 3;  // codesight config
   NodeConfig nodeConfig = 4;  // nodesight config
-  ArtifactConfig artifactConfig = 5;  // artifactory config
-  GptConfig gptConfig = 6;  // gpt config
-  RepoConfig repoConfig = 7;  // repo config
-  ReviewConfig reviewConfig = 8;  // review config
+  ToolchainConfig toolchainConfig = 5;  // toolchainsight config
+  ArtifactConfig artifactConfig = 6;  // artifactory config
+  GptConfig gptConfig = 7;  // gpt config
+  RepoConfig repoConfig = 8;  // repo config
+  ReviewConfig reviewConfig = 9;  // review config
 }
 
 message EnvVariable {
@@ -160,6 +161,8 @@ message CodeConfig {
 message NodeConfig {
   string duration = 1;  // duration time in string (h:hour, m:minute, s:second)
 }
+
+message ToolchainConfig {}
 
 message ArtifactConfig {
   string url = 1;  // artifactory url
@@ -212,6 +215,7 @@ message TriggerRequest {
   BuildTrigger buildTrigger = 2;  // buildsight trigger
   CodeTrigger codeTrigger = 3;  // codesight trigger
   NodeTrigger nodeTrigger = 4;  // nodesight trigger
+  ToolchainTrigger toolchainTrigger = 5;  // toolchainsight trigger
 }
 
 message ArtifactTrigger {}
@@ -224,6 +228,8 @@ message BuildTrigger {
 message CodeTrigger {
   ReviewTrigger  reviewTrigger = 1;  // review trigger
 }
+
+message ToolchainTrigger {}
 
 message ReviewTrigger {
   string host = 1;
@@ -275,6 +281,7 @@ message TriggerResponse {
   repeated BuildInfo buildInfos = 2;  // buildsight infos
   CodeInfo codeInfo = 3;  // codesight info
   NodeInfo nodeInfo = 4;  // nodesight info
+  ToolchainInfo toolchainInfo = 4;  // toolchainsight info
 }
 
 message ArtifactInfo {}
@@ -291,6 +298,8 @@ message NodeInfo {
   NodeStat nodeStat = 1;  // node statistic (shown on web)
   NodeReport nodeReport = 2;  // node report (empty: pass, nonempty: fail)
 }
+
+message ToolchainInfo {}
 
 message LoggingInfo {
   string file = 1;  // file name
