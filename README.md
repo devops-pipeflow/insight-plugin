@@ -281,7 +281,7 @@ message TriggerResponse {
   repeated BuildInfo buildInfos = 2;  // buildsight infos
   CodeInfo codeInfo = 3;  // codesight info
   NodeInfo nodeInfo = 4;  // nodesight info
-  ToolchainInfo toolchainInfo = 4;  // toolchainsight info
+  ToolchainInfo toolchainInfo = 5;  // toolchainsight info
 }
 
 message ArtifactInfo {}
