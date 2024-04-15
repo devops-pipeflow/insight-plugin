@@ -1,0 +1,9 @@
+{
+    "removed_packages": [
+      {
+        "name": "name",
+        "type": "type"
+      }
+    ],
+    "project_comment": ""
+  

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<apns version="8">
+    <apn carrier="Emergency" mnc="" type="emergency" apn="" roaming_protocol="IPV4V6" protocol="="IPV4V6"/>
+</apns>
