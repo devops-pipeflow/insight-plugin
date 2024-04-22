@@ -1,14 +1,15 @@
 package proto
 
 type Config struct {
-	EnvVariables   []EnvVariable  `json:"envVariables"`
-	BuildConfig    BuildConfig    `json:"buildConfig"`
-	CodeConfig     CodeConfig     `json:"codeConfig"`
-	NodeConfig     NodeConfig     `json:"nodeConfig"`
-	ArtifactConfig ArtifactConfig `json:"artifactConfig"`
-	GptConfig      GptConfig      `json:"gptConfig"`
-	RepoConfig     RepoConfig     `json:"repoConfig"`
-	ReviewConfig   ReviewConfig   `json:"reviewConfig"`
+	EnvVariables    []EnvVariable   `json:"envVariables"`
+	BuildConfig     BuildConfig     `json:"buildConfig"`
+	CodeConfig      CodeConfig      `json:"codeConfig"`
+	NodeConfig      NodeConfig      `json:"nodeConfig"`
+	ToolchainConfig ToolchainConfig `json:"toolchainConfig"`
+	ArtifactConfig  ArtifactConfig  `json:"artifactConfig"`
+	GptConfig       GptConfig       `json:"gptConfig"`
+	RepoConfig      RepoConfig      `json:"repoConfig"`
+	ReviewConfig    ReviewConfig    `json:"reviewConfig"`
 }
 
 type EnvVariable struct {
@@ -26,9 +27,9 @@ type CodeConfig struct {
 	LintVote    LintVote     `json:"lintVote"`
 }
 
-type NodeConfig struct {
-	Duration string `json:"duration"`
-}
+type NodeConfig struct{}
+
+type ToolchainConfig struct{}
 
 type ArtifactConfig struct {
 	Url  string `json:"url"`
@@ -77,10 +78,11 @@ type LintVote struct {
 type ConfigResponse struct{}
 
 type TriggerRequest struct {
-	ArtifactTrigger *ArtifactTrigger `json:"artifactTrigger"`
-	BuildTrigger    *BuildTrigger    `json:"buildTrigger"`
-	CodeTrigger     *CodeTrigger     `json:"codeTrigger"`
-	NodeTrigger     *NodeTrigger     `json:"nodeTrigger"`
+	ArtifactTrigger  *ArtifactTrigger  `json:"artifactTrigger"`
+	BuildTrigger     *BuildTrigger     `json:"buildTrigger"`
+	CodeTrigger      *CodeTrigger      `json:"codeTrigger"`
+	NodeTrigger      *NodeTrigger      `json:"nodeTrigger"`
+	ToolchainTrigger *ToolchainTrigger `json:"toolchainTrigger"`
 }
 
 type ArtifactTrigger struct{}
@@ -93,6 +95,8 @@ type BuildTrigger struct {
 type CodeTrigger struct {
 	ReviewTrigger ReviewTrigger `json:"reviewTrigger"`
 }
+
+type ToolchainTrigger struct{}
 
 type ReviewTrigger struct {
 	Host                  string `json:"host"`
@@ -140,10 +144,11 @@ type SshConfig struct {
 }
 
 type TriggerResponse struct {
-	ArtifactInfo ArtifactInfo `json:"artifactInfo"`
-	BuildInfos   []BuildInfo  `json:"buildInfos"`
-	CodeInfo     CodeInfo     `json:"codeInfo"`
-	NodeInfo     NodeInfo     `json:"nodeInfo"`
+	ArtifactInfo  ArtifactInfo  `json:"artifactInfo"`
+	BuildInfos    []BuildInfo   `json:"buildInfos"`
+	CodeInfo      CodeInfo      `json:"codeInfo"`
+	NodeInfo      NodeInfo      `json:"nodeInfo"`
+	ToolchainInfo ToolchainInfo `json:"toolchainInfo"`
 }
 
 type ArtifactInfo struct{}
@@ -160,6 +165,8 @@ type NodeInfo struct {
 	NodeStat   NodeStat   `json:"nodeStat"`
 	NodeReport NodeReport `json:"nodeReport"`
 }
+
+type ToolchainInfo struct{}
 
 type LoggingInfo struct {
 	File   string `json:"file"`
