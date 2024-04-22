@@ -16,12 +16,11 @@ import (
 )
 
 const (
-	agentDurationTime = "--duration-time"
-	agentExec         = "agent"
-	agentLogLevel     = "--log-level"
-	agentPath         = "/tmp/"
-	agentScript       = agentExec + ".sh"
-	agentSep          = "="
+	agentExec     = "agent"
+	agentLogLevel = "--log-level"
+	agentPath     = "/tmp/"
+	agentScript   = agentExec + ".sh"
+	agentSep      = "="
 
 	artifactPath = "zd-devops-nj-release-generic/devops-pipeflow/plugins"
 
@@ -180,10 +179,7 @@ func (ns *nodesight) runStat(ctx context.Context) (*proto.NodeStat, error) {
 	var stat proto.NodeStat
 
 	cmds := []string{
-		fmt.Sprintf("%s %s %s",
-			agentPath+agentExec,
-			agentDurationTime+agentSep+ns.cfg.Config.Spec.NodeConfig.Duration,
-			agentLogLevel+agentSep+"ERROR"),
+		fmt.Sprintf("%s %s", agentPath+agentExec, agentLogLevel+agentSep+"ERROR"),
 	}
 
 	out, err := ns.cfg.Ssh.Run(ctx, cmds)

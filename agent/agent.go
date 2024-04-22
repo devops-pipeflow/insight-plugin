@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"time"
 
 	"github.com/alecthomas/kingpin/v2"
 	"github.com/hashicorp/go-hclog"
@@ -25,15 +24,13 @@ import (
 )
 
 const (
-	agentDuration = "10s"
-	agentLevel    = "INFO"
-	agentName     = "name"
+	agentLevel = "INFO"
+	agentName  = "name"
 )
 
 var (
-	app          = kingpin.New(agentName, "insight agent")
-	durationTime = app.Flag("duration-time", "Duration time ((h:hour, m:minute, s:second)").Default(agentDuration).String()
-	logLevel     = app.Flag("log-level", "Log level (DEBUG|INFO|WARN|ERROR)").Default(agentLevel).String()
+	app      = kingpin.New(agentName, "insight agent")
+	logLevel = app.Flag("log-level", "Log level (DEBUG|INFO|WARN|ERROR)").Default(agentLevel).String()
 )
 
 func main() {
@@ -55,12 +52,7 @@ func Run(ctx context.Context) error {
 		return errors.Wrap(err, "failed to init logger")
 	}
 
-	duration, err := initDuration(ctx, logger, *durationTime)
-	if err != nil {
-		return errors.Wrap(err, "failed to init duration")
-	}
-
-	if err := runAgent(ctx, logger, duration); err != nil {
+	if err := runAgent(ctx, logger); err != nil {
 		return errors.Wrap(err, "failed to run agent")
 	}
 
@@ -74,63 +66,45 @@ func initLogger(_ context.Context, level string) (hclog.Logger, error) {
 	}), nil
 }
 
-func initDuration(_ context.Context, logger hclog.Logger, duration string) (time.Duration, error) {
-	logger.Debug("agent: initDuration")
-
-	var d time.Duration
-	var err error
-
-	if duration != "" {
-		d, err = time.ParseDuration(duration)
-		if err != nil {
-			return 0, errors.Wrap(err, "failed to parse duration")
-		}
-	} else {
-		d, _ = time.ParseDuration(agentDuration)
-	}
-
-	return d, nil
-}
-
-func runAgent(ctx context.Context, logger hclog.Logger, duration time.Duration) error {
+func runAgent(ctx context.Context, logger hclog.Logger) error {
 	logger.Debug("agent: runAgent")
 
 	var err error
 	var nodeStat proto.NodeStat
 
-	nodeStat.CpuStat, err = fetchCpuStat(ctx, logger, duration)
+	nodeStat.CpuStat, err = fetchCpuStat(ctx, logger)
 	if err != nil {
 		return errors.Wrap(err, "failed to fetch cpu stat")
 	}
 
-	nodeStat.DiskStat, err = fetchDiskStat(ctx, logger, duration)
+	nodeStat.DiskStat, err = fetchDiskStat(ctx, logger)
 	if err != nil {
 		return errors.Wrap(err, "failed to fetch disk stat")
 	}
 
-	nodeStat.DockerStat, _ = fetchDockerStat(ctx, logger, duration)
+	nodeStat.DockerStat, _ = fetchDockerStat(ctx, logger)
 
-	nodeStat.HostStat, err = fetchHostStat(ctx, logger, duration)
+	nodeStat.HostStat, err = fetchHostStat(ctx, logger)
 	if err != nil {
 		return errors.Wrap(err, "failed to fetch host stat")
 	}
 
-	nodeStat.LoadStat, err = fetchLoadStat(ctx, logger, duration)
+	nodeStat.LoadStat, err = fetchLoadStat(ctx, logger)
 	if err != nil {
 		return errors.Wrap(err, "failed to fetch load stat")
 	}
 
-	nodeStat.MemStat, err = fetchMemStat(ctx, logger, duration)
+	nodeStat.MemStat, err = fetchMemStat(ctx, logger)
 	if err != nil {
 		return errors.Wrap(err, "failed to fetch mem stat")
 	}
 
-	nodeStat.NetStat, err = fetchNetStat(ctx, logger, duration)
+	nodeStat.NetStat, err = fetchNetStat(ctx, logger)
 	if err != nil {
 		return errors.Wrap(err, "failed to fetch net stat")
 	}
 
-	nodeStat.ProcessStat, err = fetchProcessStat(ctx, logger, duration)
+	nodeStat.ProcessStat, err = fetchProcessStat(ctx, logger)
 	if err != nil {
 		return errors.Wrap(err, "failed to fetch process stat")
 	}
@@ -145,7 +119,7 @@ func runAgent(ctx context.Context, logger hclog.Logger, duration time.Duration) 
 	return nil
 }
 
-func fetchCpuStat(ctx context.Context, logger hclog.Logger, duration time.Duration) (proto.CpuStat, error) {
+func fetchCpuStat(ctx context.Context, logger hclog.Logger) (proto.CpuStat, error) {
 	logger.Debug("agent: fetchCpuStat")
 
 	helper := func(times []cpu.TimesStat) []proto.CpuTime {
@@ -178,11 +152,6 @@ func fetchCpuStat(ctx context.Context, logger hclog.Logger, duration time.Durati
 		return proto.CpuStat{}, errors.Wrap(err, "failed to fetch logical count")
 	}
 
-	cpuPercents, err := cpu.PercentWithContext(ctx, duration, true)
-	if err != nil {
-		return proto.CpuStat{}, errors.Wrap(err, "failed to fetch cpu percent")
-	}
-
 	cpuTimes, err := cpu.TimesWithContext(ctx, true)
 	if err != nil {
 		return proto.CpuStat{}, errors.Wrap(err, "failed to fetch cpu times")
@@ -191,12 +160,11 @@ func fetchCpuStat(ctx context.Context, logger hclog.Logger, duration time.Durati
 	return proto.CpuStat{
 		PhysicalCount: int64(physicalCount),
 		LogicalCount:  int64(logicalCount),
-		CpuPercents:   cpuPercents,
 		CpuTimes:      helper(cpuTimes),
 	}, nil
 }
 
-func fetchDiskStat(ctx context.Context, logger hclog.Logger, _ time.Duration) (proto.DiskStat, error) {
+func fetchDiskStat(ctx context.Context, logger hclog.Logger) (proto.DiskStat, error) {
 	logger.Debug("agent: fetchDiskStat")
 
 	partitionsHelper := func(partitions []disk.PartitionStat) []proto.DiskPartition {
@@ -242,7 +210,7 @@ func fetchDiskStat(ctx context.Context, logger hclog.Logger, _ time.Duration) (p
 	}, nil
 }
 
-func fetchDockerStat(ctx context.Context, logger hclog.Logger, _ time.Duration) (proto.DockerStat, error) {
+func fetchDockerStat(ctx context.Context, logger hclog.Logger) (proto.DockerStat, error) {
 	logger.Debug("agent: fetchDockerStat")
 
 	dockerStatHelper := func(stats []docker.CgroupDockerStat) []proto.CGroupDockerStat {
@@ -304,7 +272,7 @@ func fetchDockerStat(ctx context.Context, logger hclog.Logger, _ time.Duration) 
 	}, nil
 }
 
-func fetchHostStat(ctx context.Context, logger hclog.Logger, _ time.Duration) (proto.HostStat, error) {
+func fetchHostStat(ctx context.Context, logger hclog.Logger) (proto.HostStat, error) {
 	logger.Debug("agent: fetchHostStat")
 
 	info, err := host.InfoWithContext(ctx)
@@ -325,7 +293,7 @@ func fetchHostStat(ctx context.Context, logger hclog.Logger, _ time.Duration) (p
 	}, nil
 }
 
-func fetchLoadStat(ctx context.Context, logger hclog.Logger, _ time.Duration) (proto.LoadStat, error) {
+func fetchLoadStat(ctx context.Context, logger hclog.Logger) (proto.LoadStat, error) {
 	logger.Debug("agent: fetchLoadStat")
 
 	avg, err := load.AvgWithContext(ctx)
@@ -354,7 +322,7 @@ func fetchLoadStat(ctx context.Context, logger hclog.Logger, _ time.Duration) (p
 	}, nil
 }
 
-func fetchMemStat(ctx context.Context, logger hclog.Logger, _ time.Duration) (proto.MemStat, error) {
+func fetchMemStat(ctx context.Context, logger hclog.Logger) (proto.MemStat, error) {
 	logger.Debug("agent: fetchMemStat")
 
 	helper := func(devices []*mem.SwapDevice) []proto.MemSwapDevice {
@@ -420,7 +388,7 @@ func fetchMemStat(ctx context.Context, logger hclog.Logger, _ time.Duration) (pr
 	}, nil
 }
 
-func fetchNetStat(ctx context.Context, logger hclog.Logger, _ time.Duration) (proto.NetStat, error) {
+func fetchNetStat(ctx context.Context, logger hclog.Logger) (proto.NetStat, error) {
 	logger.Debug("agent: fetchNetStat")
 
 	netIoHelper := func(stats []net.IOCountersStat) []proto.NetIo {
@@ -476,7 +444,7 @@ func fetchNetStat(ctx context.Context, logger hclog.Logger, _ time.Duration) (pr
 	}, nil
 }
 
-func fetchProcessStat(ctx context.Context, logger hclog.Logger, duration time.Duration) (proto.ProcessStat, error) {
+func fetchProcessStat(ctx context.Context, logger hclog.Logger) (proto.ProcessStat, error) {
 	logger.Debug("agent: fetchProcessStat")
 
 	processChilderHelper := func(processes []*process.Process) []int32 {

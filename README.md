@@ -25,7 +25,7 @@
 ```bash
 # Run agent
 version=latest make build
-./bin/agent --duration-time=10s
+./bin/agent
 ```
 
 ```bash
@@ -39,15 +39,14 @@ version=latest make build
 ## Usage
 
 ```
-usage: agent --duration-time=DURATION-TIME [<flags>]
+usage: name [<flags>]
 
 insight agent
 
 
 Flags:
-  --[no-]help                    Show context-sensitive help (also try --help-long and --help-man).
-  --duration-time=DURATION-TIME  Duration time ((h:hour, m:minute, s:second)
-  --log-level="INFO"             Log level (DEBUG|INFO|WARN|ERROR)
+  --[no-]help         Show context-sensitive help (also try --help-long and --help-man).
+  --log-level="INFO"  Log level (DEBUG|INFO|WARN|ERROR)
 ```
 
 ```
@@ -104,7 +103,6 @@ spec:
       label: Code-Review
       message: Voting Code-Review by codesight
   nodeConfig:
-    duration: 10s
   toolchainConfig:
   artifactConfig:
     url: 127.0.0.1:8080
@@ -130,9 +128,6 @@ spec:
     key: key
     timeout: 10s
 ```
-
-> `nodeConfig`: Node config
-> > `duration`: Node sight duration (h:hour, m:minute, s:second)
 
 > `sshConfig`: SSH config
 > > `timeout`: SSH connection timeout (h:hour, m:minute, s:second)
@@ -180,9 +175,7 @@ message CodeConfig {
   LintVote lintVote = 3;  // vote config (Gerrit, pingview)
 }
 
-message NodeConfig {
-  string duration = 1;  // duration time in string (h:hour, m:minute, s:second)
-}
+message NodeConfig {}
 
 message ToolchainConfig {}
 
@@ -376,8 +369,7 @@ message NodeReport {
 message CpuStat {
   int64 physicalCount = 1; // physical cores
   int64 logicalCount = 2;  // logical cores
-  repeated double cpuPercents = 3;  // the percentage of cpu used per cpu in list
-  repeated CpuTime cpuTimes = 4;  // the time of cpu used per cpu in list
+  repeated CpuTime cpuTimes = 3;  // the time of cpu used per cpu in list
 }
 
 message DiskStat {

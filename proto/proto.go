@@ -214,7 +214,6 @@ type NodeReport struct {
 type CpuStat struct {
 	PhysicalCount int64     `json:"physicalCount"`
 	LogicalCount  int64     `json:"logicalCount"`
-	CpuPercents   []float64 `json:"cpuPercents"`
 	CpuTimes      []CpuTime `json:"cpuTimes"`
 }
 
