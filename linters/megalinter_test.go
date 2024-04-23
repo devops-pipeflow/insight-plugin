@@ -25,7 +25,31 @@ func initMegaLinter() megalinter {
 	return ml
 }
 
-func TestMegaLinterRun(t *testing.T) {
+func TestPullImage(t *testing.T) {
+	_ = initMegaLinter()
+
+	// TBD: FIXME
+
+	assert.Equal(t, nil, nil)
+}
+
+func TestRemoveImage(t *testing.T) {
+	_ = initMegaLinter()
+
+	// TBD: FIXME
+
+	assert.Equal(t, nil, nil)
+}
+
+func TestRunContainer(t *testing.T) {
+	_ = initMegaLinter()
+
+	// TBD: FIXME
+
+	assert.Equal(t, nil, nil)
+}
+
+func TestParseReport(t *testing.T) {
 	_ = initMegaLinter()
 
 	// TBD: FIXME
