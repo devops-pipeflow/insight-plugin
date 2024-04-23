@@ -75,9 +75,6 @@ kind: insight
 metadata:
   name: insight
 spec:
-  envVariables:
-    - name: env
-      value: val
   buildConfig:
     loggingConfig:
       start: 1
@@ -149,20 +146,14 @@ service Insight {
 }
 
 message ConfigRequest {
-  repeated EnvVariable envVariables = 1;  // environment variables in list
-  BuildConfig buildConfig = 2;  // buildsight config
-  CodeConfig codeConfig = 3;  // codesight config
-  NodeConfig nodeConfig = 4;  // nodesight config
-  ToolchainConfig toolchainConfig = 5;  // toolchainsight config
-  ArtifactConfig artifactConfig = 6;  // artifactory config
-  GptConfig gptConfig = 7;  // gpt config
-  RepoConfig repoConfig = 8;  // repo config
-  ReviewConfig reviewConfig = 9;  // review config
-}
-
-message EnvVariable {
-  string name = 1;  // variable name
-  string value = 2;  // variable value
+  BuildConfig buildConfig = 1;  // buildsight config
+  CodeConfig codeConfig = 2;  // codesight config
+  NodeConfig nodeConfig = 3;  // nodesight config
+  ToolchainConfig toolchainConfig = 4;  // toolchainsight config
+  ArtifactConfig artifactConfig = 5;  // artifactory config
+  GptConfig gptConfig = 6;  // gpt config
+  RepoConfig repoConfig = 7;  // repo config
+  ReviewConfig reviewConfig = 8;  // review config
 }
 
 message BuildConfig {
@@ -236,15 +227,31 @@ message TriggerRequest {
 message ArtifactTrigger {}
 
 message BuildTrigger {
-  LoggingTrigger loggingTrigger = 1;  // logging trigger
-  ReviewTrigger  reviewTrigger = 2;  // review trigger
+  repeated EnvVariable envVariables = 1;  // environment variables in list
+  LoggingTrigger loggingTrigger = 2;  // logging trigger
+  ReviewTrigger  reviewTrigger = 3;  // review trigger
 }
 
 message CodeTrigger {
   ReviewTrigger  reviewTrigger = 1;  // review trigger
 }
 
+message NodeTrigger {
+  SshConfig sshConfig = 1;  // ssh config
+}
+
 message ToolchainTrigger {}
+
+message EnvVariable {
+  string name = 1;  // variable name
+  string value = 2;  // variable value
+}
+
+message LoggingTrigger {
+  repeated string lines = 1;  // logging lines in list
+  int64 start = 2;  // logging lines start (>=1)
+  int64 len = 3;  // logging lines length
+}
 
 message ReviewTrigger {
   string host = 1;
@@ -270,16 +277,6 @@ message ReviewTrigger {
   string patchsetUploader = 21;
   string patchsetUploaderName = 22;
   string patchsetUploaderEmail = 23;
-}
-
-message NodeTrigger {
-  SshConfig sshConfig = 1;  // ssh config
-}
-
-message LoggingTrigger {
-  repeated string lines = 1;  // logging lines in list
-  int64 start = 2;  // logging lines start (>=1)
-  int64 len = 3;  // logging lines length
 }
 
 message SshConfig {
