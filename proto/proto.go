@@ -1,7 +1,6 @@
 package proto
 
 type Config struct {
-	EnvVariables    []EnvVariable   `json:"envVariables"`
 	BuildConfig     BuildConfig     `json:"buildConfig"`
 	CodeConfig      CodeConfig      `json:"codeConfig"`
 	NodeConfig      NodeConfig      `json:"nodeConfig"`
@@ -10,11 +9,6 @@ type Config struct {
 	GptConfig       GptConfig       `json:"gptConfig"`
 	RepoConfig      RepoConfig      `json:"repoConfig"`
 	ReviewConfig    ReviewConfig    `json:"reviewConfig"`
-}
-
-type EnvVariable struct {
-	Name  string `json:"name"`
-	Value string `json:"value"`
 }
 
 type BuildConfig struct {
@@ -88,6 +82,7 @@ type TriggerRequest struct {
 type ArtifactTrigger struct{}
 
 type BuildTrigger struct {
+	EnvVariables   []EnvVariable  `json:"envVariables"`
 	LoggingTrigger LoggingTrigger `json:"loggingTrigger"`
 	ReviewTrigger  ReviewTrigger  `json:"reviewTrigger"`
 }
@@ -96,7 +91,22 @@ type CodeTrigger struct {
 	ReviewTrigger ReviewTrigger `json:"reviewTrigger"`
 }
 
+type NodeTrigger struct {
+	SshConfig SshConfig `json:"sshConfig"`
+}
+
 type ToolchainTrigger struct{}
+
+type EnvVariable struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
+}
+
+type LoggingTrigger struct {
+	Lines []string `json:"lines"`
+	Start int64    `json:"start"`
+	Len   int64    `json:"len"`
+}
 
 type ReviewTrigger struct {
 	Host                  string `json:"host"`
@@ -122,16 +132,6 @@ type ReviewTrigger struct {
 	PatchsetUploader      string `json:"patchsetUploader"`
 	PatchsetUploaderName  string `json:"patchsetUploaderName"`
 	PatchsetUploaderEmail string `json:"patchsetUploaderEmail"`
-}
-
-type NodeTrigger struct {
-	SshConfig SshConfig `json:"sshConfig"`
-}
-
-type LoggingTrigger struct {
-	Lines []string `json:"lines"`
-	Start int64    `json:"start"`
-	Len   int64    `json:"len"`
 }
 
 type SshConfig struct {
