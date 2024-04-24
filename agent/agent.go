@@ -152,7 +152,7 @@ func fetchCpuStat(ctx context.Context, logger hclog.Logger) (proto.CpuStat, erro
 		return proto.CpuStat{}, errors.Wrap(err, "failed to fetch logical count")
 	}
 
-	cpuTimes, err := cpu.TimesWithContext(ctx, true)
+	cpuTimes, err := cpu.TimesWithContext(ctx, false)
 	if err != nil {
 		return proto.CpuStat{}, errors.Wrap(err, "failed to fetch cpu times")
 	}
@@ -428,7 +428,7 @@ func fetchNetStat(ctx context.Context, logger hclog.Logger) (proto.NetStat, erro
 		return buf
 	}
 
-	ioCounters, err := net.IOCountersWithContext(ctx, true)
+	ioCounters, err := net.IOCountersWithContext(ctx, false)
 	if err != nil {
 		return proto.NetStat{}, errors.Wrap(err, "failed to fetch io counters")
 	}
@@ -496,7 +496,6 @@ func fetchProcessStat(ctx context.Context, logger hclog.Logger) (proto.ProcessSt
 			cpuPercent, _ := processes[i].CPUPercentWithContext(ctx)
 			procs, _ := processes[i].ChildrenWithContext(ctx)
 			cmdline, _ := processes[i].CmdlineWithContext(ctx)
-			envs, _ := processes[i].EnvironWithContext(ctx)
 			ionice, _ := processes[i].IOniceWithContext(ctx)
 			isRunning, _ := processes[i].IsRunningWithContext(ctx)
 			memoryInfo, _ := processes[i].MemoryInfoWithContext(ctx)
@@ -514,7 +513,6 @@ func fetchProcessStat(ctx context.Context, logger hclog.Logger) (proto.ProcessSt
 				CpuPercent:        cpuPercent,
 				Children:          processChilderHelper(procs),
 				Cmdline:           cmdline,
-				Environs:          envs,
 				IoNice:            ionice,
 				IsRunning:         isRunning,
 				ProcessMemoryInfo: processMemoryInfoHelper(memoryInfo),
