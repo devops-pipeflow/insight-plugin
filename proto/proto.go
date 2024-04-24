@@ -147,6 +147,7 @@ type TriggerResponse struct {
 	ArtifactInfo  ArtifactInfo  `json:"artifactInfo"`
 	BuildInfos    []BuildInfo   `json:"buildInfos"`
 	CodeInfo      CodeInfo      `json:"codeInfo"`
+	MailInfo      MailInfo      `json:"mailInfo"`
 	NodeInfo      NodeInfo      `json:"nodeInfo"`
 	ToolchainInfo ToolchainInfo `json:"toolchainInfo"`
 }
@@ -160,6 +161,16 @@ type BuildInfo struct {
 }
 
 type CodeInfo struct{}
+
+type MailInfo struct {
+	ContentType string   `json:"contentType"`
+	FromAddress string   `json:"fromAddress"`
+	ToAddresses []string `json:"toAddresses"`
+	CcAddresses []string `json:"ccAddresses"`
+	Subject     string   `json:"subject"`
+	Body        string   `json:"body"`
+	Attachments []string `json:"attachments"`
+}
 
 type NodeInfo struct {
 	NodeStat   NodeStat   `json:"nodeStat"`
