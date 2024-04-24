@@ -292,8 +292,9 @@ message TriggerResponse {
   ArtifactInfo artifactInfo = 1;  // artifactsight info
   repeated BuildInfo buildInfos = 2;  // buildsight infos
   CodeInfo codeInfo = 3;  // codesight info
-  NodeInfo nodeInfo = 4;  // nodesight info
-  ToolchainInfo toolchainInfo = 5;  // toolchainsight info
+  MailInfo mailInfo = 4;  // mail info
+  NodeInfo nodeInfo = 5;  // nodesight info
+  ToolchainInfo toolchainInfo = 6;  // toolchainsight info
 }
 
 message ArtifactInfo {}
@@ -305,6 +306,16 @@ message BuildInfo {
 }
 
 message CodeInfo {}
+
+message MailInfo {
+  string contentType = 1; // content type (e.g., "text/html" or "text/plain")
+  string fromAddress = 2; // from address (e.g., "pipeflow")
+  repeat string toAddresses = 3; // to addresses (e.g., "name@example.com")
+  repeat string ccAddresses = 4; // cc addresses (e.g., "name@example.com")
+  string subject = 5; // subject content (e.g., "[buildsight]: ...")
+  string body = 6; // body content
+  repeat string attachments = 7; // attachment files (e.g., "attach.txt")
+}
 
 message NodeInfo {
   NodeStat nodeStat = 1;  // node statistic (shown on web)
