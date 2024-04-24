@@ -317,7 +317,7 @@ message LoggingInfo {
   string file = 1;  // file name
   int64 line = 2;  // file line
   string type = 3;  // error type (info, warn, error)
-  string detail = 4;  // error details
+  string detail = 4;  // error detail (e.g., type="info" detail="Build completed successfully.")
 }
 
 message RepoInfo {
