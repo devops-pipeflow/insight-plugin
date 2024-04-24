@@ -20,7 +20,7 @@ type Insight interface {
 	Init(context.Context) error
 	Deinit(context.Context) error
 	Run(context.Context, *proto.BuildTrigger, *proto.CodeTrigger, *proto.NodeTrigger) (
-		[]proto.BuildInfo, proto.CodeInfo, proto.NodeInfo, error)
+		[]proto.BuildInfo, proto.CodeInfo, proto.MailInfo, proto.NodeInfo, error)
 }
 
 type Config struct {
@@ -75,12 +75,13 @@ func (i *insight) Deinit(ctx context.Context) error {
 
 func (i *insight) Run(ctx context.Context,
 	buildTrigger *proto.BuildTrigger, codeTrigger *proto.CodeTrigger, nodeTrigger *proto.NodeTrigger) (
-	[]proto.BuildInfo, proto.CodeInfo, proto.NodeInfo, error) {
+	[]proto.BuildInfo, proto.CodeInfo, proto.MailInfo, proto.NodeInfo, error) {
 	i.cfg.Logger.Debug("insight: Run")
 
 	var (
 		buildInfo []proto.BuildInfo
 		codeInfo  proto.CodeInfo
+		mailInfo  proto.MailInfo
 		nodeInfo  proto.NodeInfo
 		err       error
 	)
@@ -90,7 +91,7 @@ func (i *insight) Run(ctx context.Context,
 
 	g.Go(func() error {
 		if buildTrigger != nil {
-			buildInfo, err = i.cfg.BuildSight.Run(ctx, buildTrigger)
+			buildInfo, mailInfo, err = i.cfg.BuildSight.Run(ctx, buildTrigger)
 			if err != nil {
 				return errors.Wrap(err, "failed to run buildsight")
 			}
@@ -100,7 +101,7 @@ func (i *insight) Run(ctx context.Context,
 
 	g.Go(func() error {
 		if codeTrigger != nil {
-			codeInfo, err = i.cfg.CodeSight.Run(ctx, codeTrigger)
+			codeInfo, mailInfo, err = i.cfg.CodeSight.Run(ctx, codeTrigger)
 			if err != nil {
 				return errors.Wrap(err, "failed to run codesight")
 			}
@@ -110,7 +111,7 @@ func (i *insight) Run(ctx context.Context,
 
 	g.Go(func() error {
 		if nodeTrigger != nil {
-			nodeInfo, err = i.cfg.NodeSight.Run(ctx, nodeTrigger)
+			nodeInfo, mailInfo, err = i.cfg.NodeSight.Run(ctx, nodeTrigger)
 			if err != nil {
 				return errors.Wrap(err, "failed to run nodesight")
 			}
@@ -119,8 +120,8 @@ func (i *insight) Run(ctx context.Context,
 	})
 
 	if err = g.Wait(); err != nil {
-		return buildInfo, codeInfo, nodeInfo, errors.Wrap(err, "failed to wait routine")
+		return buildInfo, codeInfo, mailInfo, nodeInfo, errors.Wrap(err, "failed to wait routine")
 	}
 
-	return buildInfo, codeInfo, nodeInfo, nil
+	return buildInfo, codeInfo, mailInfo, nodeInfo, nil
 }

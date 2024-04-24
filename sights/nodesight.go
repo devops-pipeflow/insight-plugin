@@ -34,7 +34,7 @@ const (
 type NodeSight interface {
 	Init(context.Context) error
 	Deinit(context.Context) error
-	Run(context.Context, *proto.NodeTrigger) (proto.NodeInfo, error)
+	Run(context.Context, *proto.NodeTrigger) (proto.NodeInfo, proto.MailInfo, error)
 }
 
 type NodeSightConfig struct {
@@ -70,13 +70,14 @@ func (ns *nodesight) Deinit(_ context.Context) error {
 	return nil
 }
 
-func (ns *nodesight) Run(ctx context.Context, trigger *proto.NodeTrigger) (proto.NodeInfo, error) {
+func (ns *nodesight) Run(ctx context.Context, trigger *proto.NodeTrigger) (proto.NodeInfo, proto.MailInfo, error) {
 	ns.cfg.Logger.Debug("nodesight: Run")
 
-	var info proto.NodeInfo
+	var nodeInfo proto.NodeInfo
+	var mailInfo proto.MailInfo
 
 	if err := ns.cfg.Ssh.Init(ctx, &trigger.SshConfig); err != nil {
-		return info, errors.Wrap(err, "failed to init ssh")
+		return nodeInfo, mailInfo, errors.Wrap(err, "failed to init ssh")
 	}
 
 	defer func() {
@@ -101,20 +102,20 @@ func (ns *nodesight) Run(ctx context.Context, trigger *proto.NodeTrigger) (proto
 		if err != nil {
 			return errors.Wrap(err, "failed to run stat")
 		}
-		info.NodeStat = *stat
+		nodeInfo.NodeStat = *stat
 		report, err := ns.runReport(ctx, health, stat)
 		if err != nil {
 			return errors.Wrap(err, "failed to run report")
 		}
-		info.NodeReport = *report
+		nodeInfo.NodeReport = *report
 		return nil
 	})
 
 	if err := g.Wait(); err != nil {
-		return info, errors.Wrap(err, "failed to wait routine")
+		return nodeInfo, mailInfo, errors.Wrap(err, "failed to wait routine")
 	}
 
-	return info, nil
+	return nodeInfo, mailInfo, nil
 }
 
 func (ns *nodesight) runDetect(ctx context.Context) error {

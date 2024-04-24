@@ -193,7 +193,7 @@ func runInsight(ctx context.Context, logger hclog.Logger, i insight.Insight) err
 
 	go func(ctx context.Context, buildTrigger *proto.BuildTrigger, codeTrigger *proto.CodeTrigger, nodeTrigger *proto.NodeTrigger) {
 		logger.Debug("cmd: runInsight: Run")
-		_, _, _, _ = i.Run(ctx, buildTrigger, codeTrigger, nodeTrigger)
+		_, _, _, _, _ = i.Run(ctx, buildTrigger, codeTrigger, nodeTrigger)
 	}(ctx, &buildTrigger, &codeTrigger, &nodeTrigger)
 
 	go func(ctx context.Context, i insight.Insight, s chan os.Signal) {
