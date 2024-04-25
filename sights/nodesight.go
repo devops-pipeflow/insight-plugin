@@ -201,6 +201,7 @@ func (ns *nodesight) runReport(_ context.Context, health string, stat *proto.Nod
 	var report proto.NodeReport
 
 	// TBD: FIXME
+	// Split stat into cpuStat, diskStat, dockerStat, hostStat, loadStat, memStat, netStat, processStat
 
 	return &report, nil
 }

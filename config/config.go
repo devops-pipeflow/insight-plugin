@@ -45,6 +45,9 @@ type ArtifactConfig struct {
 }
 
 type GptConfig struct {
+	Url  string `yaml:"url"`
+	User string `yaml:"user"`
+	Pass string `yaml:"pass"`
 }
 
 type RepoConfig struct {
