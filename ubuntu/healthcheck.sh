@@ -3,7 +3,7 @@
 # Set defaults
 FIX_ME="true"
 SILENT_MODE="false"
-VERSION_INFO="1.2.0"
+VERSION_INFO="1.3.0"
 
 # Print pass message
 print_pass() {
@@ -305,6 +305,36 @@ check_disk() {
     return 11
 }
 
+# Check ntp
+check_ntp() {
+    local cmd="ntpstat"
+    local ret
+
+    eval "$cmd 1> /dev/null 2> /dev/null"
+    ret=$?
+    if [ $ret -eq 0 ]; then
+        print_pass "\e[1mINFO\e[0m: check ntp \e[92mPASS\e[0m"
+        return 0
+    fi
+
+    print_fail "\e[1mERROR\e[0m: check ntp \e[91mFAIL\e[0m"
+
+    if [ "$FIX_ME" = "true" ]; then
+        print_fix "\e[1mFIXME\e[0m: copy command below, then run it"
+        print_fix "sudo timedatectl set-timezone Asia/Shanghai"
+        print_fix "sudo apt update && sudo apt install -y ntp ntpdate ntpstat"
+        print_fix "sudo ntpdate time.example.com.cn"
+        print_fix "sudo timedatectl set-ntp off"
+        print_fix "sudo bash -c \"cat >> /etc/ntp.conf\" << EOF"
+        print_fix "server time.example.com.cn prefer iburst"
+        print_fix "EOF"
+        print_fix "sudo service ntp restart"
+        print_fix "sudo hwclock --systoh"
+    fi
+
+    return 12
+}
+
 run_check() {
     local ret
 
@@ -391,6 +421,14 @@ run_check() {
     print_pass "----------------------------------------------"
 
     check_disk
+    ret=$?
+    if [ $ret -ne 0 ]; then
+        return $ret
+    fi
+
+    print_pass "----------------------------------------------"
+
+    check_ntp
     ret=$?
     if [ $ret -ne 0 ]; then
         return $ret
