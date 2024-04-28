@@ -305,19 +305,19 @@ check_disk() {
     return 11
 }
 
-# Check ntp
-check_ntp() {
+# Check clock
+check_clock() {
     local cmd="ntpstat"
     local ret
 
     eval "$cmd 1> /dev/null 2> /dev/null"
     ret=$?
     if [ $ret -eq 0 ]; then
-        print_pass "\e[1mINFO\e[0m: check ntp \e[92mPASS\e[0m"
+        print_pass "\e[1mINFO\e[0m: check clock \e[92mPASS\e[0m"
         return 0
     fi
 
-    print_fail "\e[1mERROR\e[0m: check ntp \e[91mFAIL\e[0m"
+    print_fail "\e[1mERROR\e[0m: check clock \e[91mFAIL\e[0m"
 
     if [ "$FIX_ME" = "true" ]; then
         print_fix "\e[1mFIXME\e[0m: copy command below, then run it"
@@ -428,7 +428,7 @@ run_check() {
 
     print_pass "----------------------------------------------"
 
-    check_ntp
+    check_clock
     ret=$?
     if [ $ret -ne 0 ]; then
         return $ret
