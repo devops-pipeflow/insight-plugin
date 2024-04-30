@@ -73,7 +73,7 @@ func (kl *kernellinter) Run(ctx context.Context, path string, files []string) ([
 }
 
 // nolint: gosec
-func (kl *kernellinter) lintPatch(_ context.Context, path string, files []string) ([]string, error) {
+func (kl *kernellinter) lintPatch(ctx context.Context, path string, files []string) ([]string, error) {
 	kl.cfg.Logger.Debug("kernellinter: lintPatch")
 
 	parseType := func(name string) string {
@@ -109,7 +109,7 @@ func (kl *kernellinter) lintPatch(_ context.Context, path string, files []string
 	for _, item := range files {
 		opts := kl.cfg.Options
 		opts = append(opts, "-f", filepath.Join(path, item))
-		cmd := exec.Command(kl.linter, opts...)
+		cmd := exec.CommandContext(ctx, kl.linter, opts...)
 		out, _ := cmd.CombinedOutput()
 		buf = append(buf, buildLint(item, string(out))...)
 	}
