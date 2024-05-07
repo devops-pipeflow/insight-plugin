@@ -3,7 +3,7 @@
 # Set defaults
 FIX_ME="true"
 SILENT_MODE="false"
-VERSION_INFO="1.3.0"
+VERSION_INFO="1.5.0"
 
 # Print pass message
 print_pass() {
@@ -48,8 +48,8 @@ check_hosts() {
 # Check /etc/network/interfaces
 check_interfaces() {
     local name="/etc/network/interfaces"
-    local server1="8.8.8.8"
-    local server2="8.8.4.4"
+    local server1="10.30.8.8"
+    local server2="10.40.8.8"
     local cmd="grep -E '$server1|$server2' $name"
     local ret
 
@@ -76,8 +76,8 @@ check_interfaces() {
 # Check /etc/resolv.conf
 check_resolv() {
     local name="/etc/resolv.conf"
-    local server1="8.8.8.8"
-    local server2="8.8.4.4"
+    local server1="10.30.8.8"
+    local server2="10.40.8.8"
     local cmd="grep -E '$server1|$server2' $name"
     local ret
 
@@ -450,12 +450,43 @@ OPTIONS:
     -h, --help
         Display this help message
 
+    -i, --information
+        Fetch system information
+
     -s, --silent
         Show error message only
 
     -v, --version
         Display version information
 USAGE
+}
+
+show_information() {
+    local name="fastfetch"
+    local overwrite="false"
+
+    if [ -f "$PWD"/$name ]; then
+        read -p "$name exists. Overwrite it now (y/n)?" -n 1 -r
+        echo
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            overwrite="true"
+        fi
+    else
+        overwrite="true"
+    fi
+
+    if [ "$overwrite" = "true" ]; then
+        echo
+        echo "Downloading..."
+        curl -# -L https://path/to/fastfetch -o "$PWD"/$name 1>/dev/null
+        chmod +x "$PWD"/$name
+    fi
+
+    echo
+    echo "Running..."
+
+    echo
+    "$PWD"/$name
 }
 
 set_silent() {
@@ -469,8 +500,8 @@ VERSION
 }
 
 parse_opts() {
-    local long_opts="help,silent,version,"
-    local short_opts="hsv"
+    local long_opts="help,information,silent,version,"
+    local short_opts="hisv"
     local getopt_cmd
 
     getopt_cmd=$(getopt -o $short_opts --long "$long_opts" \
@@ -482,6 +513,7 @@ parse_opts() {
     while true; do
         case "$1" in
             -h|--help) show_usage; return 1;;
+            -i|--information) show_information; return 1;;
             -s|--silent) set_silent;;
             -v|--version) print_version; return 1;;
             --) shift; break;;
