@@ -19,8 +19,8 @@ import (
 )
 
 const (
-	artifactPath = "zd-devops-nj-release-docker.artnj.zte.com.cn/docker-local/pipeflow/linter"
-	artifactName = "oxsecurity/megalinter-cupcake:latest"
+	artifactPath = "oxsecurity"
+	artifactName = "megalinter-cupcake:latest"
 )
 
 type MegaLinter interface {
