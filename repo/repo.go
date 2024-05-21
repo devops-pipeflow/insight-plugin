@@ -70,6 +70,10 @@ func (r *repo) Init(ctx context.Context) error {
 	r.pass = r.cfg.Config.Spec.RepoConfig.Pass
 	r.url = r.cfg.Config.Spec.RepoConfig.Url
 
+	r.cfg.Logger.Debug("repo: user: ", r.user)
+	r.cfg.Logger.Debug("repo: pass: ", r.pass)
+	r.cfg.Logger.Debug("repo: url: ", r.url)
+
 	return nil
 }
 

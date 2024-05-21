@@ -42,7 +42,11 @@ type Response struct {
 }
 
 type gpt struct {
-	cfg *Config
+	cfg  *Config
+	user string
+	pass string
+	url  string
+	api  string
 }
 
 func New(_ context.Context, cfg *Config) Gpt {
@@ -57,6 +61,16 @@ func DefaultConfig() *Config {
 
 func (g *gpt) Init(_ context.Context) error {
 	g.cfg.Logger.Debug("gpt: Init")
+
+	g.user = g.cfg.Config.Spec.GptConfig.User
+	g.pass = g.cfg.Config.Spec.GptConfig.Pass
+	g.url = g.cfg.Config.Spec.GptConfig.Url
+	g.api = g.cfg.Api
+
+	g.cfg.Logger.Debug("gpt: user: " + g.user)
+	g.cfg.Logger.Debug("gpt: pass: " + g.pass)
+	g.cfg.Logger.Debug("gpt: url: " + g.url)
+	g.cfg.Logger.Debug("gpt: api: " + g.api)
 
 	return nil
 }
@@ -84,7 +98,7 @@ func (g *gpt) sendRequest(_ context.Context, content string) (string, error) {
 		return "", errors.Wrap(err, "failed to marshal request")
 	}
 
-	req, _ := http.NewRequest("POST", g.cfg.Api, bytes.NewBuffer(marshal))
+	req, _ := http.NewRequest("POST", g.api, bytes.NewBuffer(marshal))
 	req.Header.Set("content-type", "application/json")
 
 	client := &http.Client{

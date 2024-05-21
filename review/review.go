@@ -119,6 +119,10 @@ func (r *review) Init(_ context.Context) error {
 	r.pass = r.cfg.Config.Spec.ReviewConfig.Pass
 	r.url = r.cfg.Config.Spec.ReviewConfig.Url
 
+	r.cfg.Logger.Debug("review: user: " + r.user)
+	r.cfg.Logger.Debug("review: pass: " + r.pass)
+	r.cfg.Logger.Debug("review: url: " + r.url)
+
 	return nil
 }
 
