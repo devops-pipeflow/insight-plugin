@@ -2,24 +2,40 @@
 
 # Set defaults
 FIX_ME="true"
+PLAIN_MODE="false"
 SILENT_MODE="false"
-VERSION_INFO="1.5.0"
+VERSION_INFO="1.6.0"
 
 # Print pass message
 print_pass() {
     if [ "$SILENT_MODE" = "false" ]; then
-        echo -e "$1"
+        if [ "$PLAIN_MODE" = "true" ]; then
+            buf=$(echo "$1" | sed "s/\\\e\[[0-9]*m//g")
+            echo -e "$buf"
+        else
+            echo -e "$1"
+        fi
     fi
 }
 
 # Print fail message
 print_fail() {
-    echo -e "$1" 1>&2
+    if [ "$PLAIN_MODE" = "true" ]; then
+        buf=$(echo "$1" | sed "s/\\\e\[[0-9]*m//g")
+        echo -e "$buf" 1>&2
+    else
+        echo -e "$1" 1>&2
+    fi
 }
 
 # Print fix message
 print_fix() {
-    echo -e "$1" 1>&2
+    if [ "$PLAIN_MODE" = "true" ]; then
+        buf=$(echo "$1" | sed "s/\\\e\[[0-9]*m//g")
+        echo -e "$buf" 1>&2
+    else
+        echo -e "$1" 1>&2
+    fi
 }
 
 # Check /etc/hosts
@@ -453,6 +469,9 @@ OPTIONS:
     -i, --information
         Fetch system information
 
+    -p, --plain
+        Show message in plain mode
+
     -s, --silent
         Show error message only
 
@@ -489,6 +508,10 @@ show_information() {
     "$PWD"/$name
 }
 
+set_plain() {
+    PLAIN_MODE="true"
+}
+
 set_silent() {
     SILENT_MODE="true"
 }
@@ -500,8 +523,8 @@ VERSION
 }
 
 parse_opts() {
-    local long_opts="help,information,silent,version,"
-    local short_opts="hisv"
+    local long_opts="help,information,plain,silent,version,"
+    local short_opts="hipsv"
     local getopt_cmd
 
     getopt_cmd=$(getopt -o $short_opts --long "$long_opts" \
@@ -514,6 +537,7 @@ parse_opts() {
         case "$1" in
             -h|--help) show_usage; return 1;;
             -i|--information) show_information; return 1;;
+            -p|--plain) set_plain;;
             -s|--silent) set_silent;;
             -v|--version) print_version; return 1;;
             --) shift; break;;
