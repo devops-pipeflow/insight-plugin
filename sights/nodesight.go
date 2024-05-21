@@ -25,6 +25,7 @@ const (
 	artifactPath = "zd-devops-nj-release-generic/devops-pipeflow/plugins"
 
 	healthPath   = "/tmp/"
+	healthPlain  = "--plain"
 	healthScript = "healthcheck.sh"
 	healthSilent = "--silent"
 
@@ -163,7 +164,7 @@ func (ns *nodesight) runHealth(ctx context.Context) (string, error) {
 	}
 
 	cmds = []string{
-		fmt.Sprintf("cd %s; bash %s %s", healthPath, healthScript, healthSilent),
+		fmt.Sprintf("cd %s; bash %s %s %s", healthPath, healthScript, healthPlain, healthSilent),
 	}
 
 	out, err = ns.cfg.Ssh.Run(ctx, cmds)
