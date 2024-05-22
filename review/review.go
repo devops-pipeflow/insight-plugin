@@ -134,6 +134,7 @@ func (r *review) Deinit(_ context.Context) error {
 
 func (r *review) Clean(_ context.Context, name string) error {
 	r.cfg.Logger.Debug("review: Clean")
+	r.cfg.Logger.Debug("review: Clean: name: " + name)
 
 	if err := os.RemoveAll(name); err != nil {
 		return errors.Wrap(err, "failed to clean")
@@ -144,6 +145,8 @@ func (r *review) Clean(_ context.Context, name string) error {
 
 func (r *review) Diff(ctx context.Context, change int, file string) (map[string]interface{}, error) {
 	r.cfg.Logger.Debug("review: Diff")
+	r.cfg.Logger.Debug("review: Diff: change: " + strconv.Itoa(change))
+	r.cfg.Logger.Debug("review: Diff: file: " + file)
 
 	buf, err := r.get(ctx, r.urlDiff(change, file))
 	if err != nil {
@@ -161,6 +164,8 @@ func (r *review) Diff(ctx context.Context, change int, file string) (map[string]
 // nolint:funlen,gocyclo
 func (r *review) Fetch(ctx context.Context, root, commit string) (path, name string, files []string, err error) {
 	r.cfg.Logger.Debug("review: Fetch")
+	r.cfg.Logger.Debug("review: Fetch: root: " + root)
+	r.cfg.Logger.Debug("review: Fetch: commit: " + commit)
 
 	filterFiles := func(data map[string]interface{}) map[string]interface{} {
 		buf := make(map[string]interface{})
@@ -239,6 +244,10 @@ func (r *review) Fetch(ctx context.Context, root, commit string) (path, name str
 }
 
 func (r *review) Query(ctx context.Context, search string, start int) ([]interface{}, error) {
+	r.cfg.Logger.Debug("review: Query")
+	r.cfg.Logger.Debug("review: Query: search: " + search)
+	r.cfg.Logger.Debug("review: Query: start: " + strconv.Itoa(start))
+
 	helper := func(search string, start int) []interface{} {
 		buf, err := r.get(ctx, r.urlQuery(search, queryOptions, start))
 		if err != nil {
@@ -274,6 +283,9 @@ func (r *review) Query(ctx context.Context, search string, start int) ([]interfa
 
 // nolint:funlen,gocyclo
 func (r *review) Vote(ctx context.Context, commit string, data []Format) error {
+	r.cfg.Logger.Debug("review: Vote")
+	r.cfg.Logger.Debug("review: Vote: commit: " + commit)
+
 	match := func(data Format, diffs []*diff.FileDiff) bool {
 		for _, d := range diffs {
 			if strings.Replace(d.PathNew, pathPrefix, "", 1) != data.File {
