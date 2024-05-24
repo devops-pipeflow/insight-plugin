@@ -95,8 +95,9 @@ func (ns *nodesight) Run(ctx context.Context, trigger *proto.NodeTrigger) (proto
 		if err := ns.runDetect(ctx); err != nil {
 			return errors.Wrap(err, "failed to run detect")
 		}
-		health, err := ns.runHealth(ctx)
+		_, err := ns.runHealth(ctx)
 		if err != nil {
+			nodeInfo.Error = err.Error()
 			return errors.Wrap(err, "failed to run health")
 		}
 		stat, err := ns.runStat(ctx)
@@ -104,7 +105,7 @@ func (ns *nodesight) Run(ctx context.Context, trigger *proto.NodeTrigger) (proto
 			return errors.Wrap(err, "failed to run stat")
 		}
 		nodeInfo.NodeStat = *stat
-		report, err := ns.runReport(ctx, health, stat)
+		report, err := ns.runReport(ctx, stat)
 		if err != nil {
 			return errors.Wrap(err, "failed to run report")
 		}
@@ -169,7 +170,7 @@ func (ns *nodesight) runHealth(ctx context.Context) (string, error) {
 
 	out, err = ns.cfg.Ssh.Run(ctx, cmds)
 	if err != nil {
-		return "", errors.Wrap(errors.New(out), err.Error())
+		return out, err
 	}
 
 	return out, nil
@@ -196,7 +197,7 @@ func (ns *nodesight) runStat(ctx context.Context) (*proto.NodeStat, error) {
 	return &stat, nil
 }
 
-func (ns *nodesight) runReport(_ context.Context, health string, stat *proto.NodeStat) (*proto.NodeReport, error) {
+func (ns *nodesight) runReport(_ context.Context, stat *proto.NodeStat) (*proto.NodeReport, error) {
 	ns.cfg.Logger.Debug("nodesight: runReport")
 
 	var report proto.NodeReport
