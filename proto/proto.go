@@ -145,7 +145,7 @@ type SshConfig struct {
 
 type TriggerResponse struct {
 	ArtifactInfo  ArtifactInfo  `json:"artifactInfo"`
-	BuildInfos    []BuildInfo   `json:"buildInfos"`
+	BuildInfo     BuildInfo     `json:"buildInfo"`
 	CodeInfo      CodeInfo      `json:"codeInfo"`
 	MailInfo      MailInfo      `json:"mailInfo"`
 	NodeInfo      NodeInfo      `json:"nodeInfo"`
@@ -155,9 +155,9 @@ type TriggerResponse struct {
 type ArtifactInfo struct{}
 
 type BuildInfo struct {
-	LoggingInfo LoggingInfo `json:"loggingInfo"`
-	RepoInfo    RepoInfo    `json:"repoInfo"`
-	ReviewInfo  ReviewInfo  `json:"reviewInfo"`
+	LoggingInfos []LoggingInfo `json:"loggingInfos"`
+	RepoInfos    []RepoInfo    `json:"repoInfos"`
+	ReviewInfos  []ReviewInfo  `json:"reviewInfos"`
 }
 
 type CodeInfo struct{}
@@ -175,15 +175,17 @@ type MailInfo struct {
 type NodeInfo struct {
 	NodeStat   NodeStat   `json:"nodeStat"`
 	NodeReport NodeReport `json:"nodeReport"`
+	Error      string     `json:"error"`
 }
 
 type ToolchainInfo struct{}
 
 type LoggingInfo struct {
-	File   string `json:"file"`
-	Line   int64  `json:"line"`
-	Type   string `json:"type"`
-	Detail string `json:"detail"`
+	File      string `json:"file"`
+	StartLine int64  `json:"startLine"`
+	EndLine   int64  `json:"endLine"`
+	Type      string `json:"type"`
+	Detail    string `json:"detail"`
 }
 
 type RepoInfo struct {
