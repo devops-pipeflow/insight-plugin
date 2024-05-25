@@ -95,9 +95,9 @@ func (ns *nodesight) Run(ctx context.Context, trigger *proto.NodeTrigger) (proto
 		if err := ns.runDetect(ctx); err != nil {
 			return errors.Wrap(err, "failed to run detect")
 		}
-		_, err := ns.runHealth(ctx)
+		health, err := ns.runHealth(ctx)
 		if err != nil {
-			nodeInfo.Error = err.Error()
+			nodeInfo.Error = health
 			return errors.Wrap(err, "failed to run health")
 		}
 		stat, err := ns.runStat(ctx)
