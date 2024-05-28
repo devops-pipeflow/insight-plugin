@@ -315,7 +315,7 @@ check_disk() {
     if [ "$FIX_ME" = "true" ]; then
         print_fix "\e[1mFIXME\e[0m: copy command below, then run it"
         print_fix "export RELEASE=$(uname -r)"
-        echo "sudo find /boot -type f -name \"config-*\" -o -name \"initrd.img-*\" -o -name \"System.map-*\" -o -name \"vmlinuz-*\" | grep -vE \"\$RELEASE\$\" | xargs sudo rm -rf"
+        print_fix "sudo find /boot -type f -name \"config-*\" -o -name \"initrd.img-*\" -o -name \"System.map-*\" -o -name \"vmlinuz-*\" | grep -vE \"\$RELEASE\$\" | xargs sudo rm -rf"
     fi
 
     return 11
