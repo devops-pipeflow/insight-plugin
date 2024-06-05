@@ -303,6 +303,7 @@ message BuildInfo {
   LoggingInfo loggingInfo = 1;  // logging info
   RepoInfo repoInfo = 2;  // repo info (Gitiles)
   ReviewInfo reviewInfo = 3;  // review info (Gerrit, pingview)
+  string error = 4;
 }
 
 message CodeInfo {}
@@ -320,6 +321,7 @@ message MailInfo {
 message NodeInfo {
   NodeStat nodeStat = 1;  // node statistic (shown on web)
   NodeReport nodeReport = 2;  // node report (empty: pass, nonempty: fail)
+  string error = 3;
 }
 
 message ToolchainInfo {}
