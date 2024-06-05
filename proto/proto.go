@@ -158,6 +158,7 @@ type BuildInfo struct {
 	LoggingInfos []LoggingInfo `json:"loggingInfos"`
 	RepoInfos    []RepoInfo    `json:"repoInfos"`
 	ReviewInfos  []ReviewInfo  `json:"reviewInfos"`
+	Error        string        `json:"error"`
 }
 
 type CodeInfo struct{}
