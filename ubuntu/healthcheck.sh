@@ -4,7 +4,7 @@
 FIX_ME="true"
 PLAIN_MODE="false"
 SILENT_MODE="false"
-VERSION_INFO="1.6.0"
+VERSION_INFO="1.7.0"
 
 # Print pass message
 print_pass() {
@@ -45,7 +45,7 @@ check_hosts() {
     local cmd="grep -i $pattern $name"
     local ret
 
-    eval "$cmd 1> /dev/null"
+    eval "$cmd > /dev/null 2>&1"
     ret=$?
     if [ $ret -ne 0 ]; then
         print_pass "\e[1mINFO\e[0m: check $name \e[92mPASS\e[0m"
@@ -69,7 +69,7 @@ check_interfaces() {
     local cmd="grep -E '$server1|$server2' $name"
     local ret
 
-    eval "$cmd 1> /dev/null"
+    eval "$cmd > /dev/null 2>&1"
     ret=$?
     if [ $ret -eq 0 ]; then
         print_pass "\e[1mINFO\e[0m: check $name \e[92mPASS\e[0m"
@@ -97,7 +97,7 @@ check_resolv() {
     local cmd="grep -E '$server1|$server2' $name"
     local ret
 
-    eval "$cmd 1> /dev/null"
+    eval "$cmd > /dev/null 2>&1"
     ret=$?
     if [ $ret -eq 0 ]; then
         print_pass "\e[1mINFO\e[0m: check $name \e[92mPASS\e[0m"
@@ -152,7 +152,7 @@ check_docker() {
     local cmd="$name version"
     local ret
 
-    eval "$cmd 1> /dev/null"
+    eval "$cmd > /dev/null 2>&1"
     ret=$?
     if [ $ret -eq 0 ]; then
         print_pass "\e[1mINFO\e[0m: check $name \e[92mPASS\e[0m"
@@ -178,7 +178,7 @@ check_group() {
     local cmd="groups $USER | grep -q $name"
     local ret
 
-    eval "$cmd 1> /dev/null"
+    eval "$cmd > /dev/null 2>&1"
     ret=$?
     if [ $ret -eq 0 ]; then
         print_pass "\e[1mINFO\e[0m: check user:$USER in group:$name \e[92mPASS\e[0m"
@@ -326,7 +326,7 @@ check_clock() {
     local cmd="ntpstat"
     local ret
 
-    eval "$cmd 1> /dev/null 2> /dev/null"
+    eval "$cmd > /dev/null 2>&1"
     ret=$?
     if [ $ret -eq 0 ]; then
         print_pass "\e[1mINFO\e[0m: check clock \e[92mPASS\e[0m"
@@ -349,6 +349,25 @@ check_clock() {
     fi
 
     return 12
+}
+
+# Check Podman
+check_podman() {
+    local name="podman"
+    local cmd="$name version"
+    local ret
+
+    eval "$cmd > /dev/null 2>&1"
+    ret=$?
+    if [ $ret -eq 0 ]; then
+        print_pass "\e[1mINFO\e[0m: check $name \e[92mPASS\e[0m"
+        return 0
+    fi
+
+    # TBD: FIXME
+    print_pass "\e[1mNOTE\e[0m: check $name \e[93mFAIL\e[0m ($name missing)"
+
+    return 0
 }
 
 run_check() {
@@ -445,6 +464,14 @@ run_check() {
     print_pass "----------------------------------------------"
 
     check_clock
+    ret=$?
+    if [ $ret -ne 0 ]; then
+        return $ret
+    fi
+
+    print_pass "----------------------------------------------"
+
+    check_podman
     ret=$?
     if [ $ret -ne 0 ]; then
         return $ret
