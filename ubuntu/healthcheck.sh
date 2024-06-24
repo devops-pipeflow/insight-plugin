@@ -4,7 +4,7 @@
 FIX_ME="true"
 PLAIN_MODE="false"
 SILENT_MODE="false"
-VERSION_INFO="1.7.0"
+VERSION_INFO="1.8.0"
 
 # Print pass message
 print_pass() {
@@ -371,14 +371,17 @@ check_podman() {
 }
 
 run_check() {
+    local err=0
     local ret
+    local val
 
     print_pass "----------------------------------------------"
 
     check_hosts
     ret=$?
     if [ $ret -ne 0 ]; then
-        return $ret
+        val=$((1<<(ret-1)))
+        err=$((err|val))
     fi
 
     print_pass "----------------------------------------------"
@@ -386,7 +389,8 @@ run_check() {
     check_interfaces
     ret=$?
     if [ $ret -ne 0 ]; then
-        return $ret
+        val=$((1<<(ret-1)))
+        err=$((err|val))
     fi
 
     print_pass "----------------------------------------------"
@@ -394,7 +398,8 @@ run_check() {
     check_resolv
     ret=$?
     if [ $ret -ne 0 ]; then
-        return $ret
+        val=$((1<<(ret-1)))
+        err=$((err|val))
     fi
 
     print_pass "----------------------------------------------"
@@ -402,7 +407,8 @@ run_check() {
     check_sysctl
     ret=$?
     if [ $ret -ne 0 ]; then
-        return $ret
+        val=$((1<<(ret-1)))
+        err=$((err|val))
     fi
 
     print_pass "----------------------------------------------"
@@ -410,7 +416,8 @@ run_check() {
     check_docker
     ret=$?
     if [ $ret -ne 0 ]; then
-        return $ret
+        val=$((1<<(ret-1)))
+        err=$((err|val))
     fi
 
     print_pass "----------------------------------------------"
@@ -418,7 +425,8 @@ run_check() {
     check_group
     ret=$?
     if [ $ret -ne 0 ]; then
-        return $ret
+        val=$((1<<(ret-1)))
+        err=$((err|val))
     fi
 
     print_pass "----------------------------------------------"
@@ -426,7 +434,8 @@ run_check() {
     check_default
     ret=$?
     if [ $ret -ne 0 ]; then
-        return $ret
+        val=$((1<<(ret-1)))
+        err=$((err|val))
     fi
 
     print_pass "----------------------------------------------"
@@ -434,7 +443,8 @@ run_check() {
     check_daemon
     ret=$?
     if [ $ret -ne 0 ]; then
-        return $ret
+        val=$((1<<(ret-1)))
+        err=$((err|val))
     fi
 
     print_pass "----------------------------------------------"
@@ -442,7 +452,8 @@ run_check() {
     check_netstat
     ret=$?
     if [ $ret -ne 0 ]; then
-        return $ret
+        val=$((1<<(ret-1)))
+        err=$((err|val))
     fi
 
     print_pass "----------------------------------------------"
@@ -450,7 +461,8 @@ run_check() {
     check_ssh
     ret=$?
     if [ $ret -ne 0 ]; then
-        return $ret
+        val=$((1<<(ret-1)))
+        err=$((err|val))
     fi
 
     print_pass "----------------------------------------------"
@@ -458,7 +470,8 @@ run_check() {
     check_disk
     ret=$?
     if [ $ret -ne 0 ]; then
-        return $ret
+        val=$((1<<(ret-1)))
+        err=$((err|val))
     fi
 
     print_pass "----------------------------------------------"
@@ -466,7 +479,8 @@ run_check() {
     check_clock
     ret=$?
     if [ $ret -ne 0 ]; then
-        return $ret
+        val=$((1<<(ret-1)))
+        err=$((err|val))
     fi
 
     print_pass "----------------------------------------------"
@@ -474,10 +488,11 @@ run_check() {
     check_podman
     ret=$?
     if [ $ret -ne 0 ]; then
-        return $ret
+        val=$((1<<(ret-1)))
+        err=$((err|val))
     fi
 
-    return 0
+    return $err
 }
 
 show_usage() {
