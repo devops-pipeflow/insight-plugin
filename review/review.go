@@ -318,7 +318,7 @@ func (r *review) Vote(ctx context.Context, commit string, data []Format) error {
 			if l <= 0 {
 				l = 1
 			}
-			b := map[string]interface{}{"line": l, "message": item.Details}
+			b := map[string]interface{}{"line": l, "message": item.Details, "unresolved": true}
 			if _, ok := c[item.File]; !ok {
 				c[item.File] = []map[string]interface{}{b}
 			} else {
